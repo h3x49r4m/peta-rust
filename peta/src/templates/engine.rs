@@ -114,12 +114,13 @@ impl TemplateEngine {
                 
                 let mut styles = String::new();
                 
-                // Load global theme CSS first
-                if let Ok(global_css) = std::fs::read_to_string("themes/default/css/main.css") {
-                    styles.push_str("/* Global Theme Styles */\n");
-                    styles.push_str(&global_css);
-                    styles.push('\n');
-                }
+                // Load global theme CSS first (now using inline styles in templates)
+                // Note: CSS is now inline in templates, so this section is commented out
+                // if let Ok(global_css) = std::fs::read_to_string("themes/default/css/main.css") {
+                //     styles.push_str("/* Global Theme Styles */\n");
+                //     styles.push_str(&global_css);
+                //     styles.push('\n');
+                // }
                 
                 // Load component-specific CSS
                 for component in component_names {

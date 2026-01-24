@@ -26,7 +26,7 @@ impl ComponentLoader {
             return Ok(components);
         }
         
-        let component_categories = ["core", "content", "interactive", "layouts"];
+        let component_categories = ["atomic", "composite", "content", "interactive", "layouts"];
         
         for category in &component_categories {
             let category_dir = components_dir.join(category);
@@ -108,7 +108,7 @@ impl ComponentLoader {
         }
         
         // Load components from each category
-        let categories = ["core", "content", "interactive", "layouts"];
+        let categories = ["atomic", "composite", "content", "interactive", "layouts"];
         
         for category in &categories {
             let category_dir = components_dir.join(category);
@@ -167,7 +167,8 @@ impl ComponentLoader {
         // This is a simple heuristic - in a real implementation,
         // we might use a mapping or component metadata
         match name {
-            "navigation" | "footer" | "base_layout" => "core",
+            "code_block" | "badge" | "button" | "icon" | "input" => "atomic",
+            "navigation" | "footer" | "base_layout" => "composite",
             "search_bar" | "tag_cloud" | "content_card" | "article_list" => "content",
             "comment_system" | "analytics" | "newsletter" => "interactive",
             "blog_layout" | "docs_layout" | "portfolio_layout" => "layouts",

@@ -1,28 +1,36 @@
 name: "footer"
 version: "1.0.0"
+enabled: true
 category: "Composite"
 description: "Footer component with site links and information"
 dependencies: []
 props:
   variant:
     type: string
+    required: false
     enum: ["default", "minimal", "compact"]
     default: "default"
   show_social:
     type: boolean
+    required: false
     default: true
   show_copyright:
     type: boolean
+    required: false
     default: true
   sections:
     type: array
+    required: false
     default: []
 slots:
   - name: content
+    required: false
     description: "Main footer content"
   - name: social
+    required: false
     description: "Social media links"
   - name: copyright
+    required: false
     description: "Copyright information"
 templates:
   - footer.html
@@ -30,3 +38,9 @@ styles:
   - footer.css
 scripts:
   - footer.js
+
+static_data: []
+config_schema: {}
+default_config: {}
+seo: null
+state: []

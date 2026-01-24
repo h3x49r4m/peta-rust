@@ -145,7 +145,7 @@ fn create_default_theme(site_dir: &Path, theme: &str) -> Result<()> {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ site.title }} - {{ page.title }}</title>
-    <link rel="stylesheet" href="{{ asset_url('css/main.css') }}">
+    <!-- CSS is now inline in templates -->
 </head>
 <body>
     <header>
@@ -383,7 +383,7 @@ pub mod theme {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ site.title }} - {{ page.title }}</title>
-    <link rel="stylesheet" href="{{ asset_url('css/main.css') }}">
+    <!-- CSS is now inline in templates -->
 </head>
 <body>
     <header>

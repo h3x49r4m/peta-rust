@@ -50,237 +50,86 @@ variables:
 
 # Component configuration
 components:
-  button:
-    name: "button"
-    version: "1.0.0"
-    template: "components/atomic/button/button.html"
-    styles: ["components/atomic/button/button.css"]
-    scripts: ["components/atomic/button/button.js"]
+  atomic:
+    name: "Atomic Components"
+    description: "Basic building block components"
+    styles: []
+    scripts: []
     config: {}
     variants: {}
+    components:
+      code_block:
+        name: "code_block"
+        type: "atomic"
+        description: "Enhanced code block with syntax highlighting, line numbers, and copy functionality"
+        version: "1.0.0"
+        enabled: true
+        category: "Atomic"
+        dependencies: []
+        props:
+          code:
+            type: "string"
+            required: true
+            description: "The code content to display"
+          language:
+            type: "string"
+            required: false
+            default: "text"
+            description: "Programming language for syntax highlighting"
+          show_line_numbers:
+            type: "boolean"
+            required: false
+            default: true
+            description: "Show line numbers"
+          copy_button:
+            type: "boolean"
+            required: false
+            default: true
+            description: "Show copy button"
+        slots: []
+        state: []
+        templates:
+          - "code_block.html"
+        styles:
+          - "code_block.css"
+        scripts:
+          - "code_block.js"
+        static_data: []
+        config_schema: {}
+        default_config: {}
+        seo: null
   
-  input:
-    name: "input"
-    version: "1.0.0"
-    template: "components/atomic/input/input.html"
-    styles: ["components/atomic/input/input.css"]
-    scripts: ["components/atomic/input/input.js"]
+  composite:
+    name: "Composite Components"
+    description: "Components composed of atomic components"
+    styles: []
+    scripts: []
     config: {}
     variants: {}
+    components: {}
   
-  badge:
-    name: "badge"
-    version: "1.0.0"
-    template: "components/atomic/badge/badge.html"
-    styles: ["components/atomic/badge/badge.css"]
-    scripts: ["components/atomic/badge/badge.js"]
+  content:
+    name: "Content Components"
+    description: "Content-specific components"
+    styles: []
+    scripts: []
     config: {}
     variants: {}
+    components: {}
   
-  icon:
-    name: "icon"
-    version: "1.0.0"
-    template: "components/atomic/icon/icon.html"
-    styles: ["components/atomic/icon/icon.css"]
-    scripts: ["components/atomic/icon/icon.js"]
+  layouts:
+    name: "Layout Components"
+    description: "Page layout components"
+    styles: []
+    scripts: []
     config: {}
     variants: {}
-  
-  navbar:
-    name: "navbar"
-    version: "1.0.0"
-    template: "components/composite/navbar/navbar.html"
-    styles: ["components/composite/navbar/navbar.css"]
-    scripts: ["components/composite/navbar/navbar.js"]
-    config: {}
-    variants: {}
-  
-  footer:
-    name: "footer"
-    version: "1.0.0"
-    template: "components/composite/footer/footer.html"
-    styles: ["components/composite/footer/footer.css"]
-    scripts: ["components/composite/footer/footer.js"]
-    config: {}
-    variants: {}
-  
-  searchbar:
-    name: "searchbar"
-    version: "1.0.0"
-    template: "components/composite/searchbar/searchbar.html"
-    styles: ["components/composite/searchbar/searchbar.css"]
-    scripts: ["components/composite/searchbar/searchbar.js"]
-    config: {}
-    variants: {}
-  
-  tagcloud:
-    name: "tagcloud"
-    version: "1.0.0"
-    template: "components/composite/tagcloud/tagcloud.html"
-    styles: ["components/composite/tagcloud/tagcloud.css"]
-    scripts: ["components/composite/tagcloud/tagcloud.js"]
-    config: {}
-    variants: {}
-  
-  article_meta:
-    name: "article_meta"
-    version: "1.0.0"
-    template: "components/content/article_meta/article_meta.html"
-    styles: ["components/content/article_meta/article_meta.css"]
-    scripts: ["components/content/article_meta/article_meta.js"]
-    config: {}
-    variants: {}
-  
-  article_toc:
-    name: "article_toc"
-    version: "1.0.0"
-    template: "components/content/article_toc/article_toc.html"
-    styles: ["components/content/article_toc/article_toc.css"]
-    scripts: ["components/content/article_toc/article_toc.js"]
-    config: {}
-    variants: {}
-  
-  article_navigation:
-    name: "article_navigation"
-    version: "1.0.0"
-    template: "components/content/article_navigation/article_navigation.html"
-    styles: ["components/content/article_navigation/article_navigation.css"]
-    scripts: ["components/content/article_navigation/article_navigation.js"]
-    config: {}
-    variants: {}
-  
-  article_related:
-    name: "article_related"
-    version: "1.0.0"
-    template: "components/content/article_related/article_related.html"
-    styles: ["components/content/article_related/article_related.css"]
-    scripts: ["components/content/article_related/article_related.js"]
-    config: {}
-    variants: {}
-  
-  book_card:
-    name: "book_card"
-    version: "1.0.0"
-    template: "components/content/book_card/book_card.html"
-    styles: ["components/content/book_card/book_card.css"]
-    scripts: ["components/content/book_card/book_card.js"]
-    config: {}
-    variants: {}
-  
-  chapter_navigation:
-    name: "chapter_navigation"
-    version: "1.0.0"
-    template: "components/content/chapter_navigation/chapter_navigation.html"
-    styles: ["components/content/chapter_navigation/chapter_navigation.css"]
-    scripts: ["components/content/chapter_navigation/chapter_navigation.js"]
-    config: {}
-    variants: {}
-  
-  book_toc:
-    name: "book_toc"
-    version: "1.0.0"
-    template: "components/content/book_toc/book_toc.html"
-    styles: ["components/content/book_toc/book_toc.css"]
-    scripts: ["components/content/book_toc/book_toc.js"]
-    config: {}
-    variants: {}
-  
-  book_progress:
-    name: "book_progress"
-    version: "1.0.0"
-    template: "components/content/book_progress/book_progress.html"
-    styles: ["components/content/book_progress/book_progress.css"]
-    scripts: ["components/content/book_progress/book_progress.js"]
-    config: {}
-    variants: {}
-  
-  snippet_card:
-    name: "snippet_card"
-    version: "1.0.0"
-    template: "components/content/snippet_card/snippet_card.html"
-    styles: ["components/content/snippet_card/snippet_card.css"]
-    scripts: ["components/content/snippet_card/snippet_card.js"]
-    config: {}
-    variants: {}
-  
-  code_viewer:
-    name: "code_viewer"
-    version: "1.0.0"
-    template: "components/content/code_viewer/code_viewer.html"
-    styles: ["components/content/code_viewer/code_viewer.css"]
-    scripts: ["components/content/code_viewer/code_viewer.js"]
-    config: {}
-    variants: {}
-  
-  language_filter:
-    name: "language_filter"
-    version: "1.0.0"
-    template: "components/content/language_filter/language_filter.html"
-    styles: ["components/content/language_filter/language_filter.css"]
-    scripts: ["components/content/language_filter/language_filter.js"]
-    config: {}
-    variants: {}
-  
-  snippet_embed:
-    name: "snippet_embed"
-    version: "1.0.0"
-    template: "components/content/snippet_embed/snippet_embed.html"
-    styles: ["components/content/snippet_embed/snippet_embed.css"]
-    scripts: ["components/content/snippet_embed/snippet_embed.js"]
-    config: {}
-    variants: {}
-  
-  project_card:
-    name: "project_card"
-    version: "1.0.0"
-    template: "components/content/project_card/project_card.html"
-    styles: ["components/content/project_card/project_card.css"]
-    scripts: ["components/content/project_card/project_card.js"]
-    config: {}
-    variants: {}
-  
-  project_gallery:
-    name: "project_gallery"
-    version: "1.0.0"
-    template: "components/content/project_gallery/project_gallery.html"
-    styles: ["components/content/project_gallery/project_gallery.css"]
-    scripts: ["components/content/project_gallery/project_gallery.js"]
-    config: {}
-    variants: {}
-  
-  project_tech:
-    name: "project_tech"
-    version: "1.0.0"
-    template: "components/content/project_tech/project_tech.html"
-    styles: ["components/content/project_tech/project_tech.css"]
-    scripts: ["components/content/project_tech/project_tech.js"]
-    config: {}
-    variants: {}
-  
-  project_links:
-    name: "project_links"
-    version: "1.0.0"
-    template: "components/content/project_links/project_links.html"
-    styles: ["components/content/project_links/project_links.css"]
-    scripts: ["components/content/project_links/project_links.js"]
-    config: {}
-    variants: {}
-  
-  project_modal:
-    name: "project_modal"
-    version: "1.0.0"
-    template: "components/content/project_modal/project_modal.html"
-    styles: ["components/content/project_modal/project_modal.css"]
-    scripts: ["components/content/project_modal/project_modal.js"]
-    config: {}
-    variants: {}
+    components: {}
 
-# Theme assets
+# Theme assets (CSS is now inline in templates)
 assets:
-  css:
-    - "main.css"
-  js:
-    - "main.js"
+  css: []
+  js: []
   images:
     - "logo.svg"
     - "favicon.ico"
