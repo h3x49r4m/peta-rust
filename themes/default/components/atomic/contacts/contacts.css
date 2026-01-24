@@ -7,9 +7,25 @@
 .contacts .social-link,
 .contacts .contacts-email {
   color: #64748b;
-  font-size: 1.25rem;
   transition: all 0.2s ease;
   text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ensure all SVG icons have the same size */
+.contacts svg {
+  width: 20px !important;
+  height: 20px !important;
+  display: block;
+}
+
+/* Ensure all SVG icons have the same size */
+.contacts svg {
+  width: 20px !important;
+  height: 20px !important;
+  display: block;
 }
 
 .contacts .social-link:hover,
@@ -21,16 +37,5 @@
 @media (max-width: 768px) {
   .contacts {
     gap: 0.5rem;
-  }
-  
-  .contact-link,
-  .social-link {
-    width: 2rem;
-    height: 2rem;
-  }
-  
-  .contact-icon,
-  .social-icon {
-    font-size: 1rem;
   }
 }

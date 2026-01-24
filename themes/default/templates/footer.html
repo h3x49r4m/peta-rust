@@ -3,8 +3,12 @@
     <div class="footer-content">
       <div class="footer-left">
         <p class="footer-copyright">
-          &copy; 2026 Peta Rust. Built with 
+          &copy; 2026 Peta. Built with 
+          {% if config.social.github %}
+          <a href="{{ config.social.github }}" class="footer-link">Peta Rust</a>.
+          {% else %}
           <a href="https://github.com/peta-rust/peta-rust" class="footer-link">Peta Rust</a>.
+          {% endif %}
         </p>
       </div>
       
@@ -28,7 +32,7 @@
           
           {% if config.social.email %}
           <a href="mailto:{{ config.social.email }}" class="contacts-email" aria-label="Email">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="#64748b">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 4.99L4 6h16zm0 12H4V8l8 5 8-5v10z"/>
             </svg>
           </a>
