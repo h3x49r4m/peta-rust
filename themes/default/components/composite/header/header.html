@@ -1,0 +1,20 @@
+<header class="header" data-component="header">
+  <div class="header-container">
+    <div class="header-left">
+      <a href="/" class="site-name">
+        {{ site.title }}
+      </a>
+    </div>
+    
+    <div class="header-right">
+      <!-- Navbar component will be injected here -->
+      <div id="navbar-placeholder"></div>
+    </div>
+  </div>
+  
+  {% if slot.children %}
+  <div class="header-children">
+    {{ slot.children }}
+  </div>
+  {% endif %}
+</header>

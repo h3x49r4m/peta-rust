@@ -168,8 +168,10 @@ impl ComponentLoader {
         // we might use a mapping or component metadata
         match name {
             "code_block" => "atomic",
-            "footer" => "composite",
+            "navbar" => "atomic",
             "contacts" => "atomic",
+            "header" => "composite",
+            "footer" => "composite",
             _ => "content",
         }
     }

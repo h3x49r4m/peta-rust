@@ -80,28 +80,167 @@ impl TemplateEngine {
                     .cloned()
                     .unwrap_or_else(|| Value::Object(serde_json::Map::new()));
                 
-                let slots: std::collections::HashMap<String, String> = args.get("2")
-                    .or_else(|| args.get("slots"))
-                    .and_then(|v| v.as_object())
-                    .map(|obj| {
-                        obj.iter()
-                            .map(|(k, v)| (k.clone(), v.as_str().unwrap_or("").to_string()))
-                            .collect()
-                    })
-                    .unwrap_or_default();
+                // Try to load and render the component directly
+                let category = match component_name {
+                    "code_block" => "atomic",
+                    "navbar" => "atomic",
+                    "contacts" => "atomic",
+                    "header" => "composite",
+                    "footer" => "composite",
+                    _ => "content",
+                };
+                let component_path = format!("themes/default/components/{}/{}", category, component_name);
                 
-                // Try to render the component using the renderer
-                // Note: This is a simplified version - in a real implementation,
-                // we would need access to the component renderer here
-                let component_html = format!(
-                    r#"<div data-component="{}" data-props="{}" data-slots="{}">Component: {}</div>"#,
-                    component_name,
-                    serde_json::to_string(&props).unwrap_or_default(),
-                    serde_json::to_string(&slots).unwrap_or_default(),
-                    component_name
-                );
+                let template_path = format!("{}/{}.html", component_path, component_name);
                 
-                Ok(Value::String(component_html))
+                if std::path::Path::new(&template_path).exists() {
+                    match std::fs::read_to_string(&template_path) {
+                        Ok(template_content) => {
+                            // Create a simple template engine for this component
+                            let mut tera = tera::Tera::default();
+                            tera.autoescape_on(vec![]); // Disable autoescape for HTML components
+                            
+                            // Add the main component template
+                            if let Err(e) = tera.add_raw_template(component_name, &template_content) {
+                                eprintln!("Failed to add template {}: {}", component_name, e);
+                                return Ok(Value::String(format!("Failed to add template {}: {}", component_name, e)));
+                            }
+                            
+                                                        
+                            
+                                                        // Add all component templates for nested rendering
+                            let component_categories = ["atomic", "composite"];
+                            for category in &component_categories {
+                                let components_dir = format!("themes/default/components/{}", category);
+                                if let Ok(entries) = std::fs::read_dir(&components_dir) {
+                                    for entry in entries.flatten() {
+                                        if let Some(component_dir_name) = entry.file_name().to_str() {
+                                            let component_template_path = format!("{}/{}/{}.html", components_dir, component_dir_name, component_dir_name);
+                            
+                                                                        if std::path::Path::new(&component_template_path).exists() {
+                            
+                                                                            if let Ok(template_content) = std::fs::read_to_string(&component_template_path) {
+                            
+                                                                                let _ = tera.add_raw_template(component_dir_name, &template_content);
+                            
+                                                                            }
+                            
+                                                                        }
+                            
+                                                                    }
+                            
+                                                                }
+                            
+                                                            }
+                            
+                                                        }
+                            
+                                                        
+                            
+                                                        let mut context = tera::Context::new();
+                            
+                                                        context.insert("props", &props);
+                            
+                                                        context.insert("site", &serde_json::json!({"title": "Peta"})); // Add site context
+                            
+                                                        
+                            
+                                                                                    match tera.render(component_name, &context) {
+                            
+                                                        
+                            
+                                                                                        Ok(mut rendered) => {
+                            
+                                                        
+                            
+                                                                                            // Handle nested component substitution
+                            
+                                                        
+                            
+                                                                                            if component_name == "header" {
+                            
+                                                        
+                            
+                                                                                                // Render navbar component
+                            
+                                                        
+                            
+                                                                                                if let Ok(navbar_template) = std::fs::read_to_string("themes/default/components/atomic/navbar/navbar.html") {
+                            
+                                                        
+                            
+                                                                                                    if let Ok(navbar_rendered) = Self::render_nested_component("navbar", &navbar_template, &mut tera, &context) {
+                            
+                                                        
+                            
+                                                                                                        rendered = rendered.replace("<!-- Navbar component will be injected here -->\n      <div id=\"navbar-placeholder\"></div>", &navbar_rendered);
+                            
+                                                        
+                            
+                                                                                                    }
+                            
+                                                        
+                            
+                                                                                                }
+                            
+                                                        
+                            
+                                                                                            }
+                            
+                                                        
+                            
+                                                                                            Ok(Value::String(rendered))
+                            
+                                                        
+                            
+                                                                                        },
+                            
+                                                        
+                            
+                                                                                        Err(e) => {
+                            
+                                                        
+                            
+                                                                                            eprintln!("Component render error for {}: {}", component_name, e);
+                            
+                                                        
+                            
+                                                                                            Ok(Value::String(format!("Component render error: {}", e)))
+                            
+                                                        
+                            
+                                                                                        },
+                            
+                                                        
+                            
+                                                                                    }
+                        }
+                        Err(e) => Ok(Value::String(format!("Component file error: {}", e))),
+                    }
+                } else {
+                    Ok(Value::String(format!("Component not found: {}", component_name)))
+                }
+            })
+        );
+        
+        // Helper function to get component category
+        tera.register_function(
+            "get_component_category",
+            Box::new(move |args: &HashMap<String, Value>| -> tera::Result<Value> {
+                let component_name = args.get("0")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| tera::Error::msg("Component name is required"))?;
+                
+                let category = match component_name {
+                    "code_block" => "atomic",
+                    "navbar" => "atomic",
+                    "contacts" => "atomic",
+                    "header" => "composite",
+                    "footer" => "composite",
+                    _ => "content",
+                };
+                
+                Ok(Value::String(category.to_string()))
             })
         );
         
@@ -378,6 +517,23 @@ impl TemplateEngine {
     /// Get component registry
     pub fn component_registry(&self) -> Option<&ComponentRegistry> {
         self.component_registry.as_ref()
+    }
+    
+    /// Helper function to render nested components
+    fn render_nested_component(
+        component_name: &str,
+        template_content: &str,
+        tera: &mut tera::Tera,
+        context: &tera::Context,
+    ) -> Result<String> {
+        if let Err(e) = tera.add_raw_template(component_name, template_content) {
+            return Err(Error::template(format!("Failed to add nested template {}: {}", component_name, e)));
+        }
+        
+        match tera.render(component_name, context) {
+            Ok(rendered) => Ok(rendered),
+            Err(e) => Err(Error::template(format!("Failed to render nested component {}: {}", component_name, e))),
+        }
     }
 }
 

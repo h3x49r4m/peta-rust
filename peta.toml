@@ -11,7 +11,7 @@ email = "h3x49r4m@outlook.com"
 
 [components]
 enabled = true
-enabled_components = ["code_block", "footer", "contacts"]
+enabled_components = ["code_block", "footer", "contacts", "navbar", "header"]
 component_configs = {}
 layout = "default"
 theme = "default"
