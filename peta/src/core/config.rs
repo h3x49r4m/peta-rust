@@ -9,6 +9,7 @@ use anyhow::{Result, Context};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SiteConfig {
     pub site: SiteInfo,
+    pub social: SocialConfig,
     pub build: BuildConfig,
     pub rst: RstConfig,
     pub server: ServerConfig,
@@ -22,6 +23,7 @@ impl Default for SiteConfig {
     fn default() -> Self {
         Self {
             site: SiteInfo::default(),
+            social: SocialConfig::default(),
             build: BuildConfig::default(),
             rst: RstConfig::default(),
             server: ServerConfig::default(),
@@ -29,6 +31,24 @@ impl Default for SiteConfig {
             assets: AssetsConfig::default(),
             deploy: DeployConfig::default(),
             components: crate::components::SiteComponentConfig::default(),
+        }
+    }
+}
+
+/// Social media configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SocialConfig {
+    pub github: Option<String>,
+    pub x: Option<String>,
+    pub email: Option<String>,
+}
+
+impl Default for SocialConfig {
+    fn default() -> Self {
+        Self {
+            github: None,
+            x: None,
+            email: None,
         }
     }
 }

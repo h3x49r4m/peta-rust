@@ -4,9 +4,14 @@ description = "High-Performance Static Site Generator"
 url = "https://example.com"
 author = "Peta Team"
 
+[social]
+github = "https://github.com/h3x49r4m/peta-rust"
+x = "https://x.com/h3x4m"
+email = "h3x49r4m@outlook.com"
+
 [components]
 enabled = true
-enabled_components = ["code_block"]
+enabled_components = ["code_block", "footer", "contacts"]
 component_configs = {}
 layout = "default"
 theme = "default"

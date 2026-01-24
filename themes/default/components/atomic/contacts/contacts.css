@@ -1,0 +1,36 @@
+.contacts {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.contacts .social-link,
+.contacts .contacts-email {
+  color: #64748b;
+  font-size: 1.25rem;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.contacts .social-link:hover,
+.contacts .contacts-email:hover {
+  color: #3b82f6;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .contacts {
+    gap: 0.5rem;
+  }
+  
+  .contact-link,
+  .social-link {
+    width: 2rem;
+    height: 2rem;
+  }
+  
+  .contact-icon,
+  .social-icon {
+    font-size: 1rem;
+  }
+}

@@ -69,7 +69,7 @@ impl TemplateEngine {
         // Enhanced component function with props and slots
         tera.register_function(
             "component",
-            Box::new(|args: &HashMap<String, Value>| -> tera::Result<Value> {
+            Box::new(move |args: &HashMap<String, Value>| -> tera::Result<Value> {
                 let component_name = args.get("0")
                     .or_else(|| args.get("name"))
                     .and_then(|v| v.as_str())
@@ -90,13 +90,15 @@ impl TemplateEngine {
                     })
                     .unwrap_or_default();
                 
-                // In a real implementation, this would render the component
-                // For now, return a structured placeholder
+                // Try to render the component using the renderer
+                // Note: This is a simplified version - in a real implementation,
+                // we would need access to the component renderer here
                 let component_html = format!(
-                    r#"<div data-component="{}" data-props="{}" data-slots="{}">"</div>"#,
+                    r#"<div data-component="{}" data-props="{}" data-slots="{}">Component: {}</div>"#,
                     component_name,
                     serde_json::to_string(&props).unwrap_or_default(),
-                    serde_json::to_string(&slots).unwrap_or_default()
+                    serde_json::to_string(&slots).unwrap_or_default(),
+                    component_name
                 );
                 
                 Ok(Value::String(component_html))

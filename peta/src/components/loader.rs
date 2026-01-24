@@ -169,6 +169,7 @@ impl ComponentLoader {
         match name {
             "code_block" => "atomic",
             "footer" => "composite",
+            "contacts" => "atomic",
             _ => "content",
         }
     }
