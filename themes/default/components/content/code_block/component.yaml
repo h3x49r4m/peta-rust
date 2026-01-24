@@ -1,0 +1,62 @@
+name: code_block
+type: composite
+description: Enhanced code block with syntax highlighting, line numbers, and copy functionality
+version: 1.0.0
+enabled: true
+category: Content
+
+
+# Component dependencies
+dependencies: []
+
+# Component props
+props:
+  code:
+    type: string
+    required: true
+    description: The code content to display
+  language:
+    type: string
+    required: false
+    default: "text"
+    description: Programming language for syntax highlighting
+  show_line_numbers:
+    type: boolean
+    required: false
+    default: true
+    description: Show line numbers
+  copy_button:
+    type: boolean
+    required: false
+    default: true
+    description: Show copy button
+
+# Component slots
+slots: []
+
+# Component state
+state: []
+
+# Component templates
+templates:
+  - code_block.html
+
+# Component styles
+styles:
+  - code_block.css
+
+# Component scripts
+scripts:
+  - code_block.js
+
+# Static data files
+static_data: []
+
+# Configuration schema
+config_schema: {}
+
+# Default configuration
+default_config: {}
+
+# SEO configuration
+seo: null

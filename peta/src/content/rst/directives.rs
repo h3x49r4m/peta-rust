@@ -2,6 +2,7 @@
 
 use crate::core::Result;
 
+
 /// Trait for RST directive handlers
 pub trait DirectiveHandler {
     /// Handle the directive and return HTML
@@ -10,6 +11,18 @@ pub trait DirectiveHandler {
 
 /// Code block directive handler
 pub struct CodeBlockHandler;
+
+impl CodeBlockHandler {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl Default for CodeBlockHandler {
+    fn default() -> Self {
+        Self
+    }
+}
 
 impl DirectiveHandler for CodeBlockHandler {
     fn handle(&mut self, content: &str) -> Result<String> {
@@ -28,15 +41,28 @@ impl DirectiveHandler for CodeBlockHandler {
         // Remove paragraph tags that might have been added by the paragraph converter
         code = code.replace("<p>", "").replace("</p>", "\n");
         
+        // We're now using Prism.js for syntax highlighting, no need for custom highlighting
+        
+        // Generate component HTML with the raw code for Prism.js
         Ok(format!(
-            r#"<div class="code-block">
+            r#"<div class="code-block-component" data-language="{}" data-line-numbers="true">
     <div class="code-header">
-        <span class="language">{}</span>
-        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+        <div class="code-info">
+            <span class="code-language">{}</span>
+        </div>
+        <button class="code-copy-button" onclick="copyCode(this)" aria-label="Copy code">
+            <svg class="code-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span class="copy-text">Copy</span>
+        </button>
     </div>
-    <pre><code class="language-{}">{}</code></pre>
+    <div class="code-content">
+        <pre class="line-numbers"><code class="language-{}">{}</code></pre>
+    </div>
 </div>"#,
-            language, language, code
+            language, language.to_uppercase(), language, code
         ))
     }
 }

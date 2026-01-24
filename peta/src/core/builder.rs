@@ -343,7 +343,7 @@ impl SiteBuilder {
             &assets_dir,
         );
         
-        if let Err(e) = asset_pipeline.process_assets() {
+        asset_pipeline.set_component_registry(self.component_registry.clone());        if let Err(e) = asset_pipeline.process_assets() {
             eprintln!("Warning: Failed to process theme assets: {}", e);
             // Fallback to basic asset copying
             self.copy_theme_assets("css", &assets_dir)?;
@@ -834,12 +834,13 @@ window.PETA_HOOKS.useTheme = useTheme;
     fn load_components(&mut self, _template_engine: &TemplateEngine) -> Result<()> {
         use crate::components::ComponentLoader;
         
-        let loader = ComponentLoader::new(&PathBuf::from(&self.config.build.theme_dir));
-        let theme_path = PathBuf::from(&self.config.build.theme_dir);
-        
+        let theme_path = PathBuf::from(&self.config.build.theme_dir).join("default");
+        let loader = ComponentLoader::new(&theme_path);        
         // Discover and load all components
         let components = loader.load_components_from_theme(&theme_path)?;
-        
+        for component in &components {
+            println!("  - {}", component.name);
+        }        
         // Register components
         for component in components {
             self.component_registry.register_component(component)?;

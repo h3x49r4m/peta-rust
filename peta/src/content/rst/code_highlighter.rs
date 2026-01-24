@@ -6,7 +6,6 @@ use syntect::highlighting::{ThemeSet, Theme};
 use syntect::parsing::SyntaxSet;
 use syntect::easy::HighlightLines;
 use syntect::util::LinesWithEndings;
-use syntect::util::as_24_bit_terminal_escaped;
 
 /// Code highlighter for syntax highlighting
 pub struct CodeHighlighter {
@@ -164,9 +163,9 @@ impl CodeHighlighter {
                     "<span class=\"line-number\" data-line=\"{}\">{}</span>",
                     line_number, line_number
                 );
-                format!("{} {}", line_number_html, as_24_bit_terminal_escaped(&ranges[..], false))
+                format!("{} {}", line_number_html, self.ranges_to_html(&ranges[..]))
             } else {
-                as_24_bit_terminal_escaped(&ranges[..], false)
+                self.ranges_to_html(&ranges[..])
             };
             
             // Highlight specific lines if configured
@@ -280,6 +279,72 @@ impl CodeHighlighter {
     /// Get current theme name
     pub fn current_theme(&self) -> &str {
         &self.config.theme
+    }
+    
+    /// Convert syntect ranges to HTML with CSS classes
+    fn ranges_to_html(&self, ranges: &[(syntect::highlighting::Style, &str)]) -> String {
+        let mut html = String::new();
+        
+        for (style, text) in ranges {
+            let css_class = self.style_to_css_class(style);
+            if css_class.is_empty() {
+                html.push_str(&self.escape_html(text));
+            } else {
+                html.push_str(&format!("<span class=\"{}\">{}</span>", css_class, self.escape_html(text)));
+            }
+        }
+        
+        html
+    }
+    
+    /// Convert syntect style to CSS class
+    fn style_to_css_class(&self, style: &syntect::highlighting::Style) -> String {
+        let mut classes = Vec::new();
+        
+        // Map foreground color to syntax token type
+        if let Some(token_type) = self.color_to_token_type(style.foreground) {
+            classes.push(format!("token-{}", token_type));
+        }
+        
+        // Add font style classes
+        if style.font_style.contains(syntect::highlighting::FontStyle::ITALIC) {
+            classes.push("token-italic".to_string());
+        }
+        if style.font_style.contains(syntect::highlighting::FontStyle::BOLD) {
+            classes.push("token-bold".to_string());
+        }
+        if style.font_style.contains(syntect::highlighting::FontStyle::UNDERLINE) {
+            classes.push("token-underline".to_string());
+        }
+        
+        classes.join(" ")
+    }
+    
+    /// Map color to token type (simplified mapping)
+    fn color_to_token_type(&self, color: syntect::highlighting::Color) -> Option<&'static str> {
+        // This is a simplified mapping - in a real implementation, you'd want
+        // more sophisticated mapping based on the theme
+        match (color.r, color.g, color.b) {
+            // Comments (typically gray)
+            (r, g, b) if r < 150 && g < 150 && b < 150 => Some("comment"),
+            // Strings (typically green)
+            (_, g, b) if g > 150 && b < 150 => Some("string"),
+            // Numbers (typically orange/yellow)
+            (r, g, b) if r > 150 && g > 100 && b < 100 => Some("number"),
+            // Keywords (typically blue)
+            (r, g, b) if r < 100 && g < 150 && b > 150 => Some("keyword"),
+            // Functions (typically purple/violet)
+            (r, g, b) if r > 100 && g < 100 && b > 150 => Some("function"),
+            // Variables (typically red)
+            (r, g, b) if r > 150 && g < 100 && b < 100 => Some("variable"),
+            // Types (typically cyan)
+            (r, g, b) if r < 100 && g > 150 && b > 150 => Some("type"),
+            // Operators (typically gray)
+            (r, g, b) if r > 100 && g > 100 && b > 100 && r < 200 => Some("operator"),
+            // Punctuation (typically light gray)
+            (r, g, b) if r > 150 && g > 150 && b > 150 => Some("punctuation"),
+            _ => None,
+        }
     }
 }
 

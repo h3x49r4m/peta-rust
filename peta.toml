@@ -5,8 +5,8 @@ url = "https://example.com"
 author = "Peta Team"
 
 [components]
-enabled = false
-enabled_components = []
+enabled = true
+enabled_components = ["code_block"]
 component_configs = {}
 layout = "default"
 theme = "default"

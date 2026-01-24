@@ -286,7 +286,7 @@ impl ComponentRegistry {
                 ComponentCategory::Atomic => stats.atomic_components += 1,
                 ComponentCategory::Composite => stats.composite_components += 1,
                 ComponentCategory::Layout => stats.layout_components += 1,
-            }
+                ComponentCategory::Content => stats.content_components += 1,            }
         }
         
         stats
@@ -327,7 +327,7 @@ impl ComponentRegistry {
 }
 
 /// Component statistics
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ComponentStats {
     /// Total number of registered components
     pub total_components: usize,
@@ -338,7 +338,8 @@ pub struct ComponentStats {
     /// Number of composite components
     pub composite_components: usize,
     /// Number of layout components
-    pub layout_components: usize,
+    /// Number of content components
+    pub content_components: usize,    pub layout_components: usize,
 }
 
 impl Default for ComponentRegistry {
@@ -415,5 +416,17 @@ mod tests {
         
         assert!(registry.register_component(component_a).is_ok());
         assert!(registry.register_component(component_b).is_err());
+    }
+}
+impl Default for ComponentStats {
+    fn default() -> Self {
+        Self {
+            total_components: 0,
+            enabled_components: 0,
+            atomic_components: 0,
+            composite_components: 0,
+            layout_components: 0,
+            content_components: 0,
+        }
     }
 }

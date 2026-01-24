@@ -10,7 +10,8 @@ pub enum ComponentCategory {
     Atomic,
     /// Complex UI components (cards, navigation, etc.)
     Composite,
-    /// Page structure templates
+    /// Content components (articles, snippets, etc.)
+    Content,    /// Page structure templates
     Layout,
 }
 

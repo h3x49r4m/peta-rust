@@ -22,7 +22,7 @@ impl RstParser {
         let mut directive_handlers: HashMap<String, Box<dyn DirectiveHandler>> = HashMap::new();
         
         // Register default directive handlers
-        directive_handlers.insert("code-block".to_string(), Box::new(crate::content::rst::directives::CodeBlockHandler));
+        directive_handlers.insert("code-block".to_string(), Box::new(crate::content::rst::directives::CodeBlockHandler::new()));
         directive_handlers.insert("snippet-card".to_string(), Box::new(crate::content::rst::directives::SnippetCardHandler));
         directive_handlers.insert("toctree".to_string(), Box::new(crate::content::rst::directives::TocTreeHandler));
         
