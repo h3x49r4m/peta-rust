@@ -6,11 +6,11 @@ use std::collections::HashMap;
 /// Component category
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum ComponentCategory {
-    /// Basic building blocks (button, input, badge)
+    /// Basic building blocks
     Atomic,
-    /// Complex UI components (cards, navigation, etc.)
+    /// Complex UI components
     Composite,
-    /// Content components (articles, snippets, etc.)
+    /// Content components
     Content,    /// Page structure templates
     Layout,
 }

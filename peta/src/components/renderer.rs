@@ -303,10 +303,7 @@ impl ComponentRendererWrapper {
     /// Get the category directory for a component name
     fn get_category_dir(&self, name: &str) -> &'static str {
         match name {
-            "navigation" | "footer" | "base_layout" => "core",
-            "search_bar" | "tag_cloud" | "content_card" | "article_list" => "content",
-            "comment_system" | "analytics" | "newsletter" => "interactive",
-            "blog_layout" | "docs_layout" | "portfolio_layout" => "layouts",
+            "footer" => "core",
             _ => "content",
         }
     }
