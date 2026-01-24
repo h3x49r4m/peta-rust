@@ -1,0 +1,36 @@
+name: "snippet_card"
+version: "1.0.0"
+category: "Content"
+description: "Code snippet card component for displaying code examples"
+dependencies: []
+props:
+  snippet:
+    type: object
+    required: true
+  show_preview:
+    type: boolean
+    default: true
+  show_language:
+    type: boolean
+    default: true
+  show_actions:
+    type: boolean
+    default: true
+  preview_lines:
+    type: number
+    default: 5
+  size:
+    type: string
+    enum: ["small", "medium", "large"]
+    default: "medium"
+slots:
+  - name: actions
+    description: "Custom action buttons"
+  - name: footer
+    description: "Additional footer content"
+templates:
+  - snippet_card.html
+styles:
+  - snippet_card.css
+scripts:
+  - snippet_card.js

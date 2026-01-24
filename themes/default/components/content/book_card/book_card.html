@@ -1,0 +1,102 @@
+<article class="book-card" data-component="book_card" data-size="{{ size }}" data-variant="{{ variant }}">
+  {% if show_cover and book.cover_image %}
+  <div class="book-card-cover">
+    <img src="{{ book.cover_image }}" alt="{{ book.title }} cover" class="book-card-cover-image" loading="lazy">
+    {% if show_progress and book.progress %}
+    <div class="book-card-progress">
+      <div class="book-card-progress-bar" style="width: {{ book.progress }}%"></div>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+  
+  <div class="book-card-content">
+    <header class="book-card-header">
+      <h3 class="book-card-title">
+        <a href="{{ book.url }}" class="book-card-title-link">{{ book.title }}</a>
+      </h3>
+      
+      {% if book.subtitle %}
+      <p class="book-card-subtitle">{{ book.subtitle }}</p>
+      {% endif %}
+      
+      {% if book.authors %}
+      <div class="book-card-authors">
+        {% for author in book.authors %}
+        <span class="book-card-author">{{ author }}</span>
+        {% if not loop.last %}, {% endif %}
+        {% endfor %}
+      </div>
+      {% endif %}
+    </header>
+    
+    {% if show_description and book.description %}
+    <div class="book-card-description">
+      <p>{{ book.description | truncate(length: 150) }}</p>
+    </div>
+    {% endif %}
+    
+    {% if show_meta %}
+    <div class="book-card-meta">
+      {% if book.published_date %}
+      <span class="book-card-meta-item">
+        {% component "icon" with name="calendar" library="feather" size="xs" %}
+        {% endslot %}
+        {{ book.published_date }}
+      </span>
+      {% endif %}
+      
+      {% if book.chapters %}
+      <span class="book-card-meta-item">
+        {% component "icon" with name="book-open" library="feather" size="xs" %}
+        {% endslot %}
+        {{ book.chapters | length }} chapters
+      </span>
+      {% endif %}
+      
+      {% if book.reading_time %}
+      <span class="book-card-meta-item">
+        {% component "icon" with name="clock" library="feather" size="xs" %}
+        {% endslot %}
+        {{ book.reading_time }}
+      </span>
+      {% endif %}
+      
+      {% if book.difficulty %}
+      <span class="book-card-meta-item book-card-meta-item--difficulty">
+        <span class="book-card-difficulty book-card-difficulty--{{ book.difficulty }}">
+          {{ book.difficulty }}
+        </span>
+      </span>
+      {% endif %}
+    </div>
+    {% endif %}
+    
+    {% if book.tags %}
+    <div class="book-card-tags">
+      {% for tag in book.tags[:3] %}
+      <span class="book-card-tag">{{ tag }}</span>
+      {% endfor %}
+      {% if book.tags|length > 3 %}
+      <span class="book-card-tag book-card-tag--more">+{{ book.tags|length - 3 }}</span>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+  
+  {% if actions or book.url %}
+  <div class="book-card-actions">
+    {% slot actions %}
+    <a href="{{ book.url }}" class="book-card-action book-card-action--primary">
+      Read Book
+    </a>
+    {% endslot %}
+  </div>
+  {% endif %}
+  
+  {% if footer %}
+  <div class="book-card-footer">
+    {% slot footer %}{% endslot %}
+  </div>
+  {% endif %}
+</article>

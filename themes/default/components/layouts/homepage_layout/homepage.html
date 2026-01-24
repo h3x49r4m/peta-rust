@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ site.title }} - {{ site.description }}</title>
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 4rem 2rem;
+            margin-bottom: 3rem;
+        }
+        .hero-content h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        .hero-content p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .btn-primary {
+            background: white;
+            color: #3b82f6;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+        .btn-secondary:hover {
+            background: white;
+            color: #3b82f6;
+        }
+        .featured-section {
+            padding: 2rem 0;
+            margin-bottom: 3rem;
+        }
+        .featured-section h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: var(--text-color, #1e293b);
+        }
+        .featured-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        .featured-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+        .featured-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+        .featured-card h3 {
+            margin: 0 0 0.5rem 0;
+        }
+        .featured-card h3 a {
+            color: var(--text-color, #1e293b);
+            text-decoration: none;
+        }
+        .featured-card h3 a:hover {
+            color: var(--primary-color, #3b82f6);
+        }
+        .featured-meta {
+            color: var(--text-secondary, #64748b);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        .featured-excerpt {
+            color: var(--text-color, #1e293b);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        .featured-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
+        .tag {
+            background: var(--background-secondary, #f1f5f9);
+            color: var(--text-secondary, #64748b);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        @media (min-width: 768px) {
+            .hero-section {
+                padding: 6rem 2rem;
+            }
+            .featured-grid {
+                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="homepage-layout">
+        <section class="hero-section">
+            <div class="hero-content">
+                <h1>{{ site.title }}</h1>
+                <p>{{ site.description }}</p>
+                <div class="hero-actions">
+                    <a href="/articles.html" class="btn btn-primary">Browse Articles</a>
+                    <a href="/snippets.html" class="btn btn-secondary">View Snippets</a>
+                </div>
+            </div>
+        </section>
+        
+        {% if featured_articles or featured_books or featured_snippets or featured_projects %}
+        <section class="featured-section">
+            <h2>Featured Content</h2>
+            <div class="featured-grid">
+                {% if featured_articles %}
+                {% for article in featured_articles %}
+                <div class="featured-card">
+                    <h3><a href="{{ article.url }}">{{ article.title }}</a></h3>
+                    <div class="featured-meta">
+                        <time>{{ article.date }}</time>
+                        {% if article.author %}<span class="author">{{ article.author }}</span>{% endif %}
+                    </div>
+                    {% if article.excerpt %}
+                    <div class="featured-excerpt">{{ article.excerpt }}</div>
+                    {% endif %}
+                    {% if article.tags %}
+                    <div class="featured-tags">
+                        {% for tag in article.tags|slice(0, 3) %}
+                        <span class="tag">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% endif %}
+                
+                {% if featured_books %}
+                {% for book in featured_books %}
+                <div class="featured-card">
+                    <h3><a href="{{ book.url }}">{{ book.title }}</a></h3>
+                    <div class="featured-meta">
+                        <span class="type">Book</span>
+                        {% if book.author %}<span class="author">{{ book.author }}</span>{% endif %}
+                    </div>
+                    {% if book.excerpt %}
+                    <div class="featured-excerpt">{{ book.excerpt }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% endif %}
+                
+                {% if featured_snippets %}
+                {% for snippet in featured_snippets %}
+                <div class="featured-card">
+                    <h3><a href="{{ snippet.url }}">{{ snippet.title }}</a></h3>
+                    <div class="featured-meta">
+                        <span class="type">Snippet</span>
+                        {% if snippet.language %}<span class="language">{{ snippet.language }}</span>{% endif %}
+                    </div>
+                    {% if snippet.excerpt %}
+                    <div class="featured-excerpt">{{ snippet.excerpt }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% endif %}
+                
+                {% if featured_projects %}
+                {% for project in featured_projects %}
+                <div class="featured-card">
+                    <h3><a href="{{ project.url }}">{{ project.title }}</a></h3>
+                    <div class="featured-meta">
+                        <span class="type">Project</span>
+                        {% if project.status %}<span class="status">{{ project.status }}</span>{% endif %}
+                    </div>
+                    {% if project.excerpt %}
+                    <div class="featured-excerpt">{{ project.excerpt }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </section>
+        {% endif %}
+    </div>
+    
+    <script>
+        // Homepage animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.featured-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

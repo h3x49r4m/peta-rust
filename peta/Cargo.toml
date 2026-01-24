@@ -1,0 +1,72 @@
+[package]
+name = "peta"
+version = "0.1.0"
+edition = "2021"
+description = "High-Performance RST-First Static Site Generator"
+authors = ["Peta Team"]
+license = "Apache-2.0"
+repository = "https://github.com/h3x49r4m/peta"
+keywords = ["static-site-generator", "rst", "blog", "documentation"]
+categories = ["web-programming", "template-engine"]
+
+[[bin]]
+name = "peta"
+path = "src/main.rs"
+
+[lib]
+name = "peta"
+path = "src/lib.rs"
+
+[dependencies]
+# Workspace dependencies
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+toml = { workspace = true }
+clap = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+
+# RST processing
+pulldown-cmark = { workspace = true }
+regex = { workspace = true }
+once_cell = { workspace = true }
+
+# Template system
+tera = { workspace = true }
+serde_yaml = { workspace = true }
+
+# Math rendering
+katex = { workspace = true }
+
+# Code highlighting
+syntect = { workspace = true }
+
+# Web server
+axum = { workspace = true }
+tower = { workspace = true }
+tower-http = { workspace = true }
+notify = { workspace = true }
+
+# Asset processing
+image = { workspace = true }
+css-minify = { workspace = true }
+
+# Search
+tantivy = { workspace = true }
+
+# Utilities
+uuid = { workspace = true }
+chrono = { workspace = true }
+url = { workspace = true }
+path-absolutize = { workspace = true }
+glob = { workspace = true }
+walkdir = { workspace = true }
+termcolor = { workspace = true }
+mime_guess = "2.0"
+open = "5.3"
+
+[dev-dependencies]
+tempfile = { workspace = true }
+assert_cmd = { workspace = true }
+predicates = { workspace = true }

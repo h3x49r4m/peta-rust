@@ -1,0 +1,146 @@
+<nav class="book-toc" data-component="book_toc" data-sticky="{{ sticky }}" data-collapsible="{{ collapsible }}">
+  {% slot header %}
+  <header class="book-toc-header">
+    <div class="book-toc-title-section">
+      <h3 class="book-toc-title">Table of Contents</h3>
+      {% if book.subtitle %}
+      <p class="book-toc-subtitle">{{ book.subtitle }}</p>
+      {% endif %}
+    </div>
+    
+    {% if collapsible %}
+    <button class="book-toc-toggle" data-toggle>
+      {% component "icon" with name="chevron-down" library="feather" size="sm" %}
+      {% endslot %}
+    </button>
+    {% endif %}
+  </header>
+  {% endslot %}
+  
+  <div class="book-toc-content" data-content>
+    {% if show_progress %}
+    <div class="book-toc-progress">
+      <div class="book-toc-progress-bar">
+        <div class="book-toc-progress-fill" style="width: {{ book.progress_percentage | default(value=0) }}%"></div>
+      </div>
+      <div class="book-toc-progress-text">
+        {{ book.progress_percentage | default(value=0) }}% complete
+      </div>
+    </div>
+    {% endif %}
+    
+    <div class="book-toc-list" data-list>
+      {% for chapter in book.chapters %}
+      <div class="book-toc-item book-toc-item--level-0 {% if chapter.current %}book-toc-item--active{% endif %}" data-level="0" data-chapter="{{ loop.index0 }}">
+        <a href="{{ chapter.url }}" class="book-toc-link" data-toc-link data-target="{{ chapter.id | default(value=chapter.title | slugify) }}">
+          {% if show_numbers %}
+          <span class="book-toc-number">{{ loop.index }}</span>
+          {% endif %}
+          
+          <div class="book-toc-info">
+            <span class="book-toc-text">{{ chapter.title }}</span>
+            {% if show_descriptions and chapter.description %}
+            <span class="book-toc-description">{{ chapter.description }}</span>
+            {% endif %}
+          </div>
+          
+          {% if chapter.read_time %}
+          <span class="book-toc-meta">
+            {% component "icon" with name="clock" library="feather" size="xs" %}
+            {% endslot %}
+            {{ chapter.read_time }}
+          </span>
+          {% endif %}
+          
+          {% if chapter.completed %}
+          <span class="book-toc-status book-toc-status--completed">
+            {% component "icon" with name="check-circle" library="feather" size="sm" %}
+            {% endslot %}
+          </span>
+          {% endif %}
+          
+          {% if chapter.sections and chapter.sections|length > 0 %}
+          <button class="book-toc-expand" data-expand>
+            {% component "icon" with name="chevron-right" library="feather" size="xs" %}
+            {% endslot %}
+          </button>
+          {% endif %}
+        </a>
+        
+        {% if chapter.sections and chapter.sections|length > 0 %}
+        <div class="book-toc-children {% if chapter.current or chapter.expanded %}book-toc-children--expanded{% endif %}" data-children>
+          {% for section in chapter.sections %}
+          <div class="book-toc-item book-toc-item--level-1 {% if section.current %}book-toc-item--active{% endif %}" data-level="1" data-section="{{ loop.index0 }}">
+            <a href="{{ section.url }}" class="book-toc-link" data-toc-link data-target="{{ section.id | default(value=section.title | slugify) }}">
+              {% if show_numbers %}
+              <span class="book-toc-number">{{ loop.index0 + 1 }}</span>
+              {% endif %}
+              
+              <span class="book-toc-text">{{ section.title }}</span>
+              
+              {% if section.completed %}
+              <span class="book-toc-status book-toc-status--completed">
+                {% component "icon" with name="check" library="feather" size="xs" %}
+                {% endslot %}
+              </span>
+              {% endif %}
+              
+              {% if section.subsections and section.subsections|length > 0 %}
+              <button class="book-toc-expand" data-expand>
+                {% component "icon" with name="chevron-right" library="feather" size="xs" %}
+                {% endslot %}
+              </button>
+              {% endif %}
+            </a>
+            
+            {% if section.subsections and section.subsections|length > 0 %}
+            <div class="book-toc-children {% if section.current or section.expanded %}book-toc-children--expanded{% endif %}" data-children>
+              {% for subsection in section.subsections %}
+              <div class="book-toc-item book-toc-item--level-2 {% if subsection.current %}book-toc-item--active{% endif %}" data-level="2" data-subsection="{{ loop.index0 }}">
+                <a href="{{ subsection.url }}" class="book-toc-link" data-toc-link data-target="{{ subsection.id | default(value=subsection.title | slugify) }}">
+                  {% if show_numbers %}
+                  <span class="book-toc-number">{{ loop.index0 + 1 }}</span>
+                  {% endif %}
+                  
+                  <span class="book-toc-text">{{ subsection.title }}</span>
+                  
+                  {% if subsection.completed %}
+                  <span class="book-toc-status book-toc-status--completed">
+                    {% component "icon" with name="check" library="feather" size="xs" %}
+                    {% endslot %}
+                  </span>
+                  {% endif %}
+                </a>
+              </div>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  
+  {% slot footer %}
+  <footer class="book-toc-footer">
+    <div class="book-toc-stats">
+      <span class="book-toc-stat">
+        {% component "icon" with name="book-open" library="feather" size="xs" %}
+        {% endslot %}
+        {{ book.chapters|length }} chapters
+      </span>
+      
+      {% if book.total_read_time %}
+      <span class="book-toc-stat">
+        {% component "icon" with name="clock" library="feather" size="xs" %}
+        {% endslot %}
+        {{ book.total_read_time }}
+      </span>
+      {% endif %}
+    </div>
+  </footer>
+  {% endslot %}
+</nav>

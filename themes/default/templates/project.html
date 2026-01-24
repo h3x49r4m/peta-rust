@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} - {{ site.title }}{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .project-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: var(--spacing-8);
+    }
+    
+    .project-header {
+        text-align: center;
+        margin-bottom: var(--spacing-12);
+        padding-bottom: var(--spacing-8);
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .project-title {
+        font-size: var(--font-size-4xl);
+        font-weight: var(--font-weight-bold);
+        color: var(--text-color);
+        margin-bottom: var(--spacing-6);
+        line-height: 1.2;
+    }
+    
+    .project-meta {
+        color: var(--text-secondary);
+        font-size: var(--font-size-base);
+        margin-bottom: var(--spacing-4);
+    }
+    
+    .project-content {
+        font-size: var(--font-size-lg);
+        line-height: 1.8;
+        color: var(--text-color);
+    }
+    
+    .project-content h1,
+    .project-content h2,
+    .project-content h3,
+    .project-content h4,
+    .project-content h5,
+    .project-content h6 {
+        margin: var(--spacing-8) 0 var(--spacing-4);
+        font-weight: var(--font-weight-bold);
+        color: var(--text-color);
+    }
+    
+    .project-content h2 {
+        font-size: var(--font-size-2xl);
+        border-bottom: 2px solid var(--color-primary-500);
+        padding-bottom: var(--spacing-2);
+    }
+    
+    .project-content h3 {
+        font-size: var(--font-size-xl);
+    }
+    
+    .project-content p {
+        margin-bottom: var(--spacing-6);
+    }
+    
+    .project-content ul,
+    .project-content ol {
+        margin: var(--spacing-4) 0;
+        padding-left: var(--spacing-8);
+    }
+    
+    .project-content li {
+        margin-bottom: var(--spacing-2);
+    }
+    
+    .project-content pre {
+        background: var(--background-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-6);
+        overflow-x: auto;
+        margin: var(--spacing-6) 0;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: var(--font-size-sm);
+        line-height: 1.5;
+    }
+    
+    .project-content code {
+        background: var(--background-secondary);
+        padding: var(--spacing-1) var(--spacing-2);
+        border-radius: var(--radius-sm);
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: var(--font-size-sm);
+    }
+    
+    .project-content pre code {
+        background: none;
+        padding: 0;
+    }
+    
+    @media (max-width: 768px) {
+        .project-title {
+            font-size: var(--font-size-3xl);
+        }
+        
+        .project-content pre {
+            padding: var(--spacing-4);
+            font-size: var(--font-size-xs);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="project-container">
+    <header class="project-header">
+        <h1 class="project-title">{{ page.title }}</h1>
+        <div class="project-meta">
+            {% if page.status %}Status: {{ page.status }}{% endif %}
+        </div>
+    </header>
+    
+    <main>
+        <article class="project-content">
+            {{ content | safe }}
+        </article>
+    </main>
+</div>
+{% endblock %}

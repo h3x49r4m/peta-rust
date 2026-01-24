@@ -1,0 +1,498 @@
+//! Main RST parser implementation following RST-first architecture
+
+use crate::content::{RstContent, ContentMetadata, ContentType};
+use crate::content::rst::{MathRenderer, CodeHighlighter, DirectiveHandler, toc_generator::TocGenerator};
+use crate::core::Result;
+use crate::core::Error;
+use std::collections::HashMap;
+use regex::Regex;
+
+/// Main RST parser that processes RST content directly to HTML
+pub struct RstParser {
+    math_renderer: MathRenderer,
+    #[allow(dead_code)]
+    code_highlighter: CodeHighlighter,
+    directive_handlers: HashMap<String, Box<dyn DirectiveHandler>>,
+    toc_generator: TocGenerator,
+}
+
+impl RstParser {
+    /// Create a new RST parser with default handlers
+    pub fn new() -> crate::core::Result<Self> {
+        let mut directive_handlers: HashMap<String, Box<dyn DirectiveHandler>> = HashMap::new();
+        
+        // Register default directive handlers
+        directive_handlers.insert("code-block".to_string(), Box::new(crate::content::rst::directives::CodeBlockHandler));
+        directive_handlers.insert("snippet-card".to_string(), Box::new(crate::content::rst::directives::SnippetCardHandler));
+        directive_handlers.insert("toctree".to_string(), Box::new(crate::content::rst::directives::TocTreeHandler));
+        
+Ok(Self {
+            math_renderer: MathRenderer::new(),
+            code_highlighter: CodeHighlighter::new().map_err(|e| Error::Content(format!("Failed to create code highlighter: {}", e)))?,
+            directive_handlers,
+            toc_generator: TocGenerator::new(),
+        })
+    }
+    
+    /// Parse RST content to HTML following RST-first architecture
+    pub fn parse(&mut self, content: &str) -> Result<RstContent> {
+        self.parse_with_type(content, None)
+    }
+    
+    /// Parse RST content with optional content type override
+    pub fn parse_with_type(&mut self, content: &str, content_type_override: Option<ContentType>) -> Result<RstContent> {
+        // 1. Extract frontmatter
+        let (frontmatter, rst_content) = self.extract_frontmatter(content)?;
+        
+        // 2. Extract metadata from frontmatter with optional type override
+        let metadata = self.extract_metadata_with_type(&frontmatter, content_type_override)?;
+        
+        // 3. Parse RST structure and process directives
+        let processed_html = self.process_rst_content(&rst_content)?;
+        
+        // 4. Generate table of contents
+        let toc = self.toc_generator.generate(&processed_html)?;
+        
+        Ok(RstContent {
+            metadata,
+            html: processed_html,
+            toc,
+            frontmatter,
+        })
+    }
+    
+    /// Extract YAML frontmatter from RST content
+    fn extract_frontmatter(&self, content: &str) -> Result<(HashMap<String, serde_json::Value>, String)> {
+        // Simple approach: split on the first occurrence of "---\n"
+        if content.starts_with("---\n") {
+            let without_prefix = &content[4..]; // Remove "---\n"
+            if let Some(pos) = without_prefix.find("\n---\n") {
+                let frontmatter_str = &without_prefix[..pos];
+                let rst_content = &without_prefix[pos + 5..]; // Skip "\n---\n"
+                
+                let frontmatter: HashMap<String, serde_json::Value> = serde_yaml::from_str(frontmatter_str)
+                    .map_err(|e| crate::core::Error::rst_parse(format!("Failed to parse frontmatter: {}", e)))?;
+                
+                return Ok((frontmatter, rst_content.to_string()));
+            }
+        }
+        
+        // No frontmatter found
+        Ok((HashMap::new(), content.to_string()))
+    }
+    
+    /// Extract metadata from frontmatter
+    #[allow(dead_code)]
+    fn extract_metadata(&self, frontmatter: &HashMap<String, serde_json::Value>) -> Result<ContentMetadata> {
+        self.extract_metadata_with_type(frontmatter, None)
+    }
+    
+    fn extract_metadata_with_type(&self, frontmatter: &HashMap<String, serde_json::Value>, content_type_override: Option<ContentType>) -> Result<ContentMetadata> {
+        let title = frontmatter.get("title")
+            .and_then(|v| v.as_str())
+            .unwrap_or("Untitled")
+            .to_string();
+        
+        let content_type = content_type_override.or_else(|| {
+            frontmatter.get("type")
+                .and_then(|v| v.as_str())
+                .map(|s| ContentType::from_string(s))
+        }).unwrap_or(ContentType::Article);
+        
+        let date = frontmatter.get("date")
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_string();
+        
+        let tags = frontmatter.get("tags")
+            .and_then(|v| v.as_array())
+            .map(|arr| {
+                arr.iter()
+                    .filter_map(|v| v.as_str())
+                    .map(|s| s.to_string())
+                    .collect()
+            })
+            .unwrap_or_default();
+        
+        let author = frontmatter.get("author")
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_string());
+        
+        let excerpt = frontmatter.get("excerpt")
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_string());
+        
+        // Generate URL from title
+        let url = self.generate_url(&title, &content_type);
+        
+        // Generate ID from title
+        let id = self.generate_id(&title);
+        
+        Ok(ContentMetadata {
+            id,
+            title,
+            content_type,
+            date,
+            tags,
+            author,
+            excerpt,
+            url,
+        })
+    }
+    
+    /// Generate URL from title and content type
+    fn generate_url(&self, title: &str, content_type: &ContentType) -> String {
+        let slug = self.slugify(title);
+        match content_type {
+            ContentType::Article => format!("articles/{}.html", slug),
+            ContentType::Book => format!("books/{}/index.html", slug),
+            ContentType::Snippet => format!("snippets/{}.html", slug),
+            ContentType::Project => format!("projects/{}.html", slug),
+        }
+    }
+    
+    /// Generate ID from title
+    fn generate_id(&self, title: &str) -> String {
+        self.slugify(title)
+    }
+    
+    /// Convert title to URL-friendly slug
+    fn slugify(&self, title: &str) -> String {
+        title.to_lowercase()
+            .replace(&[' ', '-', '_', '.', ',', ';', ':', '!', '?', '@', '#', '$', '%', '^', '&', '*', '(', ')', '+', '=', '[', ']', '{', '}', '\\', '|', '<', '>', '/', '"', '\''][..], "-")
+            .replace(&['"', '\''][..], "")
+            .chars()
+            .filter(|c| c.is_alphanumeric() || *c == '-')
+            .collect::<String>()
+            .trim_matches('-')
+            .to_string()
+    }
+    
+    /// Process RST content and convert to HTML
+    fn process_rst_content(&mut self, content: &str) -> Result<String> {
+        let mut processed = content.to_string();
+        
+        // Process directives first
+        processed = self.process_directives(&processed)?;
+        
+        // Process math equations
+        processed = self.math_renderer.render(&processed)?;
+        
+        // Process code blocks (only actual code blocks, not entire content)
+        // This is handled in the directive processing, so we don't apply it to the entire document
+        
+        // Convert RST markup to HTML (skip directive content)
+        processed = self.convert_rst_to_html(&processed)?;
+        
+        Ok(processed)
+    }
+    
+    
+    
+    /// Process RST directives
+    
+        fn process_directives(&mut self, content: &str) -> Result<String> {
+    
+                // Use a simpler approach - split by directive patterns
+    
+                let directive_start_regex = Regex::new(r"\.\. ([a-zA-Z0-9_-]+)::")
+                    .map_err(|e| crate::core::Error::rst_parse(format!("Failed to compile directive regex: {}", e)))?;
+    
+                
+    
+                let mut result = content.to_string();
+    
+                
+    
+                // Find all directive starts
+    
+                let mut directive_starts = Vec::new();
+    
+                for mat in directive_start_regex.find_iter(content) {
+    
+                    directive_starts.push((mat.start(), mat.end(), mat.as_str()));
+    
+                }
+    
+                
+    
+                // Process each directive
+    
+                for (i, &(start, end, directive_str)) in directive_starts.iter().enumerate() {
+    
+                    // Extract directive type from the directive string
+    
+                    let directive_type = directive_str
+    
+                        .trim_start_matches(".. ")
+    
+                        .trim_end_matches("::")
+    
+                        .trim();
+    
+                    
+    
+                    // Find end of directive content (next directive or end of file)
+    
+                    let content_start = end;
+    
+                    let content_end = if i + 1 < directive_starts.len() {
+    
+                        directive_starts[i + 1].0
+    
+                    } else {
+    
+                        content.len()
+    
+                    };
+    
+                    
+    
+                    let directive_content = &content[content_start..content_end];
+    
+                    
+    
+                    // Process directive if we have a handler
+    
+                    if let Some(handler) = self.directive_handlers.get_mut(directive_type) {
+    
+                        let processed = handler.handle(directive_content)?;
+    
+                        let original = &content[start..content_end];
+    
+                        result = result.replace(original, &processed);
+    
+                    }
+    
+                }
+    
+                
+    
+                Ok(result)
+    
+                
+    
+                    }
+    
+    /// Convert RST markup to HTML
+    fn convert_rst_to_html(&self, content: &str) -> Result<String> {
+        let mut html = content.to_string();
+        
+        // Convert headers
+        html = self.convert_headers(&html)?;
+        
+        // Convert emphasis
+        html = self.convert_emphasis(&html)?;
+        
+        // Convert links
+        html = self.convert_links(&html)?;
+        
+        // Convert lists
+        html = self.convert_lists(&html)?;
+        
+        // Convert paragraphs
+        html = self.convert_paragraphs(&html)?;
+        
+        Ok(html)
+    }
+    
+    /// Convert RST headers to HTML
+    fn convert_headers(&self, content: &str) -> Result<String> {
+        let mut result = Vec::new();
+        let lines: Vec<&str> = content.lines().collect();
+        let mut i = 0;
+        
+        while i < lines.len() {
+            let line = lines[i];
+            
+            // Check for RST-style underlined headers
+            if i + 1 < lines.len() {
+                let next_line = lines[i + 1];
+                if (next_line.chars().all(|c| c == '=') || next_line.chars().all(|c| c == '-')) && 
+                   next_line.len() >= line.len() / 2 {
+                    let level = if next_line.chars().all(|c| c == '=') { "2" } else { "3" };
+                    result.push(format!("<h{}>{}</h{}>", level, line.trim(), level));
+                    i += 2; // Skip both the title and underline
+                    continue;
+                }
+            }
+            
+            // Check for markdown-style headers as fallback
+            let header_regex = Regex::new(r"^(#{1,6})\s+(.+)$")
+                    .map_err(|e| crate::core::Error::rst_parse(format!("Failed to compile header regex: {}", e)))?;
+            if let Some(captures) = header_regex.captures(line) {
+                let level = captures.get(1).unwrap().as_str().len();
+                let title = captures.get(2).unwrap().as_str();
+                let anchor = self.slugify(title);
+                result.push(format!("<h{} id=\"{}\">{}</h{}>", level, anchor, title, level));
+                i += 1;
+            } else {
+                result.push(line.to_string());
+                i += 1;
+            }
+        }
+        
+        Ok(result.join("\n"))
+    }
+    
+    /// Convert RST emphasis to HTML
+    fn convert_emphasis(&self, content: &str) -> Result<String> {
+        let mut html = content.to_string();
+        
+        // Bold text
+        html = regex::Regex::new(r"\*\*([^*]+)\*\*")
+            .map_err(|e| crate::core::Error::rst_parse(format!("Failed to compile bold regex: {}", e)))?
+            .replace_all(&html, "<strong>$1</strong>")
+            .to_string();
+        
+        // Italic text
+        html = regex::Regex::new(r"\*([^*]+)\*")
+            .map_err(|e| crate::core::Error::rst_parse(format!("Failed to compile italic regex: {}", e)))?
+            .replace_all(&html, "<em>$1</em>")
+            .to_string();
+        
+        // Inline code
+        html = regex::Regex::new(r"``([^`]+)``")
+            .map_err(|e| crate::core::Error::rst_parse(format!("Failed to compile code regex: {}", e)))?
+            .replace_all(&html, "<code>$1</code>")
+            .to_string();
+        
+        Ok(html)
+    }
+    
+    /// Convert RST links to HTML
+    fn convert_links(&self, content: &str) -> Result<String> {
+        let link_regex = Regex::new(r"`([^`]+)<([^>]+)>`_")
+                    .map_err(|e| crate::core::Error::rst_parse(format!("Failed to compile link regex: {}", e)))?;
+        
+        let html = link_regex
+            .replace_all(content, r#"<a href="$2">$1</a>"#)
+            .to_string();
+        
+        Ok(html)
+    }
+    
+    /// Convert RST lists to HTML
+    fn convert_lists(&self, content: &str) -> Result<String> {
+        // This is a simplified implementation
+        // A full implementation would handle nested lists and different list types
+        let lines: Vec<&str> = content.lines().collect();
+        let mut result = Vec::new();
+        let mut in_list = false;
+        let mut list_type = "";
+        
+        for line in lines {
+            if line.starts_with("- ") || line.starts_with("* ") {
+                if !in_list {
+                    result.push("<ul>".to_string());
+                    in_list = true;
+                    list_type = "ul";
+                }
+                let item = line.trim_start_matches("- ").trim_start_matches("* ");
+                result.push(format!("<li>{}</li>", item));
+            } else if line.starts_with(|c: char| c.is_numeric()) && line.contains('.') {
+                if !in_list {
+                    result.push("<ol>".to_string());
+                    in_list = true;
+                    list_type = "ol";
+                }
+                let item = line.split('.').nth(1).unwrap_or("").trim();
+                result.push(format!("<li>{}</li>", item));
+            } else {
+                if in_list {
+                    result.push(format!("</{}>", list_type));
+                    in_list = false;
+                }
+                result.push(line.to_string());
+            }
+        }
+        
+        if in_list {
+            result.push(format!("</{}>", list_type));
+        }
+        
+        Ok(result.join("\n"))
+    }
+    
+    /// Convert RST paragraphs to HTML
+    fn convert_paragraphs(&self, content: &str) -> Result<String> {
+        let lines: Vec<&str> = content.lines().collect();
+        let mut result = Vec::new();
+        let mut paragraph = Vec::new();
+        let mut in_html_block = false;
+        let mut html_block_depth = 0; // Track nested HTML blocks
+        
+        for line in lines {
+            let trimmed = line.trim();
+            
+            // Track HTML block depth
+            if trimmed.starts_with("<div") {
+                if html_block_depth == 0 && !paragraph.is_empty() {
+                    result.push(format!("<p>{}</p>", paragraph.join(" ")));
+                    paragraph.clear();
+                }
+                html_block_depth += 1;
+                in_html_block = true;
+                result.push(line.to_string());
+            } else if trimmed.starts_with("</div>") && in_html_block {
+                html_block_depth -= 1;
+                result.push(line.to_string());
+                if html_block_depth == 0 {
+                    in_html_block = false;
+                }
+            } else if in_html_block {
+                // Inside an HTML block, preserve the line as-is
+                result.push(line.to_string());
+            } else if self.is_html_tag(trimmed) {
+                // Single-line HTML tag
+                if !paragraph.is_empty() {
+                    result.push(format!("<p>{}</p>", paragraph.join(" ")));
+                    paragraph.clear();
+                }
+                result.push(line.to_string());
+            } else if trimmed.is_empty() {
+                if !paragraph.is_empty() {
+                    result.push(format!("<p>{}</p>", paragraph.join(" ")));
+                    paragraph.clear();
+                }
+            } else if !trimmed.starts_with("    ") && !trimmed.starts_with("\t") {
+                // Regular text line
+                paragraph.push(trimmed);
+            } else {
+                // Indented content (should be preserved as-is)
+                if !paragraph.is_empty() {
+                    result.push(format!("<p>{}</p>", paragraph.join(" ")));
+                    paragraph.clear();
+                }
+                result.push(line.to_string());
+            }
+        }
+        
+        if !paragraph.is_empty() {
+            result.push(format!("<p>{}</p>", paragraph.join(" ")));
+        }
+        
+        Ok(result.join("\n"))
+    }
+    
+/// Check if a line is already an HTML tag
+    fn is_html_tag(&self, line: &str) -> bool {
+        line.starts_with("<") && line.ends_with(">") || 
+        line.starts_with("<div") || 
+        line.starts_with("</div") ||
+        line.starts_with("<pre") ||
+        line.starts_with("</pre") ||
+        line.starts_with("<code") ||
+        line.starts_with("</code") ||
+        line.starts_with("<span") ||
+        line.starts_with("</span") ||
+        line.starts_with("<button") ||
+        line.starts_with("</button")
+    }
+}
+
+impl Default for RstParser {
+    fn default() -> Self {
+        Self::new().expect("Failed to create RstParser")
+    }
+}

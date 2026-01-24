@@ -1,0 +1,41 @@
+name: "article_related"
+version: "1.0.0"
+category: "Content"
+description: "Related articles component with tag-based recommendations"
+dependencies: ["article_card"]
+props:
+  related_articles:
+    type: array
+    default: []
+  max_articles:
+    type: number
+    default: 4
+  show_thumbnails:
+    type: boolean
+    default: true
+  show_tags:
+    type: boolean
+    default: false
+  show_dates:
+    type: boolean
+    default: true
+  layout:
+    type: string
+    enum: ["grid", "list", "carousel"]
+    default: "grid"
+  columns:
+    type: number
+    default: 2
+slots:
+  - name: title
+    description: "Custom title for related articles section"
+  - name: subtitle
+    description: "Subtitle or description"
+  - name: actions
+    description: "Action buttons or links"
+templates:
+  - article_related.html
+styles:
+  - article_related.css
+scripts:
+  - article_related.js

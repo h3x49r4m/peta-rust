@@ -1,0 +1,29 @@
+name: "badge"
+version: "1.0.0"
+category: "Atomic"
+description: "Small count and labeling component"
+dependencies: []
+props:
+  variant:
+    type: string
+    enum: ["primary", "secondary", "success", "danger", "warning", "info", "light", "dark"]
+    default: "primary"
+  size:
+    type: string
+    enum: ["sm", "md", "lg"]
+    default: "md"
+  pill:
+    type: boolean
+    default: false
+  count:
+    type: number
+    default: null
+slots:
+  - name: children
+    description: "Badge content"
+templates:
+  - badge.html
+styles:
+  - badge.css
+scripts:
+  - badge.js

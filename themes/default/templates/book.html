@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} - {{ site.title }}{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .book-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: var(--spacing-8);
+    }
+    
+    .book-header {
+        text-align: center;
+        margin-bottom: var(--spacing-12);
+        padding-bottom: var(--spacing-8);
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .book-title {
+        font-size: var(--font-size-4xl);
+        font-weight: var(--font-weight-bold);
+        color: var(--text-color);
+        margin-bottom: var(--spacing-6);
+        line-height: 1.2;
+    }
+    
+    .book-meta {
+        color: var(--text-secondary);
+        font-size: var(--font-size-base);
+        margin-bottom: var(--spacing-4);
+    }
+    
+    .book-content {
+        font-size: var(--font-size-lg);
+        line-height: 1.8;
+        color: var(--text-color);
+    }
+    
+    .book-content h1,
+    .book-content h2,
+    .book-content h3,
+    .book-content h4,
+    .book-content h5,
+    .book-content h6 {
+        margin: var(--spacing-8) 0 var(--spacing-4);
+        font-weight: var(--font-weight-bold);
+        color: var(--text-color);
+    }
+    
+    .book-content h2 {
+        font-size: var(--font-size-2xl);
+        border-bottom: 2px solid var(--color-primary-500);
+        padding-bottom: var(--spacing-2);
+    }
+    
+    .book-content h3 {
+        font-size: var(--font-size-xl);
+    }
+    
+    .book-content p {
+        margin-bottom: var(--spacing-6);
+    }
+    
+    .book-content ul,
+    .book-content ol {
+        margin: var(--spacing-4) 0;
+        padding-left: var(--spacing-8);
+    }
+    
+    .book-content li {
+        margin-bottom: var(--spacing-2);
+    }
+    
+    .book-navigation {
+        display: flex;
+        justify-content: space-between;
+        margin-top: var(--spacing-12);
+        padding-top: var(--spacing-8);
+        border-top: 1px solid var(--border-color);
+    }
+    
+    .book-navigation a {
+        color: var(--color-primary-500);
+        text-decoration: none;
+        font-weight: var(--font-weight-medium);
+        padding: var(--spacing-3) var(--spacing-4);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        transition: all 0.2s ease;
+    }
+    
+    .book-navigation a:hover {
+        background: var(--color-primary-500);
+        color: white;
+        border-color: var(--color-primary-500);
+    }
+    
+    .toc {
+        background: var(--background-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-6);
+        margin-bottom: var(--spacing-8);
+    }
+    
+    .toc h3 {
+        margin-top: 0;
+        margin-bottom: var(--spacing-4);
+        color: var(--text-color);
+    }
+    
+    @media (max-width: 768px) {
+        .book-title {
+            font-size: var(--font-size-3xl);
+        }
+        
+        .book-navigation {
+            flex-direction: column;
+            gap: var(--spacing-4);
+        }
+        
+        .book-navigation a {
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="book-container">
+    <header class="book-header">
+        <h1 class="book-title">{{ page.title }}</h1>
+        <div class="book-meta">
+            {% if page.author %}by {{ page.author }}{% endif %}
+        </div>
+    </header>
+    
+    <main>
+        <article class="book-content">
+            {% if toc and toc | length > 1 %}
+            <div class="toc">
+                <h3>Table of Contents</h3>
+                {{ toc | safe }}
+            </div>
+            {% endif %}
+            
+            {{ content | safe }}
+        </article>
+        
+        {% if page.previous_chapter or page.next_chapter %}
+        <nav class="book-navigation">
+            {% if page.previous_chapter %}
+            <a href="{{ page.previous_chapter.url }}">← {{ page.previous_chapter.title }}</a>
+            {% endif %}
+            {% if page.next_chapter %}
+            <a href="{{ page.next_chapter.url }}">{{ page.next_chapter.title }} →</a>
+            {% endif %}
+        </nav>
+        {% endif %}
+    </main>
+</div>
+{% endblock %}

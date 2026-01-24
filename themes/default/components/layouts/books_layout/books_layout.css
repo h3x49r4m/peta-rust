@@ -1,0 +1,145 @@
+/* Books Layout Styles */
+.books-layout {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.books-header {
+    margin-bottom: 2rem;
+}
+
+.books-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.books-header p {
+    color: var(--text-secondary, #64748b);
+    font-size: 1.1rem;
+}
+
+.books-filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.filter-select {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 6px;
+    background: white;
+    color: var(--text-color, #1e293b);
+}
+
+.books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.book-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.book-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.book-title {
+    margin: 0 0 0.5rem 0;
+}
+
+.book-title a {
+    color: var(--text-color, #1e293b);
+    text-decoration: none;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.book-title a:hover {
+    color: var(--primary-color, #3b82f6);
+}
+
+.book-meta {
+    color: var(--text-secondary, #64748b);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.book-meta .author,
+.book-meta .category,
+.book-meta time {
+    margin-right: 1rem;
+}
+
+.book-excerpt {
+    color: var(--text-color, #1e293b);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.book-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.book-link {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.book-link.primary {
+    background: var(--primary-color, #3b82f6);
+    color: white;
+}
+
+.book-link.primary:hover {
+    background: var(--primary-hover, #2563eb);
+}
+
+.book-link.secondary {
+    background: var(--background-secondary, #f1f5f9);
+    color: var(--text-color, #1e293b);
+}
+
+.book-link.secondary:hover {
+    background: var(--background-tertiary, #e2e8f0);
+}
+
+.book-stats {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color, #e2e8f0);
+}
+
+.book-stat {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary, #64748b);
+}
+
+@media (max-width: 768px) {
+    .books-layout {
+        padding: 1rem;
+    }
+    
+    .books-grid {
+        grid-template-columns: 1fr;
+    }
+}

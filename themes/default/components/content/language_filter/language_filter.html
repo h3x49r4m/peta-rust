@@ -1,0 +1,79 @@
+<div class="language-filter" data-component="language_filter" data-layout="{{ layout }}" data-variant="{{ variant }}">
+  {% slot header %}
+  {% if layout != "dropdown" %}
+  <header class="language-filter-header">
+    <h3 class="language-filter-title">Filter by Language</h3>
+  </header>
+  {% endif %}
+  {% endslot %}
+  
+  <div class="language-filter-content">
+    {% if layout == "dropdown" %}
+    <div class="language-filter-dropdown">
+      <select class="language-filter-select" data-select>
+        {% if show_all %}
+        <option value="" {% if not selected_language %}selected{% endif %}>All Languages</option>
+        {% endif %}
+        
+        {% for language in languages %}
+        <option value="{{ language.id }}" {% if selected_language == language.id %}selected{% endif %}>
+          {{ language.name }}
+          {% if show_counts and language.count %}({{ language.count }}){% endif %}
+        </option>
+        {% endfor %}
+      </select>
+      
+      <div class="language-filter-dropdown-arrow">
+        {% component "icon" with name="chevron-down" library="feather" size="sm" %}
+        {% endslot %}
+      </div>
+    </div>
+    {% else %}
+    <div class="language-filter-list" data-list>
+      {% if show_all %}
+      <button class="language-filter-item {% if not selected_language %}language-filter-item--active{% endif %}" 
+              data-language="" 
+              data-count="{{ languages | sum(attribute='count') | default(value=0) }}">
+        <span class="language-filter-name">All</span>
+        {% if show_counts %}
+        <span class="language-filter-count">{{ languages | sum(attribute='count') | default(value=0) }}</span>
+        {% endif %}
+      </button>
+      {% endif %}
+      
+      {% for language in languages %}
+      <button class="language-filter-item {% if selected_language == language.id %}language-filter-item--active{% endif %}" 
+              data-language="{{ language.id }}" 
+              data-count="{{ language.count | default(value=0) }}">
+        {% if language.icon %}
+        <span class="language-filter-icon">{{ language.icon }}</span>
+        {% endif %}
+        
+        <span class="language-filter-name">{{ language.name }}</span>
+        
+        {% if show_counts %}
+        <span class="language-filter-count">{{ language.count | default(value=0) }}</span>
+        {% endif %}
+      </button>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  
+  {% if footer %}
+  <footer class="language-filter-footer">
+    {% slot footer %}{% endslot %}
+  </footer>
+  {% endif %}
+  
+  {% if layout != "dropdown" and selected_language %}
+  <div class="language-filter-active">
+    <span class="language-filter-active-label">Active filter:</span>
+    <span class="language-filter-active-value">{{ languages | selectattr("id", "equalto", selected_language) | first | attr("name") }}</span>
+    <button class="language-filter-clear" data-clear>
+      {% component "icon" with name="x" library="feather" size="xs" %}
+      {% endslot %}
+    </button>
+  </div>
+  {% endif %}
+</div>

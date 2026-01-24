@@ -1,0 +1,51 @@
+<div class="project-modal" data-component="project_modal" data-open="false">
+  <div class="project-modal-overlay" data-overlay></div>
+  
+  <div class="project-modal-dialog" data-dialog>
+    {% slot header %}
+    <header class="project-modal-header">
+      <h2 class="project-modal-title">{{ project.title }}</h2>
+      {% if show_close_button %}
+      <button class="project-modal-close" data-close>
+        {% component "icon" with name="x" library="feather" size="md" %}
+        {% endslot %}
+      </button>
+      {% endif %}
+    </header>
+    {% endslot %}
+    
+    <div class="project-modal-body">
+      {% slot body %}
+      {% if project.image %}
+      <div class="project-modal-image">
+        <img src="{{ project.image }}" alt="{{ project.title }} screenshot" />
+      </div>
+      {% endif %}
+      
+      {% if project.description %}
+      <div class="project-modal-description">
+        <p>{{ project.description }}</p>
+      </div>
+      {% endif %}
+      
+      {% if project.technologies %}
+      <div class="project-modal-tech">
+        <h3>Technologies</h3>
+        <div class="project-modal-tech-list">
+          {% for tech in project.technologies %}
+          <span class="project-modal-tech-item">{{ tech }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+      {% endslot %}
+    </div>
+    
+    {% slot footer %}
+    <footer class="project-modal-footer">
+      {% component "project_links" with project=project show_icons=true layout="horizontal" %}
+      {% endslot %}
+    </footer>
+    {% endslot %}
+  </div>
+</div>

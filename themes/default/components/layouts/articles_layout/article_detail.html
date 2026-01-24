@@ -1,0 +1,24 @@
+<article class="article-detail">
+    <header class="article-header">
+        <h1>{{ selected_article.title }}</h1>
+        <div class="article-meta">
+            <time datetime="{{ selected_article.date }}">{{ selected_article.date }}</time>
+            {% if selected_article.author %}
+            <span class="author">by {{ selected_article.author }}</span>
+            {% endif %}
+            {% if selected_article.reading_time %}
+            <span class="reading-time">{{ selected_article.reading_time }} min read</span>
+            {% endif %}
+        </div>
+        {% if selected_article.tags %}
+        <div class="article-tags">
+            {% for tag in selected_article.tags %}
+            <span class="tag">{{ tag }}</span>
+            {% endfor %}
+        </div>
+    </header>
+    
+    <div class="article-content">
+        {{ selected_article.content | safe }}
+    </div>
+</article>

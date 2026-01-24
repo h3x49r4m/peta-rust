@@ -1,0 +1,80 @@
+<section class="project-gallery" data-component="project_gallery" data-layout="{{ layout }}" data-columns="{{ columns }}">
+  {% slot header %}
+  <header class="project-gallery-header">
+    <h2 class="project-gallery-title">Projects</h2>
+    {% if show_filters %}
+    <div class="project-gallery-filters">
+      {% component "language_filter" with languages=project_filters show_all=true show_counts=true layout="horizontal" variant="pills" %}
+      {% endslot %}
+    </div>
+    {% endif %}
+  </header>
+  {% endslot %}
+  
+  <div class="project-gallery-content">
+    {% if show_filters %}
+    <div class="project-gallery-active-filters" data-active-filters>
+      <!-- Active filters will be inserted here by JavaScript -->
+    </div>
+    {% endif %}
+    
+    <div class="project-gallery-grid project-gallery-grid--{{ layout }}" data-grid>
+      {% for project in projects[:max_projects] %}
+      <div class="project-gallery-item" data-language="{{ project.language | default(value='') }}" data-tags="{{ project.tags | join(sep=',') }}">
+        {% component "project_card" with project=project show_image=true show_description=true show_tags=true show_stats=true size="medium" %}
+        {% endslot %}
+      </div>
+      {% endfor %}
+    </div>
+    
+    {% if projects|length > max_projects %}
+    <div class="project-gallery-more">
+      <button class="project-gallery-more-btn" data-more-btn>
+        <span class="project-gallery-more-text">Load More Projects</span>
+        {% component "icon" with name="chevron-down" library="feather" size="sm" %}
+        {% endslot %}
+      </button>
+    </div>
+    {% endif %}
+  </div>
+  
+  {% if show_pagination %}
+  <div class="project-gallery-pagination" data-pagination>
+    <button class="project-gallery-pagination-btn project-gallery-pagination-btn--prev" data-pagination-prev disabled>
+      {% component "icon" with name="chevron-left" library="feather" size="sm" %}
+      {% endslot %}
+      Previous
+    </button>
+    
+    <div class="project-gallery-pagination-pages" data-pagination-pages>
+      <!-- Pagination pages will be inserted here by JavaScript -->
+    </div>
+    
+    <button class="project-gallery-pagination-btn project-gallery-pagination-btn--next" data-pagination-next>
+      Next
+      {% component "icon" with name="chevron-right" library="feather" size="sm" %}
+      {% endslot %}
+    </button>
+  </div>
+  {% endif %}
+  
+  {% slot footer %}
+  <footer class="project-gallery-footer">
+    <div class="project-gallery-stats">
+      <span class="project-gallery-stat">
+        {% component "icon" with name="folder" library="feather" size="xs" %}
+        {% endslot %}
+        {{ projects|length }} projects
+      </span>
+      
+      {% if project_languages %}
+      <span class="project-gallery-stat">
+        {% component "icon" with name="code" library="feather" size="xs" %}
+        {% endslot %}
+        {{ project_languages|length }} languages
+      </span>
+      {% endif %}
+    </div>
+  </footer>
+  {% endslot %}
+</section>

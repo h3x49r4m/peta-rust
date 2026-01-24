@@ -1,0 +1,32 @@
+name: "book_progress"
+version: "1.0.0"
+category: "Content"
+description: "Book progress tracking component with visual indicators"
+dependencies: []
+props:
+  book:
+    type: object
+    required: true
+  show_details:
+    type: boolean
+    default: true
+  show_statistics:
+    type: boolean
+    default: true
+  show_timeline:
+    type: boolean
+    default: false
+  compact:
+    type: boolean
+    default: false
+slots:
+  - name: actions
+    description: "Action buttons for progress management"
+  - name: footer
+    description: "Additional footer content"
+templates:
+  - book_progress.html
+styles:
+  - book_progress.css
+scripts:
+  - book_progress.js

@@ -1,0 +1,40 @@
+name: "book_card"
+version: "1.0.0"
+category: "Content"
+description: "Book card component for displaying book information"
+dependencies: []
+props:
+  book:
+    type: object
+    required: true
+  show_cover:
+    type: boolean
+    default: true
+  show_description:
+    type: boolean
+    default: true
+  show_meta:
+    type: boolean
+    default: true
+  show_progress:
+    type: boolean
+    default: false
+  size:
+    type: string
+    enum: ["small", "medium", "large"]
+    default: "medium"
+  variant:
+    type: string
+    enum: ["default", "compact", "featured"]
+    default: "default"
+slots:
+  - name: actions
+    description: "Action buttons for the book"
+  - name: footer
+    description: "Additional footer content"
+templates:
+  - book_card.html
+styles:
+  - book_card.css
+scripts:
+  - book_card.js

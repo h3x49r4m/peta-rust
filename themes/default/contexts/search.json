@@ -1,0 +1,377 @@
+{
+  "articles": [
+    {
+      "id": "calculus-fundamentals",
+      "type": "article",
+      "title": "Calculus Fundamentals",
+      "url": "/articles/calculus-fundamentals.html",
+      "content": "Calculus is the mathematical study of continuous change. It has two major branches: differential calculus and integral calculus. Differential calculus concerns instantaneous rates of change and slopes of curves, while integral calculus concerns accumulation of quantities and areas under curves.",
+      "excerpt": "Learn the fundamental concepts of calculus including limits, derivatives, and integrals.",
+      "author": "Math Team",
+      "date": "2024-01-15",
+      "tags": ["mathematics", "calculus", "education"],
+      "reading_time": 15,
+      "word_count": 2500
+    },
+    {
+      "id": "quantum-mechanics",
+      "type": "article",
+      "title": "Introduction to Quantum Mechanics",
+      "url": "/articles/quantum-mechanics.html",
+      "content": "Quantum mechanics is a fundamental theory in physics that provides a description of the physical properties of nature at the scale of atoms and subatomic particles. It is the foundation of all quantum physics including quantum chemistry, quantum field theory, quantum technology, and quantum information science.",
+      "excerpt": "Explore the fascinating world of quantum mechanics and its fundamental principles.",
+      "author": "Physics Team",
+      "date": "2024-01-10",
+      "tags": ["physics", "quantum", "science"],
+      "reading_time": 20,
+      "word_count": 3200
+    },
+    {
+      "id": "code-rendering-test",
+      "type": "article",
+      "title": "Code Rendering Test",
+      "url": "/articles/code-rendering-test.html",
+      "content": "This article tests various code rendering capabilities including syntax highlighting, line numbers, and different programming languages. We'll test Python, JavaScript, Rust, C++, and other languages to ensure proper rendering.",
+      "excerpt": "Test page for code rendering and syntax highlighting across different programming languages.",
+      "author": "Dev Team",
+      "date": "2024-01-05",
+      "tags": ["code", "testing", "syntax-highlighting"],
+      "reading_time": 8,
+      "word_count": 1200
+    }
+  ],
+  "books": [
+    {
+      "id": "deep-learning-with-python",
+      "type": "book",
+      "title": "Deep Learning with Python",
+      "url": "/books/deep-learning-with-python/index.html",
+      "content": "Deep learning is a subset of machine learning that uses neural networks with multiple layers to progressively extract higher-level features from raw input. This book covers the fundamentals of deep learning using Python and popular frameworks like TensorFlow and Keras.",
+      "excerpt": "Comprehensive guide to deep learning concepts and implementation with Python.",
+      "author": "AI Team",
+      "date": "2024-01-20",
+      "tags": ["deep-learning", "python", "machine-learning", "ai"],
+      "chapters": [
+        {
+          "id": "introduction-to-dl",
+          "title": "Introduction to Deep Learning",
+          "url": "/books/deep-learning-with-python/introduction-to-dl.html"
+        },
+        {
+          "id": "neural-networks-fundamentals",
+          "title": "Neural Networks Fundamentals",
+          "url": "/books/deep-learning-with-python/neural-networks-fundamentals.html"
+        },
+        {
+          "id": "getting-started-with-keras",
+          "title": "Getting Started with Keras",
+          "url": "/books/deep-learning-with-python/getting-started-with-keras.html"
+        },
+        {
+          "id": "computer-vision",
+          "title": "Computer Vision",
+          "url": "/books/deep-learning-with-python/computer-vision.html"
+        },
+        {
+          "id": "text-and-sequences",
+          "title": "Text and Sequences",
+          "url": "/books/deep-learning-with-python/text-and-sequences.html"
+        },
+        {
+          "id": "advanced-deep-learning",
+          "title": "Advanced Deep Learning",
+          "url": "/books/deep-learning-with-python/advanced-deep-learning.html"
+        },
+        {
+          "id": "conclusions",
+          "title": "Conclusions",
+          "url": "/books/deep-learning-with-python/conclusions.html"
+        }
+      ],
+      "chapter_count": 7,
+      "estimated_reading_time": 120,
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "machine-learning-basics",
+      "type": "book",
+      "title": "Machine Learning Basics",
+      "url": "/books/machine-learning-basics/index.html",
+      "content": "Machine learning is a method of data analysis that automates analytical model building. It is a branch of artificial intelligence based on the idea that systems can learn from data, identify patterns and make decisions with minimal human intervention.",
+      "excerpt": "Learn the fundamentals of machine learning from basic concepts to practical applications.",
+      "author": "ML Team",
+      "date": "2024-01-18",
+      "tags": ["machine-learning", "basics", "algorithms", "data-science"],
+      "chapters": [
+        {
+          "id": "introduction",
+          "title": "Introduction",
+          "url": "/books/machine-learning-basics/introduction.html"
+        },
+        {
+          "id": "supervised-learning",
+          "title": "Supervised Learning",
+          "url": "/books/machine-learning-basics/supervised-learning.html"
+        },
+        {
+          "id": "unsupervised-learning",
+          "title": "Unsupervised Learning",
+          "url": "/books/machine-learning-basics/unsupervised-learning.html"
+        },
+        {
+          "id": "feature-engineering",
+          "title": "Feature Engineering",
+          "url": "/books/machine-learning-basics/feature-engineering.html"
+        },
+        {
+          "id": "model-evaluation",
+          "title": "Model Evaluation",
+          "url": "/books/machine-learning-basics/model-evaluation.html"
+        },
+        {
+          "id": "conclusions",
+          "title": "Conclusions",
+          "url": "/books/machine-learning-basics/conclusions.html"
+        }
+      ],
+      "chapter_count": 6,
+      "estimated_reading_time": 90,
+      "difficulty": "beginner"
+    },
+    {
+      "id": "quantum-computing-guide",
+      "type": "book",
+      "title": "Quantum Computing Guide",
+      "url": "/books/quantum-computing-guide/index.html",
+      "content": "Quantum computing is a type of computation that harnesses the phenomena of quantum mechanics to process information. Unlike classical computers that use bits (0 or 1), quantum computers use quantum bits or qubits, which can exist in superposition of states.",
+      "excerpt": "A comprehensive guide to quantum computing concepts and practical implementations.",
+      "author": "Quantum Team",
+      "date": "2024-01-12",
+      "tags": ["quantum-computing", "physics", "algorithms", "future-tech"],
+      "chapters": [
+        {
+          "id": "introduction",
+          "title": "Introduction",
+          "url": "/books/quantum-computing-guide/introduction.html"
+        },
+        {
+          "id": "quantum-basics",
+          "title": "Quantum Basics",
+          "url": "/books/quantum-computing-guide/quantum-basics.html"
+        },
+        {
+          "id": "quantum-gates",
+          "title": "Quantum Gates",
+          "url": "/books/quantum-computing-guide/quantum-gates.html"
+        },
+        {
+          "id": "quantum-algorithms",
+          "title": "Quantum Algorithms",
+          "url": "/books/quantum-computing-guide/quantum-algorithms.html"
+        },
+        {
+          "id": "quantum-error-correction",
+          "title": "Quantum Error Correction",
+          "url": "/books/quantum-computing-guide/quantum-error-correction.html"
+        },
+        {
+          "id": "physical-implementations",
+          "title": "Physical Implementations",
+          "url": "/books/quantum-computing-guide/physical-implementations.html"
+        },
+        {
+          "id": "future-directions",
+          "title": "Future Directions",
+          "url": "/books/quantum-computing-guide/future-directions.html"
+        }
+      ],
+      "chapter_count": 7,
+      "estimated_reading_time": 150,
+      "difficulty": "advanced"
+    }
+  ],
+  "snippets": [
+    {
+      "id": "cpp-algorithms",
+      "type": "snippet",
+      "title": "C++ Algorithm Implementations",
+      "url": "/snippets/cpp-algorithms.html",
+      "content": "#include <iostream>\n#include <vector>\n#include <algorithm>\n\n// Binary search implementation\nint binarySearch(const std::vector<int>& arr, int target) {\n    int left = 0, right = arr.size() - 1;\n    while (left <= right) {\n        int mid = left + (right - left) / 2;\n        if (arr[mid] == target) return mid;\n        if (arr[mid] < target) left = mid + 1;\n        else right = mid - 1;\n    }\n    return -1;\n}",
+      "excerpt": "Common algorithm implementations in C++ including binary search, sorting, and data structures.",
+      "language": "cpp",
+      "date": "2024-01-08",
+      "tags": ["cpp", "algorithms", "data-structures", "search"],
+      "lines_of_code": 45
+    },
+    {
+      "id": "go-web-server",
+      "type": "snippet",
+      "title": "Go Web Server",
+      "url": "/snippets/go-web-server.html",
+      "content": "package main\n\nimport (\n    \"fmt\"\n    \"log\"\n    \"net/http\"\n)\n\nfunc handler(w http.ResponseWriter, r *http.Request) {\n    fmt.Fprintf(w, \"Hello, %s!\", r.URL.Path[1:])\n}\n\nfunc main() {\n    http.HandleFunc(\"/\", handler)\n    log.Fatal(http.ListenAndServe(\":8080\", nil))\n}",
+      "excerpt": "Simple web server implementation in Go with routing and middleware.",
+      "language": "go",
+      "date": "2024-01-06",
+      "tags": ["go", "web-server", "http", "backend"],
+      "lines_of_code": 15
+    },
+    {
+      "id": "python-data-processing",
+      "type": "snippet",
+      "title": "Python Data Processing",
+      "url": "/snippets/python-data-processing.html",
+      "content": "import pandas as pd\nimport numpy as np\nimport matplotlib.pyplot as plt\n\n# Load and process data\ndf = pd.read_csv('data.csv')\ndf['processed'] = df['value'].apply(lambda x: x * 2)\ndf.groupby('category').agg({'processed': 'mean'}).plot(kind='bar')\nplt.show()",
+      "excerpt": "Data processing pipeline using pandas, numpy, and matplotlib for analysis.",
+      "language": "python",
+      "date": "2024-01-04",
+      "tags": ["python", "data-processing", "pandas", "analysis"],
+      "lines_of_code": 12
+    },
+    {
+      "id": "rust-concurrent-programming",
+      "type": "snippet",
+      "title": "Rust Concurrent Programming",
+      "url": "/snippets/rust-concurrent-programming.html",
+      "content": "use std::thread;\nuse std::sync::{Arc, Mutex};\nuse std::time::Duration;\n\nfn main() {\n    let counter = Arc::new(Mutex::new(0));\n    let mut handles = vec!![];\n\n    for _ in 0..10 {\n        let counter_clone = Arc::clone(&counter);\n        let handle = thread::spawn(move || {\n            let mut num = counter_clone.lock().unwrap();\n            *num += 1;\n        });\n        handles.push(handle);\n    }\n\n    for handle in handles {\n        handle.join().unwrap();\n    }\n\n    println!(\"Result: {}\", *counter.lock().unwrap());\n}",
+      "excerpt": "Concurrent programming in Rust using threads, Arc, and Mutex for thread safety.",
+      "language": "rust",
+      "date": "2024-01-02",
+      "tags": ["rust", "concurrency", "threads", "safety"],
+      "lines_of_code": 25
+    },
+    {
+      "id": "typescript-react-component",
+      "type": "snippet",
+      "title": "TypeScript React Component",
+      "url": "/snippets/typescript-react-component.html",
+      "content": "import React, { useState, useEffect } from 'react';\n\ninterface Props {\n  title: string;\n  onAction?: () => void;\n}\n\nconst Component: React.FC<Props> = ({ title, onAction }) => {\n  const [count, setCount] = useState(0);\n\n  useEffect(() => {\n    console.log('Component mounted');\n    return () => console.log('Component unmounted');\n  }, []);\n\n  return (\n    <div className=\"component\">\n      <h2>{title}</h2>\n      <p>Count: {count}</p>\n      <button onClick={() => setCount(count + 1)}>Increment</button>\n      {onAction && <button onClick={onAction}>Action</button>}\n    </div>\n  );\n};\n\nexport default Component;",
+      "excerpt": "TypeScript React component with hooks, interfaces, and event handling.",
+      "language": "typescript",
+      "date": "2023-12-30",
+      "tags": ["typescript", "react", "components", "hooks"],
+      "lines_of_code": 22
+    },
+    {
+      "id": "sql-queries",
+      "type": "snippet",
+      "title": "Advanced SQL Queries",
+      "url": "/snippets/sql-queries.html",
+      "content": "-- Complex JOIN with subqueries\nSELECT u.name, u.email, COUNT(o.id) as order_count\nFROM users u\nLEFT JOIN orders o ON u.id = o.user_id\nWHERE u.created_at > '2024-01-01'\nGROUP BY u.id, u.name, u.email\nHAVING COUNT(o.id) > 0\nORDER BY order_count DESC\nLIMIT 10;\n\n-- Window function example\nSELECT \n    name,\n    salary,\n    ROW_NUMBER() OVER (ORDER BY salary DESC) as rank,\n    LAG(salary) OVER (ORDER BY salary DESC) as prev_salary\nFROM employees;",
+      "excerpt": "Advanced SQL queries including complex JOINs, subqueries, and window functions.",
+      "language": "sql",
+      "date": "2023-12-28",
+      "tags": ["sql", "database", "queries", "analytics"],
+      "lines_of_code": 18
+    },
+    {
+      "id": "quantum-computing",
+      "type": "snippet",
+      "title": "Quantum Computing Circuit",
+      "url": "/snippets/quantum-computing.html",
+      "content": "from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister\nfrom qiskit.visualization import plot_histogram\nfrom qiskit import Aer, execute\n\n# Create quantum circuit\nqr = QuantumRegister(2)\ncr = ClassicalRegister(2)\ncircuit = QuantumCircuit(qr, cr)\n\n# Apply quantum gates\ncircuit.h(qr[0])  # Hadamard gate\ncircuit.cx(qr[0], qr[1])  # CNOT gate\ncircuit.measure(qr, cr)\n\n# Execute circuit\nbackend = Aer.get_backend('qasm_simulator')\njob = execute(circuit, backend, shots=1000)\nresult = job.result()\ncounts = result.get_counts()\n\nprint(\"Measurement results:\", counts)",
+      "excerpt": "Quantum circuit implementation using Qiskit with superposition and entanglement.",
+      "language": "python",
+      "date": "2023-12-26",
+      "tags": ["quantum", "qiskit", "circuit", "entanglement"],
+      "lines_of_code": 20
+    },
+    {
+      "id": "derivatives",
+      "type": "snippet",
+      "title": "Mathematical Derivatives",
+      "url": "/snippets/derivatives.html",
+      "content": "import sympy as sp\n\n# Define symbols\nx, y = sp.symbols('x y')\n\n# Basic derivatives\nf = x**3 + 2*x**2 + x + 1\nf_prime = sp.diff(f, x)\nprint(f\"f'(x) = {f_prime}\")\n\n# Partial derivatives\ng = x**2 * y + y**3\ngx = sp.diff(g, x)\ngy = sp.diff(g, y)\nprint(f\"∂g/∂x = {gx}\")\nprint(f\"∂g/∂y = {gy}\")\n\n# Chain rule\nh = sp.sin(x**2)\nh_prime = sp.diff(h, x)\nprint(f\"h'(x) = {h_prime}\")",
+      "excerpt": "Mathematical derivative calculations using SymPy including partial derivatives.",
+      "language": "python",
+      "date": "2023-12-24",
+      "tags": ["mathematics", "derivatives", "calculus", "sympy"],
+      "lines_of_code": 16
+    },
+    {
+      "id": "integrals",
+      "type": "snippet",
+      "title": "Mathematical Integrals",
+      "url": "/snippets/integrals.html",
+      "content": "import sympy as sp\nimport numpy as np\nfrom scipy import integrate\n\n# Symbolic integration\nx = sp.symbols('x')\nf = x**2 + 3*x + 2\nF = sp.integrate(f, x)\nprint(f\"∫f(x)dx = {F}\")\n\n# Definite integral\na, b = 0, 5\ndefinite = sp.integrate(f, (x, a, b))\nprint(f\"∫[{a},{b}] f(x)dx = {definite}\")\n\n# Numerical integration\ndef func(x):\n    return x**2 + 3*x + 2\n\nnumerical, error = integrate.quad(func, 0, 5)\nprint(f\"Numerical result: {numerical} (error: {error})\")",
+      "excerpt": "Mathematical integral calculations using both symbolic and numerical methods.",
+      "language": "python",
+      "date": "2023-12-22",
+      "tags": ["mathematics", "integrals", "calculus", "numerical"],
+      "lines_of_code": 18
+    },
+    {
+      "id": "uncertainty-principle",
+      "type": "snippet",
+      "title": "Heisenberg Uncertainty Principle",
+      "url": "/snippets/uncertainty-principle.html",
+      "content": "import numpy as np\nimport matplotlib.pyplot as plt\nfrom scipy.stats import norm\n\n# Heisenberg uncertainty principle demonstration\nh_bar = 1.054571817e-34  # Reduced Planck constant\n\ndef uncertainty_demo(delta_x):\n    \"\"\"Calculate minimum momentum uncertainty\"\"\"\n    delta_p = h_bar / (2 * delta_x)\n    return delta_p\n\n# Position uncertainties (meters)\npositions = np.logspace(-10, -5, 100)\nmomentum_uncertainties = [uncertainty_demo(dx) for dx in positions]\n\n# Plot uncertainty relationship\nplt.figure(figsize=(10, 6))\nplt.loglog(positions, momentum_uncertainties)\nplt.xlabel('Position Uncertainty Δx (m)')\nplt.ylabel('Momentum Uncertainty Δp (kg·m/s)')\nplt.title('Heisenberg Uncertainty Principle')\nplt.grid(True, alpha=0.3)\nplt.show()\n\nprint(f\"For Δx = 1e-8 m, minimum Δp = {uncertainty_demo(1e-8):.2e} kg·m/s\")",
+      "excerpt": "Demonstration of the Heisenberg uncertainty principle with calculations and visualization.",
+      "language": "python",
+      "date": "2023-12-20",
+      "tags": ["quantum", "physics", "uncertainty", "heisenberg"],
+      "lines_of_code": 24
+    },
+    {
+      "id": "wave-function",
+      "type": "snippet",
+      "title": "Quantum Wave Function",
+      "url": "/snippets/wave-function.html",
+      "content": "import numpy as np\nimport matplotlib.pyplot as plt\nfrom scipy.integrate import simps\n\n# Quantum wave function for particle in a box\nL = 1.0  # Box length (m)\nn = 1    # Quantum number\nh_bar = 1.054571817e-34  # Reduced Planck constant\nm = 9.10938356e-31  # Electron mass (kg)\n\ndef wave_function(x, n, L):\n    \"\"\"Wave function for particle in a 1D box\"\"\"\n    return np.sqrt(2/L) * np.sin(n * np.pi * x / L)\n\ndef probability_density(x, n, L):\n    \"\"\"Probability density |ψ|²\"\"\"\n    psi = wave_function(x, n, L)\n    return np.abs(psi)**2\n\n# Position array\nx = np.linspace(0, L, 1000)\n\n# Calculate wave function and probability density\npsi = wave_function(x, n, L)\nprob_density = probability_density(x, n, L)\n\n# Normalize check (should be 1)\nnormalization = simps(prob_density, x)\nprint(f\"Normalization check: {normalization:.6f}\")\n\n# Plot results\nfig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))\n\nax1.plot(x, psi, 'b-', linewidth=2)\nax1.set_xlabel('Position x (m)')\nax1.set_ylabel('Wave Function ψ(x)')\nax1.set_title(f'Wave Function for n = {n}')\nax1.grid(True, alpha=0.3)\n\nax2.plot(x, prob_density, 'r-', linewidth=2)\nax2.fill_between(x, 0, prob_density, alpha=0.3)\nax2.set_xlabel('Position x (m)')\nax2.set_ylabel('Probability Density |ψ|²')\nax2.set_title('Probability Density')\nax2.grid(True, alpha=0.3)\n\nplt.tight_layout()\nplt.show()",
+      "excerpt": "Quantum wave function calculation and visualization for a particle in a 1D box.",
+      "language": "python",
+      "date": "2023-12-18",
+      "tags": ["quantum", "wave-function", "probability", "physics"],
+      "lines_of_code": 32
+    }
+  ],
+  "projects": [
+    {
+      "id": "math-visualizer",
+      "type": "project",
+      "title": "Mathematical Function Visualizer",
+      "url": "/projects/math-visualizer.html",
+      "content": "An interactive web application for visualizing mathematical functions including calculus operations, derivatives, integrals, and 3D plotting. Built with React, D3.js, and mathematical computation libraries.",
+      "excerpt": "Interactive mathematical function visualization tool with calculus operations.",
+      "author": "Math Team",
+      "date": "2024-01-22",
+      "tags": ["mathematics", "visualization", "calculus", "web-app"],
+      "technologies": ["React", "D3.js", "Sympy", "Plotly"],
+      "status": "active",
+      "github_url": "https://github.com/peta-rust/math-visualizer",
+      "demo_url": "https://math-visualizer.peta-rust.github.io",
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "quantum-simulator",
+      "type": "project",
+      "title": "Quantum Circuit Simulator",
+      "url": "/projects/quantum-simulator.html",
+      "content": "A web-based quantum circuit simulator that allows users to build, simulate, and visualize quantum circuits. Supports common quantum gates, measurement operations, and includes educational tutorials.",
+      "excerpt": "Interactive quantum circuit simulator with visual representation and educational content.",
+      "author": "Quantum Team",
+      "date": "2024-01-19",
+      "tags": ["quantum-computing", "simulation", "education", "physics"],
+      "technologies": ["Qiskit", "React", "WebGL", "Three.js"],
+      "status": "active",
+      "github_url": "https://github.com/peta-rust/quantum-simulator",
+      "demo_url": "https://quantum-simulator.peta-rust.github.io",
+      "difficulty": "advanced"
+    },
+    {
+      "id": "code-block-showcase",
+      "type": "project",
+      "title": "Code Block Showcase",
+      "url": "/projects/code-block-showcase.html",
+      "content": "A showcase website demonstrating various code highlighting and presentation techniques. Features multiple themes, languages, copy-to-clipboard functionality, and responsive design.",
+      "excerpt": "Code highlighting showcase with multiple themes and interactive features.",
+      "author": "Dev Team",
+      "date": "2024-01-16",
+      "tags": ["code", "highlighting", "showcase", "web-design"],
+      "technologies": ["HTML", "CSS", "JavaScript", "Prism.js"],
+      "status": "completed",
+      "github_url": "https://github.com/peta-rust/code-block-showcase",
+      "demo_url": "https://code-block-showcase.peta-rust.github.io",
+      "difficulty": "beginner"
+    }
+  ]
+}

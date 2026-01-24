@@ -1,0 +1,54 @@
+name: "input"
+version: "1.0.0"
+category: "Atomic"
+description: "Form input component with validation support"
+dependencies: []
+props:
+  type:
+    type: string
+    enum: ["text", "email", "password", "number", "search", "url", "tel"]
+    default: "text"
+  placeholder:
+    type: string
+    default: ""
+  value:
+    type: string
+    default: ""
+  disabled:
+    type: boolean
+    default: false
+  required:
+    type: boolean
+    default: false
+  error:
+    type: string
+    default: ""
+  label:
+    type: string
+    default: ""
+  size:
+    type: string
+    enum: ["sm", "md", "lg"]
+    default: "md"
+  variant:
+    type: string
+    enum: ["default", "outlined", "filled"]
+    default: "default"
+slots:
+  - name: prefix
+    description: "Content before input"
+  - name: suffix
+    description: "Content after input"
+state:
+  - name: focused
+    type: boolean
+    default: false
+  - name: dirty
+    type: boolean
+    default: false
+templates:
+  - input.html
+styles:
+  - input.css
+scripts:
+  - input.js

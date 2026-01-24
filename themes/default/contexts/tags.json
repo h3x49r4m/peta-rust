@@ -1,0 +1,534 @@
+{
+  "tags": [
+    {
+      "name": "mathematics",
+      "count": 8,
+      "description": "Mathematical concepts, calculations, and theories",
+      "category": "academic",
+      "related_tags": ["calculus", "derivatives", "integrals", "physics"]
+    },
+    {
+      "name": "calculus",
+      "count": 4,
+      "description": "Differential and integral calculus concepts",
+      "category": "mathematics",
+      "related_tags": ["derivatives", "integrals", "mathematics"]
+    },
+    {
+      "name": "derivatives",
+      "count": 2,
+      "description": "Mathematical derivatives and differentiation",
+      "category": "mathematics",
+      "related_tags": ["calculus", "integrals", "mathematics"]
+    },
+    {
+      "name": "integrals",
+      "count": 2,
+      "description": "Mathematical integrals and integration",
+      "category": "mathematics",
+      "related_tags": ["calculus", "derivatives", "mathematics"]
+    },
+    {
+      "name": "physics",
+      "count": 5,
+      "description": "Physics concepts and applications",
+      "category": "science",
+      "related_tags": ["quantum", "mechanics", "mathematics"]
+    },
+    {
+      "name": "quantum",
+      "count": 6,
+      "description": "Quantum mechanics and quantum computing",
+      "category": "physics",
+      "related_tags": ["quantum-computing", "quantum-mechanics", "physics", "uncertainty"]
+    },
+    {
+      "name": "quantum-mechanics",
+      "count": 3,
+      "description": "Fundamental principles of quantum mechanics",
+      "category": "physics",
+      "related_tags": ["quantum", "physics", "wave-function"]
+    },
+    {
+      "name": "quantum-computing",
+      "count": 4,
+      "description": "Quantum computing concepts and implementations",
+      "category": "technology",
+      "related_tags": ["quantum", "algorithms", "physics", "future-tech"]
+    },
+    {
+      "name": "uncertainty",
+      "count": 1,
+      "description": "Heisenberg uncertainty principle",
+      "category": "physics",
+      "related_tags": ["quantum", "physics", "heisenberg"]
+    },
+    {
+      "name": "wave-function",
+      "count": 1,
+      "description": "Quantum wave functions and probability",
+      "category": "physics",
+      "related_tags": ["quantum", "physics", "probability"]
+    },
+    {
+      "name": "education",
+      "count": 7,
+      "description": "Educational content and tutorials",
+      "category": "general",
+      "related_tags": ["tutorials", "learning", "concepts"]
+    },
+    {
+      "name": "code",
+      "count": 8,
+      "description": "Programming code examples and implementations",
+      "category": "programming",
+      "related_tags": ["programming", "algorithms", "syntax-highlighting"]
+    },
+    {
+      "name": "programming",
+      "count": 6,
+      "description": "Programming concepts and languages",
+      "category": "technology",
+      "related_tags": ["code", "algorithms", "development"]
+    },
+    {
+      "name": "algorithms",
+      "count": 3,
+      "description": "Algorithm implementations and analysis",
+      "category": "computer-science",
+      "related_tags": ["programming", "data-structures", "search"]
+    },
+    {
+      "name": "data-structures",
+      "count": 2,
+      "description": "Data structure implementations",
+      "category": "computer-science",
+      "related_tags": ["algorithms", "programming", "cpp"]
+    },
+    {
+      "name": "search",
+      "count": 2,
+      "description": "Search algorithms and implementations",
+      "category": "algorithms",
+      "related_tags": ["algorithms", "data-structures", "cpp"]
+    },
+    {
+      "name": "cpp",
+      "count": 1,
+      "description": "C++ programming language",
+      "category": "programming-languages",
+      "related_tags": ["programming", "algorithms", "data-structures"]
+    },
+    {
+      "name": "go",
+      "count": 1,
+      "description": "Go programming language",
+      "category": "programming-languages",
+      "related_tags": ["programming", "web-server", "http"]
+    },
+    {
+      "name": "web-server",
+      "count": 1,
+      "description": "Web server implementations",
+      "category": "web-development",
+      "related_tags": ["go", "http", "backend"]
+    },
+    {
+      "name": "http",
+      "count": 1,
+      "description": "HTTP protocol and implementations",
+      "category": "web-development",
+      "related_tags": ["web-server", "go", "backend"]
+    },
+    {
+      "name": "backend",
+      "count": 1,
+      "description": "Backend development",
+      "category": "web-development",
+      "related_tags": ["web-server", "http", "go"]
+    },
+    {
+      "name": "python",
+      "count": 6,
+      "description": "Python programming language",
+      "category": "programming-languages",
+      "related_tags": ["programming", "data-processing", "quantum", "mathematics"]
+    },
+    {
+      "name": "data-processing",
+      "count": 1,
+      "description": "Data processing and analysis",
+      "category": "data-science",
+      "related_tags": ["python", "pandas", "analysis"]
+    },
+    {
+      "name": "pandas",
+      "count": 1,
+      "description": "Pandas data analysis library",
+      "category": "python-libraries",
+      "related_tags": ["python", "data-processing", "analysis"]
+    },
+    {
+      "name": "analysis",
+      "count": 1,
+      "description": "Data analysis techniques",
+      "category": "data-science",
+      "related_tags": ["data-processing", "pandas", "python"]
+    },
+    {
+      "name": "rust",
+      "count": 1,
+      "description": "Rust programming language",
+      "category": "programming-languages",
+      "related_tags": ["programming", "concurrency", "threads"]
+    },
+    {
+      "name": "concurrency",
+      "count": 1,
+      "description": "Concurrent programming concepts",
+      "category": "programming",
+      "related_tags": ["rust", "threads", "safety"]
+    },
+    {
+      "name": "threads",
+      "count": 1,
+      "description": "Multi-threading programming",
+      "category": "programming",
+      "related_tags": ["rust", "concurrency", "safety"]
+    },
+    {
+      "name": "safety",
+      "count": 1,
+      "description": "Memory and thread safety",
+      "category": "programming",
+      "related_tags": ["rust", "concurrency", "threads"]
+    },
+    {
+      "name": "typescript",
+      "count": 1,
+      "description": "TypeScript programming language",
+      "category": "programming-languages",
+      "related_tags": ["programming", "react", "components"]
+    },
+    {
+      "name": "react",
+      "count": 1,
+      "description": "React JavaScript library",
+      "category": "javascript-libraries",
+      "related_tags": ["typescript", "components", "hooks"]
+    },
+    {
+      "name": "components",
+      "count": 1,
+      "description": "React components",
+      "category": "web-development",
+      "related_tags": ["react", "typescript", "hooks"]
+    },
+    {
+      "name": "hooks",
+      "count": 1,
+      "description": "React hooks",
+      "category": "react",
+      "related_tags": ["react", "typescript", "components"]
+    },
+    {
+      "name": "sql",
+      "count": 1,
+      "description": "SQL database queries",
+      "category": "database",
+      "related_tags": ["database", "queries", "analytics"]
+    },
+    {
+      "name": "database",
+      "count": 1,
+      "description": "Database concepts and queries",
+      "category": "data-management",
+      "related_tags": ["sql", "queries", "analytics"]
+    },
+    {
+      "name": "queries",
+      "count": 1,
+      "description": "Database queries",
+      "category": "database",
+      "related_tags": ["sql", "database", "analytics"]
+    },
+    {
+      "name": "analytics",
+      "count": 1,
+      "description": "Data analytics",
+      "category": "data-science",
+      "related_tags": ["sql", "database", "queries"]
+    },
+    {
+      "name": "qiskit",
+      "count": 1,
+      "description": "Qiskit quantum computing framework",
+      "category": "python-libraries",
+      "related_tags": ["quantum", "python", "circuit"]
+    },
+    {
+      "name": "circuit",
+      "count": 1,
+      "description": "Quantum circuits",
+      "category": "quantum-computing",
+      "related_tags": ["quantum", "qiskit", "entanglement"]
+    },
+    {
+      "name": "entanglement",
+      "count": 1,
+      "description": "Quantum entanglement",
+      "category": "quantum-mechanics",
+      "related_tags": ["quantum", "circuit", "qiskit"]
+    },
+    {
+      "name": "sympy",
+      "count": 1,
+      "description": "SymPy symbolic mathematics library",
+      "category": "python-libraries",
+      "related_tags": ["python", "mathematics", "derivatives"]
+    },
+    {
+      "name": "numerical",
+      "count": 1,
+      "description": "Numerical methods",
+      "category": "mathematics",
+      "related_tags": ["mathematics", "integrals", "calculus"]
+    },
+    {
+      "name": "testing",
+      "count": 1,
+      "description": "Testing methodologies and tools",
+      "category": "development",
+      "related_tags": ["code", "syntax-highlighting"]
+    },
+    {
+      "name": "syntax-highlighting",
+      "count": 1,
+      "description": "Code syntax highlighting",
+      "category": "web-development",
+      "related_tags": ["code", "testing", "web-design"]
+    },
+    {
+      "name": "web-design",
+      "count": 1,
+      "description": "Web design and UI/UX",
+      "category": "web-development",
+      "related_tags": ["syntax-highlighting", "code", "showcase"]
+    },
+    {
+      "name": "showcase",
+      "count": 1,
+      "description": "Portfolio and showcase projects",
+      "category": "web-development",
+      "related_tags": ["web-design", "code", "syntax-highlighting"]
+    },
+    {
+      "name": "deep-learning",
+      "count": 1,
+      "description": "Deep learning concepts and implementations",
+      "category": "machine-learning",
+      "related_tags": ["python", "machine-learning", "ai"]
+    },
+    {
+      "name": "machine-learning",
+      "count": 2,
+      "description": "Machine learning algorithms and concepts",
+      "category": "artificial-intelligence",
+      "related_tags": ["deep-learning", "python", "algorithms"]
+    },
+    {
+      "name": "ai",
+      "count": 1,
+      "description": "Artificial intelligence",
+      "category": "technology",
+      "related_tags": ["deep-learning", "machine-learning", "python"]
+    },
+    {
+      "name": "basics",
+      "count": 1,
+      "description": "Basic concepts and fundamentals",
+      "category": "education",
+      "related_tags": ["machine-learning", "concepts", "learning"]
+    },
+    {
+      "name": "concepts",
+      "count": 2,
+      "description": "Fundamental concepts",
+      "category": "education",
+      "related_tags": ["basics", "learning", "education"]
+    },
+    {
+      "name": "learning",
+      "count": 2,
+      "description": "Learning resources and tutorials",
+      "category": "education",
+      "related_tags": ["concepts", "basics", "education"]
+    },
+    {
+      "name": "tutorials",
+      "count": 1,
+      "description": "Tutorial content",
+      "category": "education",
+      "related_tags": ["learning", "concepts", "education"]
+    },
+    {
+      "name": "visualization",
+      "count": 1,
+      "description": "Data visualization techniques",
+      "category": "data-science",
+      "related_tags": ["mathematics", "calculus", "web-app"]
+    },
+    {
+      "name": "web-app",
+      "count": 2,
+      "description": "Web applications",
+      "category": "web-development",
+      "related_tags": ["visualization", "react", "quantum"]
+    },
+    {
+      "name": "simulation",
+      "count": 1,
+      "description": "Simulation tools and techniques",
+      "category": "technology",
+      "related_tags": ["quantum", "web-app", "education"]
+    },
+    {
+      "name": "future-tech",
+      "count": 1,
+      "description": "Future technology trends",
+      "category": "technology",
+      "related_tags": ["quantum-computing", "ai", "quantum"]
+    },
+    {
+      "name": "heisenberg",
+      "count": 1,
+      "description": "Heisenberg and his principles",
+      "category": "physics",
+      "related_tags": ["uncertainty", "quantum", "physics"]
+    },
+    {
+      "name": "probability",
+      "count": 1,
+      "description": "Probability theory and applications",
+      "category": "mathematics",
+      "related_tags": ["wave-function", "quantum", "mathematics"]
+    }
+  ],
+  "categories": [
+    {
+      "name": "academic",
+      "description": "Academic and educational content",
+      "count": 8
+    },
+    {
+      "name": "science",
+      "description": "Scientific concepts and research",
+      "count": 5
+    },
+    {
+      "name": "technology",
+      "description": "Technology and computing",
+      "count": 12
+    },
+    {
+      "name": "programming",
+      "description": "Programming languages and concepts",
+      "count": 6
+    },
+    {
+      "name": "mathematics",
+      "description": "Mathematical topics",
+      "count": 8
+    },
+    {
+      "name": "computer-science",
+      "description": "Computer science fundamentals",
+      "count": 3
+    },
+    {
+      "name": "programming-languages",
+      "description": "Specific programming languages",
+      "count": 5
+    },
+    {
+      "name": "web-development",
+      "description": "Web development technologies",
+      "count": 8
+    },
+    {
+      "name": "data-science",
+      "description": "Data science and analytics",
+      "count": 5
+    },
+    {
+      "name": "artificial-intelligence",
+      "description": "AI and machine learning",
+      "count": 2
+    },
+    {
+      "name": "python-libraries",
+      "description": "Python libraries and frameworks",
+      "count": 3
+    },
+    {
+      "name": "database",
+      "description": "Database technologies",
+      "count": 1
+    },
+    {
+      "name": "data-management",
+      "description": "Data management systems",
+      "count": 1
+    },
+    {
+      "name": "javascript-libraries",
+      "description": "JavaScript libraries and frameworks",
+      "count": 1
+    },
+    {
+      "name": "react",
+      "description": "React ecosystem",
+      "count": 1
+    },
+    {
+      "name": "quantum-computing",
+      "description": "Quantum computing technologies",
+      "count": 4
+    },
+    {
+      "name": "quantum-mechanics",
+      "description": "Quantum mechanical principles",
+      "count": 3
+    },
+    {
+      "name": "physics",
+      "description": "Physics topics",
+      "count": 5
+    },
+    {
+      "name": "algorithms",
+      "description": "Algorithmic topics",
+      "count": 1
+    },
+    {
+      "name": "education",
+      "description": "Educational content",
+      "count": 7
+    },
+    {
+      "name": "general",
+      "description": "General topics",
+      "count": 1
+    },
+    {
+      "name": "development",
+      "description": "Software development",
+      "count": 1
+    },
+    {
+      "name": "machine-learning",
+      "description": "Machine learning topics",
+      "count": 1
+    }
+  ]
+}

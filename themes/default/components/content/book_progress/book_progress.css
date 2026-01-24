@@ -1,0 +1,384 @@
+.book-progress {
+  --book-progress-padding: var(--spacing-4);
+  --book-progress-gap: var(--spacing-3);
+  --book-progress-bg-color: var(--background-secondary);
+  --book-progress-border-color: var(--border-color);
+  --book-progress-title-color: var(--text-primary);
+  --book-progress-text-color: var(--text-secondary);
+  --book-progress-meta-color: var(--text-muted);
+  --book-progress-fill-color: var(--color-primary-500);
+  --book-progress-timeline-color: var(--color-primary-300);
+  --book-progress-completed-color: var(--color-green-500);
+  --book-progress-current-color: var(--color-blue-500);
+  
+  background-color: var(--book-progress-bg-color);
+  border: 1px solid var(--book-progress-border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--book-progress-padding);
+}
+
+.book-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--book-progress-gap);
+}
+
+.book-progress-title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--book-progress-title-color);
+}
+
+.book-progress-percentage {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--book-progress-fill-color);
+}
+
+/* Progress bar */
+.book-progress-bar-container {
+  position: relative;
+  margin-bottom: var(--book-progress-gap);
+}
+
+.book-progress-bar {
+  height: 12px;
+  background-color: var(--border-color);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  position: relative;
+}
+
+.book-progress-fill {
+  height: 100%;
+  background-color: var(--book-progress-fill-color);
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.book-progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: progressShimmer 2s ease-in-out infinite;
+}
+
+@keyframes progressShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Timeline */
+.book-progress-timeline {
+  position: absolute;
+  top: -4px;
+  left: 0;
+  right: 0;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.book-progress-timeline-item {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: var(--book-progress-timeline-color);
+  border-radius: 50%;
+  transform: translateX(-50%);
+  transition: all 0.2s ease;
+}
+
+.book-progress-timeline-item--completed {
+  background-color: var(--book-progress-completed-color);
+  width: 10px;
+  height: 10px;
+}
+
+.book-progress-timeline-item--current {
+  background-color: var(--book-progress-current-color);
+  width: 12px;
+  height: 12px;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+  animation: currentPulse 2s ease-in-out infinite;
+}
+
+@keyframes currentPulse {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.2); }
+}
+
+/* Details */
+.book-progress-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--book-progress-gap);
+  margin-bottom: var(--book-progress-gap);
+}
+
+.book-progress-current {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.book-progress-current-chapter,
+.book-progress-last-read {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-sm);
+}
+
+.book-progress-current-label,
+.book-progress-last-read-label {
+  color: var(--book-progress-meta-color);
+  font-weight: var(--font-weight-medium);
+}
+
+.book-progress-current-title,
+.book-progress-last-read-date {
+  color: var(--book-progress-text-color);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Statistics */
+.book-progress-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  background-color: var(--background-tertiary);
+  border-radius: var(--radius-md);
+}
+
+.book-progress-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--spacing-1);
+}
+
+.book-progress-stat-value {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--book-progress-title-color);
+}
+
+.book-progress-stat-label {
+  font-size: var(--font-size-xs);
+  color: var(--book-progress-meta-color);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Actions */
+.book-progress-actions {
+  display: flex;
+  gap: var(--spacing-2);
+  margin-bottom: var(--book-progress-gap);
+}
+
+.book-progress-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  text-decoration: none;
+}
+
+.book-progress-action--primary {
+  background-color: var(--book-progress-fill-color);
+  color: white;
+}
+
+.book-progress-action--primary:hover,
+.book-progress-action--primary:focus {
+  background-color: var(--color-primary-600);
+  transform: translateY(-1px);
+}
+
+.book-progress-action--secondary {
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--book-progress-border-color);
+}
+
+.book-progress-action--secondary:hover,
+.book-progress-action--secondary:focus {
+  background-color: var(--background-tertiary);
+  color: var(--text-primary);
+}
+
+/* Footer */
+.book-progress-footer {
+  padding-top: var(--spacing-3);
+  border-top: 1px solid var(--book-progress-border-color);
+  margin-bottom: var(--spacing-3);
+}
+
+/* Estimate */
+.book-progress-estimate {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-xs);
+  color: var(--book-progress-meta-color);
+  padding-top: var(--spacing-3);
+  border-top: 1px solid var(--book-progress-border-color);
+}
+
+.book-progress-estimate-label {
+  font-weight: var(--font-weight-medium);
+}
+
+.book-progress-estimate-date {
+  color: var(--book-progress-text-color);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Compact variant */
+.book-progress[data-compact="true"] {
+  --book-progress-padding: var(--spacing-3);
+  --book-progress-gap: var(--spacing-2);
+}
+
+.book-progress[data-compact="true"] .book-progress-title {
+  font-size: var(--font-size-base);
+}
+
+.book-progress[data-compact="true"] .book-progress-percentage {
+  font-size: var(--font-size-lg);
+}
+
+.book-progress[data-compact="true"] .book-progress-bar {
+  height: 8px;
+}
+
+.book-progress[data-compact="true"] .book-progress-stats {
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-2);
+  padding: var(--spacing-2);
+}
+
+.book-progress[data-compact="true"] .book-progress-stat-value {
+  font-size: var(--font-size-base);
+}
+
+.book-progress[data-compact="true"] .book-progress-current-chapter,
+.book-progress[data-compact="true"] .book-progress-last-read {
+  font-size: var(--font-size-xs);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .book-progress {
+    --book-progress-padding: var(--spacing-3);
+  }
+  
+  .book-progress-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-2);
+  }
+  
+  .book-progress-title {
+    font-size: var(--font-size-base);
+  }
+  
+  .book-progress-percentage {
+    font-size: var(--font-size-lg);
+  }
+  
+  .book-progress-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-2);
+  }
+  
+  .book-progress-actions {
+    flex-direction: column;
+  }
+  
+  .book-progress-action {
+    width: 100%;
+  }
+}
+
+/* Loading state */
+.book-progress.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.book-progress.loading .book-progress-fill {
+  animation: progressLoading 1.5s ease-in-out infinite;
+}
+
+@keyframes progressLoading {
+  0% { width: 0%; }
+  50% { width: 60%; }
+  100% { width: 0%; }
+}
+
+/* Success state */
+.book-progress[data-status="completed"] .book-progress-fill {
+  background-color: var(--book-progress-completed-color);
+}
+
+.book-progress[data-status="completed"] .book-progress-percentage {
+  color: var(--book-progress-completed-color);
+}
+
+/* Hover effects */
+.book-progress-timeline-item {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.book-progress-timeline-item:hover {
+  transform: translateX(-50%) scale(1.2);
+  z-index: 10;
+}
+
+/* Progress milestones */
+.book-progress-milestone {
+  position: absolute;
+  top: -8px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.book-progress-milestone-marker {
+  width: 16px;
+  height: 16px;
+  background-color: var(--color-yellow-500);
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.book-progress-milestone-label {
+  font-size: var(--font-size-xs);
+  color: var(--book-progress-meta-color);
+  background-color: var(--background-primary);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}

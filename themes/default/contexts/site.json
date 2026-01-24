@@ -1,0 +1,93 @@
+{
+  "site": {
+    "title": "Peta Documentation",
+    "description": "A comprehensive static site generator with component-based themes",
+    "url": "https://peta-rust.github.io",
+    "author": "Peta Team",
+    "language": "en",
+    "timezone": "UTC",
+    "build_date": "2024-01-23T10:00:00Z",
+    "version": "4.0.0"
+  },
+  "navigation": {
+    "main": [
+      {
+        "title": "Home",
+        "url": "/",
+        "icon": "home"
+      },
+      {
+        "title": "Articles",
+        "url": "/articles.html",
+        "icon": "article"
+      },
+      {
+        "title": "Books",
+        "url": "/books.html",
+        "icon": "book"
+      },
+      {
+        "title": "Snippets",
+        "url": "/snippets.html",
+        "icon": "code"
+      },
+      {
+        "title": "Projects",
+        "url": "/projects.html",
+        "icon": "project"
+      }
+    ],
+    "footer": [
+      {
+        "title": "About",
+        "url": "/about.html"
+      },
+      {
+        "title": "Documentation",
+        "url": "/docs.html"
+      },
+      {
+        "title": "GitHub",
+        "url": "https://github.com/peta-rust/peta",
+        "external": true
+      }
+    ]
+  },
+  "social": {
+    "github": "https://github.com/peta-rust/peta",
+    "twitter": "https://twitter.com/peta_rust",
+    "linkedin": "https://linkedin.com/in/peta-rust"
+  },
+  "theme": {
+    "default_theme": "light",
+    "available_themes": ["light", "dark", "auto"],
+    "font_family": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    "monospace_font": "'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace"
+  },
+  "features": {
+    "search": true,
+    "dark_mode": true,
+    "code_highlighting": true,
+    "math_rendering": true,
+    "rss_feed": true,
+    "sitemap": true
+  },
+  "analytics": {
+    "enabled": false,
+    "google_analytics_id": null,
+    "plausible_domain": null
+  },
+  "seo": {
+    "meta_description": "Peta - A comprehensive static site generator with component-based themes built in Rust",
+    "meta_keywords": ["static site generator", "rust", "documentation", "blog", "components"],
+    "og_image": "/assets/images/og-image.png",
+    "twitter_card": "summary_large_image"
+  },
+  "build": {
+    "minify": true,
+    "optimize_images": true,
+    "generate_search_index": true,
+    "generate_sitemap": true,
+    "generate_rss": true
+  }
+}

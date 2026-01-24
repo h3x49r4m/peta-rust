@@ -1,0 +1,36 @@
+name: "snippet_embed"
+version: "1.0.0"
+category: "Content"
+description: "Snippet embed component for embedding code snippets from external sources"
+dependencies: []
+props:
+  snippet:
+    type: object
+    required: true
+  show_header:
+    type: boolean
+    default: true
+  show_footer:
+    type: boolean
+    default: true
+  show_line_numbers:
+    type: boolean
+    default: true
+  theme:
+    type: string
+    enum: ["light", "dark", "auto"]
+    default: "auto"
+  max_height:
+    type: string
+    default: "400px"
+slots:
+  - name: header
+    description: "Custom header content"
+  - name: footer
+    description: "Custom footer content"
+templates:
+  - snippet_embed.html
+styles:
+  - snippet_embed.css
+scripts:
+  - snippet_embed.js

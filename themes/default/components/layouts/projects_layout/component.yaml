@@ -1,0 +1,21 @@
+name: "projects_layout"
+version: "1.0.0"
+category: "layout"
+description: "Projects listing layout with status filtering"
+dependencies: []
+props:
+  projects:
+    type: array
+    description: "Projects to display"
+  statuses:
+    type: array
+    description: "Project statuses for filtering"
+  current_status:
+    type: string
+    description: "Currently selected status"
+templates:
+  - "projects.html"
+styles:
+  - "projects_layout.css"
+scripts:
+  - "projects_layout.js"

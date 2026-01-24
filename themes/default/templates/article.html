@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} - {{ site.title }}{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .article-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: var(--spacing-8);
+    }
+    
+    .article-header {
+        text-align: center;
+        margin-bottom: var(--spacing-12);
+        padding-bottom: var(--spacing-8);
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .article-title {
+        font-size: var(--font-size-4xl);
+        font-weight: var(--font-weight-bold);
+        color: var(--text-color);
+        margin-bottom: var(--spacing-6);
+        line-height: 1.2;
+    }
+    
+    .article-meta {
+        color: var(--text-secondary);
+        font-size: var(--font-size-base);
+        margin-bottom: var(--spacing-4);
+    }
+    
+    .article-tags {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: var(--spacing-2);
+        margin-top: var(--spacing-4);
+    }
+    
+    .article-content {
+        font-size: var(--font-size-lg);
+        line-height: 1.8;
+        color: var(--text-color);
+    }
+    
+    .article-content h1,
+    .article-content h2,
+    .article-content h3,
+    .article-content h4,
+    .article-content h5,
+    .article-content h6 {
+        margin: var(--spacing-8) 0 var(--spacing-4);
+        font-weight: var(--font-weight-bold);
+        color: var(--text-color);
+    }
+    
+    .article-content h2 {
+        font-size: var(--font-size-2xl);
+        border-bottom: 2px solid var(--color-primary-500);
+        padding-bottom: var(--spacing-2);
+    }
+    
+    .article-content h3 {
+        font-size: var(--font-size-xl);
+    }
+    
+    .article-content p {
+        margin-bottom: var(--spacing-6);
+    }
+    
+    .article-content ul,
+    .article-content ol {
+        margin: var(--spacing-4) 0;
+        padding-left: var(--spacing-8);
+    }
+    
+    .article-content li {
+        margin-bottom: var(--spacing-2);
+    }
+    
+    .article-navigation {
+        display: flex;
+        justify-content: space-between;
+        margin-top: var(--spacing-12);
+        padding-top: var(--spacing-8);
+        border-top: 1px solid var(--border-color);
+    }
+    
+    .article-navigation a {
+        color: var(--color-primary-500);
+        text-decoration: none;
+        font-weight: var(--font-weight-medium);
+        padding: var(--spacing-3) var(--spacing-4);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        transition: all 0.2s ease;
+    }
+    
+    .article-navigation a:hover {
+        background: var(--color-primary-500);
+        color: white;
+        border-color: var(--color-primary-500);
+    }
+    
+    .toc {
+        background: var(--background-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-6);
+        margin-bottom: var(--spacing-8);
+    }
+    
+    .toc h3 {
+        margin-top: 0;
+        margin-bottom: var(--spacing-4);
+        color: var(--text-color);
+    }
+    
+    .math-display {
+        background: var(--background-secondary);
+        padding: var(--spacing-6);
+        border-radius: var(--radius-lg);
+        margin: var(--spacing-6) 0;
+        text-align: center;
+        border-left: 4px solid var(--color-primary-500);
+    }
+    
+    .math-inline {
+        color: var(--color-primary-500);
+        font-weight: var(--font-weight-medium);
+    }
+    
+    .line-number {
+        display: none;
+    }
+    
+    .ansi-reset {
+        color: inherit;
+    }
+    
+    @media (max-width: 768px) {
+        .article-title {
+            font-size: var(--font-size-3xl);
+        }
+        
+        .article-navigation {
+            flex-direction: column;
+            gap: var(--spacing-4);
+        }
+        
+        .article-navigation a {
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="article-container">
+    <header class="article-header">
+        <h1 class="article-title">{{ page.title }}</h1>
+        <div class="article-meta">
+            {% if page.date %}<time>{{ page.date }}</time>{% endif %}
+            {% if page.author %} by {{ page.author }}{% endif %}
+        </div>
+        {% if page.tags %}
+        <div class="article-tags">
+            {% for tag in page.tags %}
+            <span class="tag">{{ tag }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </header>
+    
+    <main>
+        <article class="article-content">
+            {% if toc and toc | length > 1 %}
+            <div class="toc">
+                <h3>Table of Contents</h3>
+                {{ toc | safe }}
+            </div>
+            {% endif %}
+            
+            {{ content | safe }}
+        </article>
+        
+        {% if page.previous_article or page.next_article %}
+        <nav class="article-navigation">
+            {% if page.previous_article %}
+            <a href="{{ page.previous_article.url }}">← {{ page.previous_article.title }}</a>
+            {% endif %}
+            {% if page.next_article %}
+            <a href="{{ page.next_article.url }}">{{ page.next_article.title }} →</a>
+            {% endif %}
+        </nav>
+        {% endif %}
+    </main>
+</div>
+{% endblock %}

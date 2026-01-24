@@ -1,0 +1,120 @@
+/* Input Component Styles */
+.input-wrapper {
+  margin-bottom: 1rem;
+}
+
+.input-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.input-label .required {
+  color: var(--error-color, #dc3545);
+  margin-left: 0.25rem;
+}
+
+.input-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.input-field {
+  flex: 1;
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.input-field:disabled {
+  background-color: var(--gray-100, #f8f9fa);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Size variants */
+.input-sm .input-field {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.input-lg .input-field {
+  padding: 0.75rem 1rem;
+  font-size: 1.125rem;
+}
+
+/* Style variants */
+.input-outlined .input-field {
+  border: 2px solid var(--border-color);
+  background-color: transparent;
+}
+
+.input-filled .input-field {
+  border: none;
+  border-bottom: 2px solid var(--border-color);
+  border-radius: 0;
+  background-color: var(--gray-50, #f8f9fa);
+}
+
+.input-filled .input-field:focus {
+  border-bottom-color: var(--primary-color);
+  box-shadow: none;
+}
+
+/* Prefix and suffix */
+.input-prefix,
+.input-suffix {
+  display: flex;
+  align-items: center;
+  padding: 0 0.75rem;
+  color: var(--secondary-color);
+}
+
+.input-prefix {
+  border-right: 1px solid var(--border-color);
+  border-radius: 0.375rem 0 0 0.375rem;
+}
+
+.input-suffix {
+  border-left: 1px solid var(--border-color);
+  border-radius: 0 0.375rem 0.375rem 0;
+}
+
+.input-prefix + .input-field {
+  border-radius: 0 0.375rem 0.375rem 0;
+  border-left: none;
+}
+
+.input-field + .input-suffix {
+  border-radius: 0.375rem 0 0 0.375rem;
+  border-right: none;
+}
+
+/* Error state */
+.input-error .input-field {
+  border-color: var(--error-color, #dc3545);
+}
+
+.input-error .input-field:focus {
+  border-color: var(--error-color, #dc3545);
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.input-error-message {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--error-color, #dc3545);
+}

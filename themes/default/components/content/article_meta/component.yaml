@@ -1,0 +1,46 @@
+name: "article_meta"
+version: "1.0.0"
+category: "Content"
+description: "Article metadata component displaying author, date, reading time, and tags"
+dependencies: []
+props:
+  author:
+    type: string
+    default: ""
+  date:
+    type: string
+    default: ""
+  reading_time:
+    type: number
+    default: 0
+  tags:
+    type: array
+    default: []
+  show_author:
+    type: boolean
+    default: true
+  show_date:
+    type: boolean
+    default: true
+  show_reading_time:
+    type: boolean
+    default: true
+  show_tags:
+    type: boolean
+    default: true
+  date_format:
+    type: string
+    default: "MMM DD, YYYY"
+slots:
+  - name: prefix
+    description: "Content before metadata"
+  - name: suffix
+    description: "Content after metadata"
+  - name: extra
+    description: "Additional metadata"
+templates:
+  - article_meta.html
+styles:
+  - article_meta.css
+scripts:
+  - article_meta.js

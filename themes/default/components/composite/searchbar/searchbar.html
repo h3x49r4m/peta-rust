@@ -1,0 +1,58 @@
+<div class="searchbar" data-component="searchbar" data-size="{{ size }}">
+  {% if prefix %}
+  <div class="searchbar-prefix">
+    {% slot prefix %}{% endslot %}
+  </div>
+  {% endif %}
+  
+  <div class="searchbar-input-wrapper">
+    {% component "icon" with name="search" library="feather" size="md" %}
+    {% endslot %}
+    <input 
+      type="search" 
+      class="searchbar-input" 
+      placeholder="{{ placeholder }}"
+      {% if autocomplete %}autocomplete="off"{% endif %}
+      data-search-input
+    />
+    {% if loading %}
+    <div class="searchbar-loading">
+      {% component "icon" with name="loader" library="feather" size="sm" %}
+      {% endslot %}
+    </div>
+    {% endif %}
+  </div>
+  
+  {% if suffix %}
+  <div class="searchbar-suffix">
+    {% slot suffix %}{% endslot %}
+  </div>
+  {% endif %}
+  
+  {% if show_button %}
+  <button class="searchbar-button" data-search-button>
+    {% component "icon" with name="search" library="feather" size="md" %}
+    {% endslot %}
+  </button>
+  {% endif %}
+  
+  {% if show_filters %}
+  <div class="searchbar-filters" data-search-filters>
+    {% slot filters %}
+    {% for filter in filters %}
+    {% component "badge" with variant="outline" size="sm" %}
+      {% slot children %}{{ filter.name }}{% endslot %}
+    {% endcomponent %}
+    {% endfor %}
+    {% endslot %}
+  </div>
+  {% endif %}
+  
+  {% if autocomplete %}
+  <div class="searchbar-autocomplete" data-search-autocomplete>
+    <div class="searchbar-results" data-search-results>
+      <!-- Autocomplete results will be populated here -->
+    </div>
+  </div>
+  {% endif %}
+</div>

@@ -1,0 +1,63 @@
+# Rust build artifacts
+/target/
+Cargo.lock
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Build output directories - consolidated under _out/
+_out/
+_dist/
+_build/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Log files
+*.log
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Cache directories
+.cache/
+.parcel-cache/
+.peta_cache/
+
+# Coverage reports
+tarpaulin-report.html
+coverage/
+*.profraw
+
+# Backup files
+*.old
+*.orig
+
+# Test artifacts
+test_*.rs
+simple_test.rs
+
+# Node modules (if any)
+node_modules/
+
+# Package files
+*.pkg
+*.dmg

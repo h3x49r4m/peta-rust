@@ -1,0 +1,382 @@
+name: "default"
+version: "4.0.0"
+description: "V4 component-based theme for Peta Rust with React-inspired architecture"
+author: "Peta Rust Team"
+license: "MIT"
+extends: null
+
+# Theme variables for CSS custom properties
+variables:
+  # Color palette
+  primary_color: "#3b82f6"
+  secondary_color: "#6c757d"
+  success_color: "#10b981"
+  warning_color: "#f59e0b"
+  error_color: "#ef4444"
+  info_color: "#06b6d4"
+  
+  # Background colors
+  background_color: "#ffffff"
+  background_secondary: "#f8fafc"
+  background_tertiary: "#f1f5f9"
+  
+  # Text colors
+  text_color: "#1e293b"
+  text_secondary: "#64748b"
+  text_muted: "#94a3b8"
+  
+  # Border colors
+  border_color: "#e2e8f0"
+  border_light: "#f1f5f9"
+  
+  # Typography
+  font_family: "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+  font_family_mono: "JetBrains Mono, 'Fira Code', Consolas, monospace"
+  
+  # Spacing
+  spacing_xs: "0.25rem"
+  spacing_sm: "0.5rem"
+  spacing_md: "1rem"
+  spacing_lg: "1.5rem"
+  spacing_xl: "2rem"
+  spacing_2xl: "3rem"
+  
+  # Border radius
+  radius_sm: "0.25rem"
+  radius_md: "0.375rem"
+  radius_lg: "0.5rem"
+  radius_xl: "0.75rem"
+  radius_full: "9999px"
+
+# Component configuration
+components:
+  button:
+    name: "button"
+    version: "1.0.0"
+    template: "components/atomic/button/button.html"
+    styles: ["components/atomic/button/button.css"]
+    scripts: ["components/atomic/button/button.js"]
+    config: {}
+    variants: {}
+  
+  input:
+    name: "input"
+    version: "1.0.0"
+    template: "components/atomic/input/input.html"
+    styles: ["components/atomic/input/input.css"]
+    scripts: ["components/atomic/input/input.js"]
+    config: {}
+    variants: {}
+  
+  badge:
+    name: "badge"
+    version: "1.0.0"
+    template: "components/atomic/badge/badge.html"
+    styles: ["components/atomic/badge/badge.css"]
+    scripts: ["components/atomic/badge/badge.js"]
+    config: {}
+    variants: {}
+  
+  icon:
+    name: "icon"
+    version: "1.0.0"
+    template: "components/atomic/icon/icon.html"
+    styles: ["components/atomic/icon/icon.css"]
+    scripts: ["components/atomic/icon/icon.js"]
+    config: {}
+    variants: {}
+  
+  navbar:
+    name: "navbar"
+    version: "1.0.0"
+    template: "components/composite/navbar/navbar.html"
+    styles: ["components/composite/navbar/navbar.css"]
+    scripts: ["components/composite/navbar/navbar.js"]
+    config: {}
+    variants: {}
+  
+  footer:
+    name: "footer"
+    version: "1.0.0"
+    template: "components/composite/footer/footer.html"
+    styles: ["components/composite/footer/footer.css"]
+    scripts: ["components/composite/footer/footer.js"]
+    config: {}
+    variants: {}
+  
+  searchbar:
+    name: "searchbar"
+    version: "1.0.0"
+    template: "components/composite/searchbar/searchbar.html"
+    styles: ["components/composite/searchbar/searchbar.css"]
+    scripts: ["components/composite/searchbar/searchbar.js"]
+    config: {}
+    variants: {}
+  
+  tagcloud:
+    name: "tagcloud"
+    version: "1.0.0"
+    template: "components/composite/tagcloud/tagcloud.html"
+    styles: ["components/composite/tagcloud/tagcloud.css"]
+    scripts: ["components/composite/tagcloud/tagcloud.js"]
+    config: {}
+    variants: {}
+  
+  article_meta:
+    name: "article_meta"
+    version: "1.0.0"
+    template: "components/content/article_meta/article_meta.html"
+    styles: ["components/content/article_meta/article_meta.css"]
+    scripts: ["components/content/article_meta/article_meta.js"]
+    config: {}
+    variants: {}
+  
+  article_toc:
+    name: "article_toc"
+    version: "1.0.0"
+    template: "components/content/article_toc/article_toc.html"
+    styles: ["components/content/article_toc/article_toc.css"]
+    scripts: ["components/content/article_toc/article_toc.js"]
+    config: {}
+    variants: {}
+  
+  article_navigation:
+    name: "article_navigation"
+    version: "1.0.0"
+    template: "components/content/article_navigation/article_navigation.html"
+    styles: ["components/content/article_navigation/article_navigation.css"]
+    scripts: ["components/content/article_navigation/article_navigation.js"]
+    config: {}
+    variants: {}
+  
+  article_related:
+    name: "article_related"
+    version: "1.0.0"
+    template: "components/content/article_related/article_related.html"
+    styles: ["components/content/article_related/article_related.css"]
+    scripts: ["components/content/article_related/article_related.js"]
+    config: {}
+    variants: {}
+  
+  book_card:
+    name: "book_card"
+    version: "1.0.0"
+    template: "components/content/book_card/book_card.html"
+    styles: ["components/content/book_card/book_card.css"]
+    scripts: ["components/content/book_card/book_card.js"]
+    config: {}
+    variants: {}
+  
+  chapter_navigation:
+    name: "chapter_navigation"
+    version: "1.0.0"
+    template: "components/content/chapter_navigation/chapter_navigation.html"
+    styles: ["components/content/chapter_navigation/chapter_navigation.css"]
+    scripts: ["components/content/chapter_navigation/chapter_navigation.js"]
+    config: {}
+    variants: {}
+  
+  book_toc:
+    name: "book_toc"
+    version: "1.0.0"
+    template: "components/content/book_toc/book_toc.html"
+    styles: ["components/content/book_toc/book_toc.css"]
+    scripts: ["components/content/book_toc/book_toc.js"]
+    config: {}
+    variants: {}
+  
+  book_progress:
+    name: "book_progress"
+    version: "1.0.0"
+    template: "components/content/book_progress/book_progress.html"
+    styles: ["components/content/book_progress/book_progress.css"]
+    scripts: ["components/content/book_progress/book_progress.js"]
+    config: {}
+    variants: {}
+  
+  snippet_card:
+    name: "snippet_card"
+    version: "1.0.0"
+    template: "components/content/snippet_card/snippet_card.html"
+    styles: ["components/content/snippet_card/snippet_card.css"]
+    scripts: ["components/content/snippet_card/snippet_card.js"]
+    config: {}
+    variants: {}
+  
+  code_viewer:
+    name: "code_viewer"
+    version: "1.0.0"
+    template: "components/content/code_viewer/code_viewer.html"
+    styles: ["components/content/code_viewer/code_viewer.css"]
+    scripts: ["components/content/code_viewer/code_viewer.js"]
+    config: {}
+    variants: {}
+  
+  language_filter:
+    name: "language_filter"
+    version: "1.0.0"
+    template: "components/content/language_filter/language_filter.html"
+    styles: ["components/content/language_filter/language_filter.css"]
+    scripts: ["components/content/language_filter/language_filter.js"]
+    config: {}
+    variants: {}
+  
+  snippet_embed:
+    name: "snippet_embed"
+    version: "1.0.0"
+    template: "components/content/snippet_embed/snippet_embed.html"
+    styles: ["components/content/snippet_embed/snippet_embed.css"]
+    scripts: ["components/content/snippet_embed/snippet_embed.js"]
+    config: {}
+    variants: {}
+  
+  project_card:
+    name: "project_card"
+    version: "1.0.0"
+    template: "components/content/project_card/project_card.html"
+    styles: ["components/content/project_card/project_card.css"]
+    scripts: ["components/content/project_card/project_card.js"]
+    config: {}
+    variants: {}
+  
+  project_gallery:
+    name: "project_gallery"
+    version: "1.0.0"
+    template: "components/content/project_gallery/project_gallery.html"
+    styles: ["components/content/project_gallery/project_gallery.css"]
+    scripts: ["components/content/project_gallery/project_gallery.js"]
+    config: {}
+    variants: {}
+  
+  project_tech:
+    name: "project_tech"
+    version: "1.0.0"
+    template: "components/content/project_tech/project_tech.html"
+    styles: ["components/content/project_tech/project_tech.css"]
+    scripts: ["components/content/project_tech/project_tech.js"]
+    config: {}
+    variants: {}
+  
+  project_links:
+    name: "project_links"
+    version: "1.0.0"
+    template: "components/content/project_links/project_links.html"
+    styles: ["components/content/project_links/project_links.css"]
+    scripts: ["components/content/project_links/project_links.js"]
+    config: {}
+    variants: {}
+  
+  project_modal:
+    name: "project_modal"
+    version: "1.0.0"
+    template: "components/content/project_modal/project_modal.html"
+    styles: ["components/content/project_modal/project_modal.css"]
+    scripts: ["components/content/project_modal/project_modal.js"]
+    config: {}
+    variants: {}
+
+# Theme assets
+assets:
+  css:
+    - "main.css"
+  js:
+    - "main.js"
+  images:
+    - "logo.svg"
+    - "favicon.ico"
+    - "og-image.png"
+  fonts:
+    - "inter-v12-latin-regular.woff2"
+    - "inter-v12-latin-600.woff2"
+    - "jetbrains-mono-v15-latin-regular.woff2"
+  
+  # Asset optimization settings
+  optimization:
+    minify_css: true
+    minify_js: true
+    optimize_images: true
+    critical_css: true
+    image_quality: 85
+    webp_conversion: true
+    cache_busting: true
+
+# Theme features
+features:
+  # Responsive design
+  responsive: true
+  breakpoints:
+    sm: "640px"
+    md: "768px"
+    lg: "1024px"
+    xl: "1280px"
+    "2xl": "1536px"
+  
+  # Dark mode support
+  dark_mode: true
+  dark_mode_toggle: true
+  
+  # Search functionality
+  search: true
+  search_type: "client_side"
+  
+  # Code highlighting
+  code_highlighting: true
+  code_theme: "github-dark"
+  line_numbers: true
+  copy_button: true
+  
+  # Math rendering
+  math_rendering: true
+  math_engine: "katex"
+  
+  # Performance optimizations
+  lazy_loading: true
+  prefetch_links: true
+  service_worker: false
+  
+  # SEO features
+  structured_data: true
+  open_graph: true
+  twitter_cards: true
+  sitemap: true
+  robots_txt: true
+
+# Template configuration
+templates:
+  # Base templates
+  base: "base_layout"
+  
+  # Content type templates
+  articles: "articles_layout"
+  books: "books_layout"
+  snippets: "snippets_layout"
+  projects: "projects_layout"
+  
+  # Special pages
+  search: "search"
+  error: "error"
+  not_found: "404"
+
+# Plugin configuration
+plugins:
+  # SEO plugins
+  - name: "seo"
+    enabled: true
+    config:
+      title_separator: " | "
+      meta_description: true
+      meta_keywords: false
+  
+  # Analytics plugins
+  - name: "analytics"
+    enabled: false
+    config:
+      provider: "google"
+      tracking_id: ""
+  
+  # Comment plugins
+  - name: "comments"
+    enabled: false
+    config:
+      provider: "disqus"
+      shortname: ""

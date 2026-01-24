@@ -1,0 +1,98 @@
+<div class="book-progress" data-component="book_progress" data-compact="{{ compact }}">
+  <div class="book-progress-header">
+    <h3 class="book-progress-title">Reading Progress</h3>
+    <div class="book-progress-percentage">{{ book.progress_percentage | default(value=0) }}%</div>
+  </div>
+  
+  <div class="book-progress-bar-container">
+    <div class="book-progress-bar">
+      <div class="book-progress-fill" style="width: {{ book.progress_percentage | default(value=0) }}%"></div>
+    </div>
+    
+    {% if show_timeline %}
+    <div class="book-progress-timeline">
+      {% for chapter in book.chapters %}
+      <div class="book-progress-timeline-item {% if chapter.completed %}book-progress-timeline-item--completed{% endif %} {% if chapter.current %}book-progress-timeline-item--current{% endif %}" 
+           data-chapter="{{ loop.index0 }}"
+           title="{{ chapter.title }}"
+           style="left: {{ (loop.index0 / (book.chapters|length - 1)) * 100 }}%">
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  
+  {% if show_details %}
+  <div class="book-progress-details">
+    <div class="book-progress-current">
+      {% if book.current_chapter %}
+      <div class="book-progress-current-chapter">
+        <span class="book-progress-current-label">Currently Reading:</span>
+        <span class="book-progress-current-title">{{ book.current_chapter.title }}</span>
+      </div>
+      {% endif %}
+      
+      {% if book.last_read %}
+      <div class="book-progress-last-read">
+        <span class="book-progress-last-read-label">Last read:</span>
+        <span class="book-progress-last-read-date">{{ book.last_read | date(format="%B %d, %Y") }}</span>
+      </div>
+      {% endif %}
+    </div>
+    
+    {% if show_statistics %}
+    <div class="book-progress-stats">
+      <div class="book-progress-stat">
+        <span class="book-progress-stat-value">{{ book.completed_chapters | default(value=0) }}</span>
+        <span class="book-progress-stat-label">Chapters completed</span>
+      </div>
+      
+      <div class="book-progress-stat">
+        <span class="book-progress-stat-value">{{ book.chapters | length }}</span>
+        <span class="book-progress-stat-label">Total chapters</span>
+      </div>
+      
+      {% if book.reading_time %}
+      <div class="book-progress-stat">
+        <span class="book-progress-stat-value">{{ book.reading_time }}</span>
+        <span class="book-progress-stat-label">Reading time</span>
+      </div>
+      {% endif %}
+      
+      {% if book.started_date %}
+      <div class="book-progress-stat">
+        <span class="book-progress-stat-value">{{ book.started_date | date(format="%b %d") }}</span>
+        <span class="book-progress-stat-label">Started</span>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+  
+  {% if actions %}
+  <div class="book-progress-actions">
+    {% slot actions %}
+    <button class="book-progress-action book-progress-action--primary" data-action="continue">
+      Continue Reading
+    </button>
+    <button class="book-progress-action book-progress-action--secondary" data-action="reset">
+      Reset Progress
+    </button>
+    {% endslot %}
+  </div>
+  {% endif %}
+  
+  {% if footer %}
+  <div class="book-progress-footer">
+    {% slot footer %}{% endslot %}
+  </div>
+  {% endif %}
+  
+  {% if book.estimated_completion %}
+  <div class="book-progress-estimate">
+    <span class="book-progress-estimate-label">Estimated completion:</span>
+    <span class="book-progress-estimate-date">{{ book.estimated_completion | date(format="%B %d, %Y") }}</span>
+  </div>
+  {% endif %}
+</div>

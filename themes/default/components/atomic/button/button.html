@@ -1,0 +1,46 @@
+{{#if href}}
+<a href="{{href}}" 
+   class="btn btn-{{variant}} btn-{{size}} {{#if disabled}}disabled{{/if}} {{#if focused}}focused{{/if}}"
+   {{#if target}}target="{{target}}"{{/if}}
+   {{#if onClick}}onclick="{{onClick}}"{{/if}}
+   data-component="button"
+   data-variant="{{variant}}"
+   data-size="{{size}}"
+   {{#if disabled}}disabled{{/if}}>
+  {{#if icon}}
+  <span class="btn-icon">{{{icon}}}</span>
+  {{/if}}
+  {{#if children}}
+  <span class="btn-text">{{{children}}}</span>
+  {{else}}
+  <span class="btn-text">Button</span>
+  {{/if}}
+  {{#if loading}}
+  <span class="btn-loading">
+    <span class="btn-spinner"></span>
+  </span>
+  {{/if}}
+</a>
+{{else}}
+<button type="button"
+        class="btn btn-{{variant}} btn-{{size}} {{#if disabled}}disabled{{/if}} {{#if focused}}focused{{/if}}"
+        {{#if onClick}}onclick="{{onClick}}"{{/if}}
+        {{#if disabled}}disabled{{/if}}
+        data-component="button"
+        data-variant="{{variant}}"
+        data-size="{{size}}">
+  {{#if icon}}
+  <span class="btn-icon">{{{icon}}}</span>
+  {{/if}}
+  {{#if children}}
+  <span class="btn-text">{{{children}}}</span>
+  {{else}}
+  <span class="btn-text">Button</span>
+  {{/if}}
+  {{#if loading}}
+  <span class="btn-loading">
+    <span class="btn-spinner"></span>
+  </span>
+  {{/if}}
+</button>
+{{/if}}

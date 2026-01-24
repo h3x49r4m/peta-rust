@@ -1,0 +1,44 @@
+name: "navbar"
+version: "1.0.0"
+category: "Composite"
+description: "Navigation bar component with responsive design"
+dependencies: []
+props:
+  variant:
+    type: string
+    enum: ["horizontal", "vertical", "sidebar"]
+    default: "horizontal"
+  sticky:
+    type: boolean
+    default: false
+  transparent:
+    type: boolean
+    default: false
+  responsive:
+    type: boolean
+    default: true
+  max_width:
+    type: string
+    default: "1200px"
+slots:
+  - name: brand
+    description: "Brand logo or title"
+  - name: menu
+    description: "Navigation menu items"
+  - name: actions
+    description: "Action buttons (search, theme toggle, etc.)"
+  - name: mobile-toggle
+    description: "Mobile menu toggle button"
+state:
+  - name: mobile_open
+    type: boolean
+    default: false
+  - name: scrolled
+    type: boolean
+    default: false
+templates:
+  - navbar.html
+styles:
+  - navbar.css
+scripts:
+  - navbar.js

@@ -1,0 +1,40 @@
+name: "project_card"
+version: "1.0.0"
+category: "Content"
+description: "Project card component for displaying project information"
+dependencies: []
+props:
+  project:
+    type: object
+    required: true
+  show_image:
+    type: boolean
+    default: true
+  show_description:
+    type: boolean
+    default: true
+  show_tags:
+    type: boolean
+    default: true
+  show_stats:
+    type: boolean
+    default: true
+  size:
+    type: string
+    enum: ["small", "medium", "large"]
+    default: "medium"
+  variant:
+    type: string
+    enum: ["default", "compact", "featured"]
+    default: "default"
+slots:
+  - name: actions
+    description: "Custom action buttons"
+  - name: footer
+    description: "Additional footer content"
+templates:
+  - project_card.html
+styles:
+  - project_card.css
+scripts:
+  - project_card.js

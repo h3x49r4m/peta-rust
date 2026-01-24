@@ -1,0 +1,28 @@
+name: "articles_layout"
+version: "1.0.0"
+category: "layout"
+description: "Layout for articles listing and detail pages"
+dependencies: []
+props:
+  articles:
+    type: array
+    description: "Array of article objects"
+  selected_article:
+    type: object
+    description: "Currently selected article for detail view"
+    default: null
+  article_tags:
+    type: array
+    description: "All available article tags for filtering"
+    default: []
+  selected_tag:
+    type: string
+    description: "Currently selected tag filter"
+    default: ""
+templates:
+  - "articles_list.html"
+  - "article_detail.html"
+styles:
+  - "articles_layout.css"
+scripts:
+  - "articles_layout.js"

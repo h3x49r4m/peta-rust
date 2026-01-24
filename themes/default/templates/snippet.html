@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} - {{ site.title }}{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .snippet-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: var(--spacing-8);
+    }
+    
+    .snippet-header {
+        text-align: center;
+        margin-bottom: var(--spacing-12);
+        padding-bottom: var(--spacing-8);
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .snippet-title {
+        font-size: var(--font-size-4xl);
+        font-weight: var(--font-weight-bold);
+        color: var(--text-color);
+        margin-bottom: var(--spacing-6);
+        line-height: 1.2;
+    }
+    
+    .snippet-meta {
+        color: var(--text-secondary);
+        font-size: var(--font-size-base);
+        margin-bottom: var(--spacing-4);
+    }
+    
+    .snippet-content {
+        font-size: var(--font-size-lg);
+        line-height: 1.8;
+        color: var(--text-color);
+    }
+    
+    .snippet-content h1,
+    .snippet-content h2,
+    .snippet-content h3,
+    .snippet-content h4,
+    .snippet-content h5,
+    .snippet-content h6 {
+        margin: var(--spacing-8) 0 var(--spacing-4);
+        font-weight: var(--font-weight-bold);
+        color: var(--text-color);
+    }
+    
+    .snippet-content h2 {
+        font-size: var(--font-size-2xl);
+        border-bottom: 2px solid var(--color-primary-500);
+        padding-bottom: var(--spacing-2);
+    }
+    
+    .snippet-content h3 {
+        font-size: var(--font-size-xl);
+    }
+    
+    .snippet-content p {
+        margin-bottom: var(--spacing-6);
+    }
+    
+    .snippet-content pre {
+        background: var(--background-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-6);
+        overflow-x: auto;
+        margin: var(--spacing-6) 0;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: var(--font-size-sm);
+        line-height: 1.5;
+    }
+    
+    .snippet-content code {
+        background: var(--background-secondary);
+        padding: var(--spacing-1) var(--spacing-2);
+        border-radius: var(--radius-sm);
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: var(--font-size-sm);
+    }
+    
+    .snippet-content pre code {
+        background: none;
+        padding: 0;
+    }
+    
+    @media (max-width: 768px) {
+        .snippet-title {
+            font-size: var(--font-size-3xl);
+        }
+        
+        .snippet-content pre {
+            padding: var(--spacing-4);
+            font-size: var(--font-size-xs);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="snippet-container">
+    <header class="snippet-header">
+        <h1 class="snippet-title">{{ page.title }}</h1>
+        <div class="snippet-meta">
+            {% if page.language %}Language: {{ page.language }}{% endif %}
+        </div>
+    </header>
+    
+    <main>
+        <article class="snippet-content">
+            {{ content | safe }}
+        </article>
+    </main>
+</div>
+{% endblock %}

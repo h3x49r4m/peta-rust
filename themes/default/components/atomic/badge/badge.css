@@ -1,0 +1,80 @@
+/* Badge Component Styles */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25em 0.4em;
+  font-size: 75%;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 0.375rem;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+/* Size variants */
+.badge-sm {
+  padding: 0.125em 0.25em;
+  font-size: 0.75rem;
+}
+
+.badge-lg {
+  padding: 0.375em 0.5em;
+  font-size: 0.875rem;
+}
+
+/* Pill variant */
+.badge-pill {
+  padding-right: 0.6em;
+  padding-left: 0.6em;
+  border-radius: 10rem;
+}
+
+/* Color variants */
+.badge-primary {
+  color: #fff;
+  background-color: var(--primary-color, #007bff);
+}
+
+.badge-secondary {
+  color: #fff;
+  background-color: var(--secondary-color, #6c757d);
+}
+
+.badge-success {
+  color: #fff;
+  background-color: var(--success-color, #28a745);
+}
+
+.badge-danger {
+  color: #fff;
+  background-color: var(--danger-color, #dc3545);
+}
+
+.badge-warning {
+  color: #212529;
+  background-color: var(--warning-color, #ffc107);
+}
+
+.badge-info {
+  color: #fff;
+  background-color: var(--info-color, #17a2b8);
+}
+
+.badge-light {
+  color: #212529;
+  background-color: var(--light-color, #f8f9fa);
+}
+
+.badge-dark {
+  color: #fff;
+  background-color: var(--dark-color, #343a40);
+}
+
+/* Hover effects */
+.badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}

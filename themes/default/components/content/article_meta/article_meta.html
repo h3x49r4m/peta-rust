@@ -1,0 +1,59 @@
+<div class="article-meta" data-component="article_meta">
+  {% if prefix %}
+  <div class="article-meta-prefix">
+    {% slot prefix %}{% endslot %}
+  </div>
+  {% endif %}
+  
+  <div class="article-meta-content">
+    {% if show_date and date %}
+    <time class="article-meta-date" datetime="{{ date }}">
+      {% component "icon" with name="calendar" library="feather" size="sm" %}
+      {% endslot %}
+      {{ date | date(date_format) }}
+    </time>
+    {% endif %}
+    
+    {% if show_author and author %}
+    <span class="article-meta-author">
+      {% component "icon" with name="user" library="feather" size="sm" %}
+      {% endslot %}
+      by {{ author }}
+    </span>
+    {% endif %}
+    
+    {% if show_reading_time and reading_time > 0 %}
+    <span class="article-meta-reading-time">
+      {% component "icon" with name="clock" library="feather" size="sm" %}
+      {% endslot %}
+      {{ reading_time }} min read
+    </span>
+    {% endif %}
+    
+    {% slot extra %}
+    <!-- Additional metadata can be injected here -->
+    {% endslot %}
+  </div>
+  
+  {% if show_tags and tags and tags|length > 0 %}
+  <div class="article-meta-tags">
+    {% component "icon" with name="tag" library="feather" size="sm" %}
+    {% endslot %}
+    <div class="article-meta-tags-list">
+      {% for tag in tags %}
+      {% component "badge" with variant="outline" size="sm" %}
+        {% slot children %}
+        <a href="/tags/{{ tag }}">{{ tag }}</a>
+        {% endslot %}
+      {% endcomponent %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  
+  {% if suffix %}
+  <div class="article-meta-suffix">
+    {% slot suffix %}{% endslot %}
+  </div>
+  {% endif %}
+</div>

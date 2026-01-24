@@ -1,0 +1,36 @@
+name: "chapter_navigation"
+version: "1.0.0"
+category: "Content"
+description: "Chapter navigation component for books"
+dependencies: []
+props:
+  chapters:
+    type: array
+    required: true
+  current_chapter:
+    type: number
+    default: 0
+  show_progress:
+    type: boolean
+    default: true
+  show_numbers:
+    type: boolean
+    default: true
+  layout:
+    type: string
+    enum: ["vertical", "horizontal", "accordion"]
+    default: "vertical"
+  collapsible:
+    type: boolean
+    default: false
+slots:
+  - name: header
+    description: "Custom header content"
+  - name: footer
+    description: "Custom footer content"
+templates:
+  - chapter_navigation.html
+styles:
+  - chapter_navigation.css
+scripts:
+  - chapter_navigation.js

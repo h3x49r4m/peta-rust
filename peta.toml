@@ -1,0 +1,58 @@
+[site]
+title = "Peta"
+description = "High-Performance Static Site Generator"
+url = "https://example.com"
+author = "Peta Team"
+
+[components]
+enabled = false
+enabled_components = []
+component_configs = {}
+layout = "default"
+theme = "default"
+
+[build]
+content_dir = "_content"
+output_dir = "_out/dist"
+theme_dir = "themes"
+drafts = false
+
+[rst]
+default_directives = ["code-block", "snippet-card", "toctree"]
+math_renderer = "katex"
+code_highlighter = "syntect"
+toc_depth = 3
+cross_references = true
+
+[rst.math]
+katex_delimiters = ["$$", "$", "\\[", "\\]"]
+fallback_mathjax = true
+cache_rendered = true
+
+[rst.code]
+line_numbers = true
+copy_button = true
+theme = "one-dark"
+
+[server]
+port = 3566
+host = "127.0.0.1"
+open_browser = true
+livereload = true
+
+[search]
+enabled = true
+client_side = true
+index_content = true
+index_metadata = true
+
+[assets]
+minify_css = true
+minify_js = true
+optimize_images = true
+image_quality = 85
+
+[deploy]
+target = "github"
+branch = "gh-pages"
+domain = "username.github.io"

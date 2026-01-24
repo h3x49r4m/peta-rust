@@ -1,0 +1,40 @@
+name: "article_card"
+version: "1.0.0"
+category: "Content"
+description: "Card component for displaying article previews"
+dependencies: ["card"]
+props:
+  show_excerpt:
+    type: boolean
+    default: true
+  show_meta:
+    type: boolean
+    default: true
+  show_tags:
+    type: boolean
+    default: true
+  show_image:
+    type: boolean
+    default: true
+  compact:
+    type: boolean
+    default: false
+slots:
+  - name: image
+    description: "Article image"
+  - name: title
+    description: "Article title"
+  - name: excerpt
+    description: "Article excerpt"
+  - name: meta
+    description: "Article metadata (date, author, etc.)"
+  - name: tags
+    description: "Article tags"
+  - name: actions
+    description: "Action buttons"
+templates:
+  - article_card.html
+styles:
+  - article_card.css
+scripts:
+  - article_card.js

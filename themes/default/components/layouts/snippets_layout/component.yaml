@@ -1,0 +1,21 @@
+name: "snippets_layout"
+version: "1.0.0"
+category: "layout"
+description: "Code snippets listing layout with language filtering"
+dependencies: []
+props:
+  snippets:
+    type: array
+    description: "Code snippets to display"
+  languages:
+    type: array
+    description: "Programming languages for filtering"
+  current_language:
+    type: string
+    description: "Currently selected language"
+templates:
+  - "snippets.html"
+styles:
+  - "snippets_layout.css"
+scripts:
+  - "snippets_layout.js"

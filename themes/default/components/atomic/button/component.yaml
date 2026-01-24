@@ -1,0 +1,50 @@
+name: "button"
+version: "1.0.0"
+category: "Atomic"
+description: "Interactive button component with multiple variants"
+dependencies: []
+props:
+  variant:
+    type: string
+    enum: ["primary", "secondary", "outline", "text"]
+    default: "primary"
+  size:
+    type: string
+    enum: ["sm", "md", "lg"]
+    default: "md"
+  disabled:
+    type: boolean
+    default: false
+  onClick:
+    type: function
+    default: null
+  href:
+    type: string
+    default: ""
+  target:
+    type: string
+    default: "_self"
+slots:
+  - name: children
+    description: "Button content"
+  - name: icon
+    description: "Optional icon"
+state:
+  - name: loading
+    type: boolean
+    default: false
+  - name: focused
+    type: boolean
+    default: false
+templates:
+  - button.html
+styles:
+  - button.css
+scripts:
+  - button.js
+seo:
+  structured_data:
+    type: "WebPageElement"
+    properties:
+      name: "Button"
+      description: "Interactive button element"

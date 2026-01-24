@@ -1,0 +1,62 @@
+<nav class="article-navigation" data-component="article_navigation" data-style="{{ style }}">
+  {% if prefix %}
+  <div class="article-navigation-prefix">
+    {% slot prefix %}{% endslot %}
+  </div>
+  {% endif %}
+  
+  <div class="article-navigation-content">
+    {% if previous_article %}
+    <a href="{{ previous_article.url }}" class="article-navigation-link article-navigation-link--prev" data-direction="prev">
+      {% if show_arrows %}
+      <span class="article-navigation-arrow article-navigation-arrow--prev">
+        {% component "icon" with name="chevron-left" library="feather" size="md" %}
+        {% endslot %}
+      </span>
+      {% endif %}
+      <span class="article-navigation-text">
+        {% if show_titles %}
+        {{ previous_article.title }}
+        {% else %}
+        Previous
+        {% endif %}
+      </span>
+    </a>
+    {% endif %}
+    
+    <div class="article-navigation-center">
+      {% slot center %}
+      <div class="article-navigation-progress">
+        <div class="article-navigation-progress-bar" data-progress-bar></div>
+        <div class="article-navigation-progress-text">
+          Reading Progress
+        </div>
+      </div>
+      {% endslot %}
+    </div>
+    
+    {% if next_article %}
+    <a href="{{ next_article.url }}" class="article-navigation-link article-navigation-link--next" data-direction="next">
+      <span class="article-navigation-text">
+        {% if show_titles %}
+        {{ next_article.title }}
+        {% else %}
+        Next
+        {% endif %}
+      </span>
+      {% if show_arrows %}
+      <span class="article-navigation-arrow article-navigation-arrow--next">
+        {% component "icon" with name="chevron-right" library="feather" size="md" %}
+        {% endslot %}
+      </span>
+      {% endif %}
+    </a>
+    {% endif %}
+  </div>
+  
+  {% if suffix %}
+  <div class="article-navigation-suffix">
+    {% slot suffix %}{% endslot %}
+  </div>
+  {% endif %}
+</nav>
