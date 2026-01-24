@@ -26,7 +26,7 @@ impl ComponentLoader {
             return Ok(components);
         }
         
-        let component_categories = ["atomic", "composite", "content", "interactive", "layouts"];
+        let component_categories = ["atomic", "composite"];
         
         for category in &component_categories {
             let category_dir = components_dir.join(category);
@@ -108,7 +108,7 @@ impl ComponentLoader {
         }
         
         // Load components from each category
-        let categories = ["atomic", "composite", "content", "interactive", "layouts"];
+        let categories = ["atomic", "composite"];
         
         for category in &categories {
             let category_dir = components_dir.join(category);

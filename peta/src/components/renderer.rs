@@ -145,7 +145,7 @@ impl ComponentRendererWrapper {
     
     /// Render a layout component
     pub fn render_layout(&self, layout_name: &str, context: &serde_json::Value) -> Result<String> {
-        let layout_dir = self.template_engine.theme_dir_buf().join("layouts");
+        let layout_dir = self.template_engine.theme_dir_buf().join("templates");
         let layout_file = layout_dir.join(format!("{}.html", layout_name));
         
         if !layout_file.exists() {
@@ -156,7 +156,7 @@ impl ComponentRendererWrapper {
         layout_context["layout_name"] = json!(layout_name);
         
         let context = tera::Context::from_serialize(&layout_context)?;
-        self.template_engine.render(&format!("layouts/{}", layout_name), &context)
+        self.template_engine.render(&format!("{}", layout_name), &context)
     }
     
     /// Include component styles in HTML

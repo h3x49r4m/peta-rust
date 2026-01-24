@@ -10,9 +10,6 @@ pub enum ComponentCategory {
     Atomic,
     /// Complex UI components
     Composite,
-    /// Content components
-    Content,    /// Page structure templates
-    Layout,
 }
 
 /// Prop configuration for component properties

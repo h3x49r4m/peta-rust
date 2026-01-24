@@ -68,7 +68,6 @@ impl ComponentCommands {
         let category_dir = match category {
             ComponentCategory::Atomic => component_dir.join("atomic"),
             ComponentCategory::Composite => component_dir.join("composite"),
-            ComponentCategory::Layout => component_dir.join("layouts"),
         };
         
         let target_dir = category_dir.join(name);
@@ -111,13 +110,11 @@ impl ComponentCommands {
             match category {
                 ComponentCategory::Atomic => "atomic",
                 ComponentCategory::Composite => "composite", 
-                ComponentCategory::Layout => "layouts",
             }, name));
         output.info(&format!("  2. Modify themes/default/components/{}/{}/{}.html to customize appearance", 
             match category {
                 ComponentCategory::Atomic => "atomic",
                 ComponentCategory::Composite => "composite", 
-                ComponentCategory::Layout => "layouts",
             }, name, name));
         output.info("  3. Use your component with: {% component \"your_component_name\" %}");
         
@@ -134,7 +131,7 @@ impl ComponentCommands {
         let component_path = Path::new("themes").join("default").join("components");
         
         // Try to find the component in different categories
-        let categories = ["atomic", "composite", "layouts"];
+        let categories = ["atomic", "composite"];
         let mut component_config_path = None;
         
         for category in &categories {
@@ -206,7 +203,7 @@ impl ComponentCommands {
         let component_path = Path::new("themes").join("default").join("components");
         
         // Try to find the component in different categories
-        let categories = ["atomic", "composite", "layouts"];
+        let categories = ["atomic", "composite"];
         let mut component_dir = None;
         
         for category in &categories {
@@ -340,27 +337,6 @@ impl ComponentCommands {
   </div>
   {{/if}}
 </div>"#, name, name, name, name, name, name, name, name, name)
-            }
-            ComponentCategory::Layout => {
-                format!(r#"<div class="{}-layout" data-component="{}">
-  <header class="{}-header">
-    {{#if slot.header}}
-      {{slot.header}}
-    {{/if}}
-  </header>
-  
-  <main class="{}-main">
-    {{#if slot.content}}
-      {{slot.content}}
-    {{/if}}
-  </main>
-  
-  <footer class="{}-footer">
-    {{#if slot.footer}}
-      {{slot.footer}}
-    {{/if}}
-  </footer>
-</div>"#, name, name, name, name, name, name)
             }
         };
         

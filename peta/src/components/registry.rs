@@ -283,10 +283,9 @@ impl ComponentRegistry {
         
         for component in self.components.values() {
             match component.category {
-                ComponentCategory::Atomic => stats.atomic_components += 1,
-                ComponentCategory::Composite => stats.composite_components += 1,
-                ComponentCategory::Layout => stats.layout_components += 1,
-                ComponentCategory::Content => stats.content_components += 1,            }
+                            ComponentCategory::Atomic => stats.atomic_components += 1,
+                            ComponentCategory::Composite => stats.composite_components += 1,
+                        }
         }
         
         stats
@@ -337,9 +336,6 @@ pub struct ComponentStats {
     pub atomic_components: usize,
     /// Number of composite components
     pub composite_components: usize,
-    /// Number of layout components
-    /// Number of content components
-    pub content_components: usize,    pub layout_components: usize,
 }
 
 impl Default for ComponentRegistry {
@@ -425,8 +421,6 @@ impl Default for ComponentStats {
             enabled_components: 0,
             atomic_components: 0,
             composite_components: 0,
-            layout_components: 0,
-            content_components: 0,
         }
     }
 }

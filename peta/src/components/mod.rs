@@ -111,8 +111,7 @@ impl Component {
         let category_dir = match self.category {
             ComponentCategory::Atomic => "atomic",
             ComponentCategory::Composite => "composite",
-            ComponentCategory::Layout => "layouts",
-            ComponentCategory::Content => "content",        };
+        };
         
         theme_dir.join("components").join(category_dir).join(&self.name)
     }
