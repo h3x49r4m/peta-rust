@@ -218,7 +218,7 @@ Ok(Component {
     /// Get component category directory
     fn get_component_category_dir(&self, name: &str) -> &str {
         match name {
-            "code_block" | "badge" | "button" | "icon" | "input" => "atomic",
+            "code_block" => "atomic",
             "navigation" | "footer" | "base_layout" => "composite",
             "search_bar" | "tag_cloud" | "content_card" | "article_list" => "content",
             "comment_system" | "analytics" | "newsletter" => "interactive",

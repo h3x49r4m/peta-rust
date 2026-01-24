@@ -1,5 +1,5 @@
 [workspace]
-members = ["peta", "tests"]
+members = ["peta"]
 resolver = "2"
 
 [workspace.dependencies]
