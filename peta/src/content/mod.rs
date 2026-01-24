@@ -8,6 +8,17 @@ pub mod taxonomy;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+/// Processed article with math detection
+#[derive(Debug, Clone)]
+pub struct ProcessedArticle {
+    pub content: String,
+    pub metadata: ContentMetadata,
+    pub has_math_formulas: bool,
+    pub math_formula_count: usize,
+    pub math_render_script: Option<String>,
+    pub toc: Option<String>,
+}
+
 /// Content metadata extracted from frontmatter
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ContentMetadata {
@@ -19,6 +30,8 @@ pub struct ContentMetadata {
     pub author: Option<String>,
     pub excerpt: Option<String>,
     pub url: String,
+    #[serde(default)]
+    pub extra: HashMap<String, String>,
 }
 
 /// Content types supported by the site generator
@@ -69,6 +82,9 @@ pub struct RstContent {
     pub html: String,
     pub toc: Vec<TocEntry>,
     pub frontmatter: HashMap<String, serde_json::Value>,
+    pub has_math_formulas: bool,
+    pub math_formula_count: usize,
+    pub math_render_script: Option<String>,
 }
 
 impl RstContent {
@@ -84,6 +100,30 @@ impl RstContent {
             html,
             toc,
             frontmatter,
+            has_math_formulas: false,
+            math_formula_count: 0,
+            math_render_script: None,
+        }
+    }
+    
+    /// Create new RST content with math detection
+    pub fn new_with_math(
+        metadata: ContentMetadata,
+        html: String,
+        toc: Vec<TocEntry>,
+        frontmatter: HashMap<String, serde_json::Value>,
+        has_math_formulas: bool,
+        math_formula_count: usize,
+        math_render_script: Option<String>,
+    ) -> Self {
+        Self {
+            metadata,
+            html,
+            toc,
+            frontmatter,
+            has_math_formulas,
+            math_formula_count,
+            math_render_script,
         }
     }
     

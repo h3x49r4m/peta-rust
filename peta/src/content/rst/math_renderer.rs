@@ -12,6 +12,8 @@ pub struct MathRenderer {
     cache: std::collections::HashMap<String, String>,
 }
 
+use super::MathDetectionResult;
+
 impl MathRenderer {
     /// Create a new math renderer
     pub fn new() -> Self {
@@ -25,6 +27,104 @@ impl MathRenderer {
             fallback_mathjax: true,
             cache: std::collections::HashMap::new(),
         }
+    }
+    
+    /// Create an on-demand math renderer
+    pub fn new_on_demand() -> Self {
+        Self {
+            katex_delimiters: vec![
+                "$$".to_string(),
+                "$".to_string(),
+                "\\[".to_string(),
+                "\\]".to_string(),
+            ],
+            fallback_mathjax: true,
+            cache: std::collections::HashMap::new(),
+        }
+    }
+    
+    /// Check if content needs math rendering
+    pub fn should_render(&self, content: &str) -> bool {
+        content.contains("$") || 
+        content.contains("\\[") || 
+        content.contains("\\(") ||
+        content.contains("data-latex")
+    }
+    
+    /// Generate on-demand rendering JavaScript
+    pub fn generate_on_demand_script(&self, detection: &MathDetectionResult) -> String {
+        if !detection.has_formulas {
+            return String::new();
+        }
+        
+        format!(r#"
+<script>
+// Auto-generated math renderer for {} formulas
+(function() {{
+    if (typeof window.mathRendererLoaded === 'undefined') {{
+        window.mathRendererLoaded = false;
+        window.pendingMathRender = false;
+        
+        // Load KaTeX on demand
+        function loadKaTeX() {{
+            if (window.mathRendererLoaded) return;
+            
+            // Load CSS
+            const css = document.createElement('link');
+            css.rel = 'stylesheet';
+            css.href = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css';
+            document.head.appendChild(css);
+            
+            // Load JS
+            const katex = document.createElement('script');
+            katex.src = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js';
+            katex.onload = function() {{
+                const autoRender = document.createElement('script');
+                autoRender.src = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js';
+                autoRender.onload = function() {{
+                    window.mathRendererLoaded = true;
+                    renderMathFormulas();
+                }};
+                document.body.appendChild(autoRender);
+            }};
+            document.body.appendChild(katex);
+        }}
+        
+        // Render math formulas
+        function renderMathFormulas() {{
+            if (!window.mathRendererLoaded) {{
+                window.pendingMathRender = true;
+                loadKaTeX();
+                return;
+            }}
+            
+            const elements = document.querySelectorAll('[data-latex]');
+            elements.forEach(el => {{
+                const latex = el.getAttribute('data-latex');
+                if (latex && katex) {{
+                    try {{
+                        el.innerHTML = '';
+                        katex.render(latex, el, {{
+                            displayMode: el.classList.contains('math-display'),
+                            throwOnError: false
+                        }});
+                    }} catch (e) {{
+                        console.error('Math rendering error:', e);
+                    }}
+                }}
+            }});
+        }}
+        
+        // Auto-render when DOM is ready
+        if (document.readyState === 'loading') {{
+            document.addEventListener('DOMContentLoaded', renderMathFormulas);
+        }} else {{
+            renderMathFormulas();
+        }}
+    }}
+}})();
+</script>
+"#, detection.formula_count)
     }
     
     /// Render math equations in HTML content
@@ -98,21 +198,16 @@ impl MathRenderer {
             return Ok(cached.clone());
         }
         
-        // For now, create KaTeX-compatible HTML
-        // In a real implementation, you would use the KaTeX library
+        // Create HTML elements with data-latex attributes for on-demand rendering
         let rendered = if display {
             format!(
-                r#"<div class="math-display" data-latex="{}">
-    <span class="katex-display">{}</span>
-</div>"#,
-                equation, equation
+                r#"<div class="math-display" data-latex="{}"></div>"#,
+                equation
             )
         } else {
             format!(
-                r#"<span class="math-inline" data-latex="{}">
-    <span class="katex">{}</span>
-</span>"#,
-                equation, equation
+                r#"<span class="math-inline" data-latex="{}"></span>"#,
+                equation
             )
         };
         

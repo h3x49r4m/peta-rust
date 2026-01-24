@@ -4,6 +4,7 @@ use crate::core::{Result, Error};
 use crate::core::theme::Theme;
 use crate::templates::{filters, functions};
 use crate::components::ComponentRegistry;
+use crate::content::ProcessedArticle;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
@@ -517,6 +518,27 @@ impl TemplateEngine {
     /// Get component registry
     pub fn component_registry(&self) -> Option<&ComponentRegistry> {
         self.component_registry.as_ref()
+    }
+    
+    /// Render article with math detection
+    pub fn render_article_with_math(&self, article: &ProcessedArticle) -> Result<String> {
+        let mut context = Context::new();
+        
+        context.insert("content", &article.content);
+        context.insert("metadata", &article.metadata);
+        context.insert("has_math_formulas", &article.has_math_formulas);
+        context.insert("math_formula_count", &article.math_formula_count);
+        
+        if let Some(toc) = &article.toc {
+            context.insert("toc", toc);
+        }
+        
+        // If has math formulas, inject render script
+        if let Some(math_script) = &article.math_render_script {
+            context.insert("math_render_script", math_script);
+        }
+        
+        self.render("article.html", &context)
     }
     
     /// Helper function to render nested components

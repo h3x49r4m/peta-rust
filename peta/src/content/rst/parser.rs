@@ -1,7 +1,7 @@
 //! Main RST parser implementation following RST-first architecture
 
 use crate::content::{RstContent, ContentMetadata, ContentType};
-use crate::content::rst::{MathRenderer, CodeHighlighter, DirectiveHandler, toc_generator::TocGenerator};
+use crate::content::rst::{MathRenderer, CodeHighlighter, DirectiveHandler, toc_generator::TocGenerator, MathProcessor, MathDetectionResult};
 use crate::core::Result;
 use crate::core::Error;
 use std::collections::HashMap;
@@ -10,6 +10,7 @@ use regex::Regex;
 /// Main RST parser that processes RST content directly to HTML
 pub struct RstParser {
     math_renderer: MathRenderer,
+    math_processor: MathProcessor,
     #[allow(dead_code)]
     code_highlighter: CodeHighlighter,
     directive_handlers: HashMap<String, Box<dyn DirectiveHandler>>,
@@ -28,6 +29,7 @@ impl RstParser {
         
 Ok(Self {
             math_renderer: MathRenderer::new(),
+            math_processor: MathProcessor::new()?,
             code_highlighter: CodeHighlighter::new().map_err(|e| Error::Content(format!("Failed to create code highlighter: {}", e)))?,
             directive_handlers,
             toc_generator: TocGenerator::new(),
@@ -53,11 +55,22 @@ Ok(Self {
         // 4. Generate table of contents
         let toc = self.toc_generator.generate(&processed_html)?;
         
+        // 5. Detect math formulas and generate rendering script
+        let math_detection = self.math_processor.auto_detect_math_content(&processed_html)?;
+        let math_script = if math_detection.has_formulas {
+            Some(self.math_renderer.generate_on_demand_script(&math_detection))
+        } else {
+            None
+        };
+        
         Ok(RstContent {
             metadata,
             html: processed_html,
             toc,
             frontmatter,
+            has_math_formulas: math_detection.has_formulas,
+            math_formula_count: math_detection.formula_count,
+            math_render_script: math_script,
         })
     }
     
@@ -137,6 +150,7 @@ Ok(Self {
             author,
             excerpt,
             url,
+            extra: HashMap::new(),
         })
     }
     
@@ -488,6 +502,21 @@ Ok(Self {
         line.starts_with("</span") ||
         line.starts_with("<button") ||
         line.starts_with("</button")
+    }
+    
+    /// Parse RST content with math detection
+    pub fn parse_with_math_detection(&mut self, content: &str) -> Result<(RstContent, MathDetectionResult)> {
+        // Process content with math detection
+        let (processed_content, math_detection) = self.math_processor.process_with_detection(content)?;
+        
+        // Parse the processed content
+        let mut rst_content = self.parse(&processed_content)?;
+        
+        // Add math detection metadata
+        rst_content.metadata.extra.insert("has_math_formulas".to_string(), math_detection.has_formulas.to_string());
+        rst_content.metadata.extra.insert("math_formula_count".to_string(), math_detection.formula_count.to_string());
+        
+        Ok((rst_content, math_detection))
     }
 }
 

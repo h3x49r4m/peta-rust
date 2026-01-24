@@ -425,6 +425,11 @@ impl SiteBuilder {
         context.insert("page", &content.metadata);
         context.insert("content", &content.html);
         context.insert("toc", &content.toc);
+        context.insert("has_math_formulas", &content.has_math_formulas);
+        context.insert("math_formula_count", &content.math_formula_count);
+        if let Some(ref script) = content.math_render_script {
+            context.insert("math_render_script", script);
+        }
         context
     }
     

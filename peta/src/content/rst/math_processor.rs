@@ -2,7 +2,7 @@
 
 use crate::core::{Error, Result};
 use regex::Regex;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 /// Math block extracted from RST content
 #[derive(Debug, Clone)]
@@ -30,6 +30,17 @@ pub struct MathProcessor {
     render_cache: HashMap<String, String>,
     /// Configuration
     config: MathConfig,
+}
+
+/// Math detection result
+#[derive(Debug, Clone)]
+pub struct MathDetectionResult {
+    /// Whether the content contains math formulas
+    pub has_formulas: bool,
+    /// Number of math formulas found
+    pub formula_count: usize,
+    /// Math blocks extracted from content
+    pub math_blocks: Vec<MathBlock>,
 }
 
 /// Configuration for math processing
@@ -71,10 +82,10 @@ impl MathProcessor {
     /// Create a math processor with custom configuration
     pub fn with_config(config: MathConfig) -> Result<Self> {
         let display_math_regex = Regex::new(r"\$\$([^$]*(?:\$\$[^$]*\$\$)*[^$]*)\$\$")
-            .map_err(|e| Error::math(format!("Invalid display math regex: {}", e)))?;
+            .map_err(|e| Error::content(format!("Invalid display math regex: {}", e)))?;
         
         let inline_math_regex = Regex::new(r"\$([^$\n]*(?:\$\$[^$\n]*\$\$)*[^$\n]*)\$")
-            .map_err(|e| Error::math(format!("Invalid inline math regex: {}", e)))?;
+            .map_err(|e| Error::content(format!("Invalid inline math regex: {}", e)))?;
         
         Ok(Self {
             katex_renderer: KatexRenderer::new()?,
@@ -86,7 +97,7 @@ impl MathProcessor {
     }
     
     /// Process RST content with math rendering
-    pub fn process_rst_with_math(&self, content: &str) -> Result<String> {
+    pub fn process_rst_with_math(&mut self, content: &str) -> Result<String> {
         if !self.config.enabled {
             return Ok(content.to_string());
         }
@@ -216,7 +227,7 @@ impl MathProcessor {
     }
     
     /// Reinsert rendered math formulas into content
-    fn reinsert_rendered_math(&self, mut content: String, math_blocks: Vec<MathBlock>) -> Result<String> {
+    fn reinsert_rendered_math(&mut self, mut content: String, math_blocks: Vec<MathBlock>) -> Result<String> {
         // Sort blocks by position in reverse order to maintain positions
         let mut sorted_blocks = math_blocks;
         sorted_blocks.sort_by_key(|b| std::cmp::Reverse(b.start_pos));
@@ -230,7 +241,7 @@ impl MathProcessor {
     }
     
     /// Render a single math block
-    fn render_math_block(&self, block: &MathBlock) -> Result<String> {
+    fn render_math_block(&mut self, block: &MathBlock) -> Result<String> {
         // Check cache first
         if self.config.cache_rendered {
             if let Some(cached) = self.render_cache.get(&block.formula) {
@@ -279,6 +290,44 @@ impl MathProcessor {
     pub fn cache_stats(&self) -> (usize, usize) {
         (self.render_cache.len(), self.render_cache.capacity())
     }
+    
+    /// Automatically detect if content contains math formulas
+    pub fn auto_detect_math_content(&self, content: &str) -> Result<MathDetectionResult> {
+        // First try to extract from original LaTeX syntax
+        let math_blocks = self.extract_math_blocks(content)?;
+        if !math_blocks.is_empty() {
+            return Ok(MathDetectionResult {
+                has_formulas: true,
+                formula_count: math_blocks.len(),
+                math_blocks,
+            });
+        }
+        
+        // If no LaTeX found, check for data-latex attributes (already processed content)
+        let data_latex_regex = Regex::new(r#"data-latex="([^"]*)""#)
+            .map_err(|e| Error::content(format!("Invalid data-latex regex: {}", e)))?;
+        
+        let math_count = data_latex_regex.find_iter(content).count();
+        let has_formulas = math_count > 0;
+        
+        Ok(MathDetectionResult {
+            has_formulas,
+            formula_count: math_count,
+            math_blocks: Vec::new(), // Not needed for already processed content
+        })
+    }
+    
+    /// Process RST content and return both processed content and detection result
+    pub fn process_with_detection(&mut self, content: &str) -> Result<(String, MathDetectionResult)> {
+        let detection = self.auto_detect_math_content(content)?;
+        let processed_content = if detection.has_formulas {
+            self.process_rst_with_math(content)?
+        } else {
+            content.to_string()
+        };
+        
+        Ok((processed_content, detection))
+    }
 }
 
 /// KaTeX renderer for math formulas
@@ -298,7 +347,7 @@ impl KatexRenderer {
     /// Render a math formula using KaTeX
     pub fn render(&self, formula: &str, display: bool) -> Result<String> {
         if !self.available {
-            return Err(Error::math("KaTeX renderer not available".to_string()));
+            return Err(Error::content("KaTeX renderer not available".to_string()));
         }
         
         // In a real implementation, this would call the KaTeX rendering engine

@@ -127,6 +127,12 @@
 </style>
 {% endblock %}
 
+{% block scripts %}
+{% if has_math_formulas %}
+{{ math_render_script | safe }}
+{% endif %}
+{% endblock %}
+
 {% block content %}
 <div class="book-container">
     <header class="book-header">

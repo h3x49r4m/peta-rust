@@ -59,6 +59,7 @@ impl MetadataExtractor {
             author,
             excerpt,
             url,
+            extra: HashMap::new(),
         })
     }
     
