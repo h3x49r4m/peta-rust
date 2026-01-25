@@ -1,0 +1,57 @@
+<!-- Modal Overlay -->
+<div class="snippet-modal-overlay" data-component="snippet_card_modal">
+    <!-- Modal Container -->
+    <div class="snippet-modal-container">
+        <!-- Modal Header -->
+        <header class="snippet-modal-header">
+            <div class="snippet-modal-title-wrapper">
+                <h2 class="snippet-modal-title">{{ props.snippet.title | default(value="Snippet Title") }}</h2>
+                {% if props.snippet.language %}
+                <span class="snippet-modal-language">{{ props.snippet.language }}</span>
+                {% endif %}
+            </div>
+            <button class="snippet-modal-close" aria-label="Close modal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </header>
+        
+        <!-- Modal Content -->
+        <main class="snippet-modal-content">
+            <div class="snippet-modal-body">
+                {% if props.snippet.content %}
+                {{ props.snippet.content | safe }}
+                {% else %}
+                <p>No content available</p>
+                {% endif %}
+            </div>
+        </main>
+        
+        <!-- Modal Footer -->
+        <footer class="snippet-modal-footer">
+            <div class="snippet-modal-meta">
+                {% if props.snippet.date %}
+                <span class="snippet-modal-date">{{ props.snippet.date }}</span>
+                {% endif %}
+                {% if props.snippet.tags %}
+                <div class="snippet-modal-tags">
+                    {% for tag in props.snippet.tags %}
+                    <span class="snippet-modal-tag">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="snippet-modal-actions">
+                <button class="snippet-modal-copy-btn" data-copy-content="{{ props.snippet.content | default(value='') }}">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    Copy
+                </button>
+            </div>
+        </footer>
+    </div>
+</div>

@@ -14,7 +14,7 @@
     
     <!-- Component Styles -->
     <style>
-    {{ component_styles(component_names=["header", "navbar", "contacts", "grid_card", "code_block", "tag_cloud", "footer", "page_tags"]) | safe }}
+    {{ component_styles(component_names=["header", "navbar", "contacts", "grid_card", "code_block", "tag_cloud", "footer", "page_tags", "snippet_card_modal"]) | safe }}
     </style>
     
     {% block extra_styles %}{% endblock extra_styles %}
@@ -33,6 +33,9 @@
     <!-- Footer -->
     {% include "footer.html" %}
     
+    <!-- Component Scripts -->
+    <script src="/js/components/snippet_card_modal.js"></script>
+        
     <!-- External JavaScript -->
     <script src="/js/main.js"></script>
 

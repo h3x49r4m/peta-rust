@@ -24,7 +24,7 @@
 {% if articles %}
 <div class="listing-grid">
   {% for article in articles %}
-  {{ component(name="grid_card") | safe }}
+  {{ component(name="grid_card", page=article) | safe }}
   {% endfor %}
 </div>
 {% else %}

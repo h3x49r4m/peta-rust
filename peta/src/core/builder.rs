@@ -86,7 +86,19 @@ impl SiteBuilder {
             return Ok(());
         }
         
-        let pattern = dir.join("**/*.rst");
+        // First load index.rst files in subdirectories
+        let pattern = dir.join("**/index.rst");
+        
+        if let Ok(paths) = glob(pattern.to_str().unwrap()) {
+            for path in paths.flatten() {
+                if let Ok(content) = self.load_rst_file(&path, content_type.clone()).await {
+                    self.rst_content.push(content);
+                }
+            }
+        }
+        
+        // Then load direct .rst files in the directory (not in subdirectories)
+        let pattern = dir.join("*.rst");
         
         if let Ok(paths) = glob(pattern.to_str().unwrap()) {
             for path in paths.flatten() {
@@ -276,13 +288,26 @@ impl SiteBuilder {
         let mut projects = Vec::new();
         
         for content in &self.rst_content {
-            let item = serde_json::json!({
+            let mut item = serde_json::json!({
                 "title": content.metadata.title,
                 "url": content.metadata.url,
                 "date": content.metadata.date,
                 "tags": content.metadata.tags,
-                "excerpt": content.metadata.excerpt.as_deref().unwrap_or("No excerpt available")
+                "excerpt": content.metadata.excerpt.as_deref().unwrap_or("No excerpt available"),
+                "author": content.metadata.author,
+                "content_type": format!("{:?}", content.metadata.content_type)
             });
+            
+            // Add content field for snippets to enable modal display
+            if content.metadata.content_type == ContentType::Snippet {
+                item["content"] = serde_json::Value::String(content.html.clone());
+                if let Some(language) = content.metadata.extra.get("language") {
+                    item["language"] = serde_json::Value::String(language.clone());
+                }
+                item["slug"] = serde_json::Value::String(
+                    content.metadata.url.split('/').last().unwrap_or("").replace(".html", "")
+                );
+            }
             
             match content.metadata.content_type {
                 ContentType::Article => articles.push(item),
@@ -422,7 +447,14 @@ impl SiteBuilder {
     /// Create template context for content rendering
     fn create_template_context(&self, content: &RstContent) -> tera::Context {
         let mut context = self.create_base_context();
-        context.insert("page", &content.metadata);
+        
+        // Create page metadata with slug
+        let mut page_metadata = content.metadata.clone();
+        page_metadata.extra.insert("slug".to_string(), 
+            content.metadata.url.split('/').last().unwrap_or("").replace(".html", "")
+        );
+        
+        context.insert("page", &page_metadata);
         context.insert("content", &content.html);
         context.insert("toc", &content.toc);
         context.insert("has_math_formulas", &content.has_math_formulas);
@@ -430,6 +462,37 @@ impl SiteBuilder {
         if let Some(ref script) = content.math_render_script {
             context.insert("math_render_script", script);
         }
+        
+        // Add all snippets data if this is a snippet page
+        if content.metadata.content_type == ContentType::Snippet {
+            let mut snippets = Vec::new();
+            for snippet_content in &self.rst_content {
+                if snippet_content.metadata.content_type == ContentType::Snippet {
+                    let mut item = serde_json::json!({
+                        "title": snippet_content.metadata.title,
+                        "url": snippet_content.metadata.url,
+                        "date": snippet_content.metadata.date,
+                        "tags": snippet_content.metadata.tags,
+                        "excerpt": snippet_content.metadata.excerpt.as_deref().unwrap_or("No excerpt available"),
+                        "author": snippet_content.metadata.author,
+                        "content_type": format!("{:?}", snippet_content.metadata.content_type)
+                    });
+                    
+                    // Add content field for snippets to enable modal display
+                    item["content"] = serde_json::Value::String(snippet_content.html.clone());
+                    if let Some(language) = snippet_content.metadata.extra.get("language") {
+                        item["language"] = serde_json::Value::String(language.clone());
+                    }
+                    item["slug"] = serde_json::Value::String(
+                        snippet_content.metadata.url.split('/').last().unwrap_or("").replace(".html", "")
+                    );
+                    
+                    snippets.push(item);
+                }
+            }
+            context.insert("snippets", &snippets);
+        }
+        
         context
     }
     

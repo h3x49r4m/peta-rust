@@ -175,6 +175,7 @@ impl ComponentLoader {
             "header" => "composite",
             "footer" => "composite",
             "page_tags" => "composite",
+            "snippet_card_modal" => "composite",
             _ => "content",
         }
     }

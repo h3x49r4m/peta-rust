@@ -1,27 +1,34 @@
 <div class="grid-card" data-component="grid_card">
   <div class="card-header">
-    <div class="content-type-badge">Content</div>
+    <div class="content-type-badge">{{ page.content_type | default(value="Content") }}</div>
   </div>
   
   <div class="card-content">
     <h3 class="card-title">
-      <a href="#">Sample Content Item</a>
+      <a href="{{ page.url | default(value="#") }}">{{ page.title | default(value="Untitled") }}</a>
     </h3>
     
     <div class="card-meta">
-      <span class="meta-author">by Author</span>
-      <span class="meta-date">2024-01-24</span>
+      {% if page.author %}
+      <span class="meta-author">by {{ page.author }}</span>
+      {% endif %}
+      {% if page.date %}
+      <span class="meta-date">{{ page.date }}</span>
+      {% endif %}
     </div>
     
-    <p class="card-excerpt">This is a sample excerpt for the grid card component. It demonstrates the layout and styling of content cards.</p>
+    <p class="card-excerpt">{{ page.excerpt | default(value=page.description | default(value="No excerpt available")) }}</p>
     
+    {% if page.tags %}
     <div class="card-tags">
-      <span class="card-tag">Sample</span>
-      <span class="card-tag">Demo</span>
+      {% for tag in page.tags %}
+      <span class="card-tag">{{ tag }}</span>
+      {% endfor %}
     </div>
+    {% endif %}
   </div>
   
   <div class="card-footer">
-    <a href="#" class="card-link">Read More →</a>
+    <a href="{{ page.url | default(value="#") }}" class="card-link">Read More →</a>
   </div>
 </div>

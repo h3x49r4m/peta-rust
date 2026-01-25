@@ -244,6 +244,7 @@ impl TemplateEngine {
                     "header" => "composite",
                     "footer" => "composite",
                     "page_tags" => "composite",
+                    "snippet_card_modal" => "composite",
                     _ => "content",
                 };
                 let component_path = format!("themes/default/components/{}/{}", category, component_name);
@@ -295,9 +296,13 @@ impl TemplateEngine {
                                                         
                             
                                                         let mut context = tera::Context::new();
-                            
-                                                        context.insert("props", &props);
-                                                        
+                                                                                                                
+                                                                                                                context.insert("props", &props);
+                                                                                                                
+                                                                                                                // If page is passed as a prop, also insert it as page
+                                                                                                                if let Some(page) = props.get("page") {
+                                                                                                                    context.insert("page", page);
+                                                                                                                }                                                        
                                                         // Add site context with page type detection
                                                         let page_type = if component_name == "page_tags" {
                                                             if let Some(props) = props.as_object() {
@@ -936,6 +941,7 @@ impl TemplateEngine {
                     "header" => "composite",
                     "footer" => "composite",
                     "page_tags" => "composite",
+                    "snippet_card_modal" => "composite",
                     _ => "content",
                 };
                 
@@ -1003,10 +1009,26 @@ impl TemplateEngine {
                 let mut scripts = String::new();
                 for component in component_names {
                     if let Some(name) = component.as_str() {
-                        scripts.push_str(&format!("// Script for component: {}\n", name));
-                        scripts.push_str(&format!("document.addEventListener('DOMContentLoaded', () => {{\n"));
-                        scripts.push_str(&format!("  // Initialize {} component\n", name));
-                        scripts.push_str(&format!("}});\n"));
+                        // Load the actual JS file if it exists
+                        let js_path = format!("themes/default/components/{}/{}.js", 
+                            match name {
+                                "header" => "composite",
+                                "footer" => "composite",
+                                "page_tags" => "composite",
+                                "snippet_card_modal" => "composite",
+                                _ => "atomic",
+                            }, name);
+                        
+                        if let Ok(js_content) = std::fs::read_to_string(&js_path) {
+                            scripts.push_str(&js_content);
+                            scripts.push('\n');
+                        } else {
+                            // Fallback to placeholder script
+                            scripts.push_str(&format!("// Script for component: {}\n", name));
+                            scripts.push_str(&format!("document.addEventListener('DOMContentLoaded', () => {{\n"));
+                            scripts.push_str(&format!("  // Initialize {} component\n", name));
+                            scripts.push_str(&format!("}});\n"));
+                        }
                     }
                 }
                 
