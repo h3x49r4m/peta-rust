@@ -234,14 +234,13 @@
 {% endblock %}
 
 {% block content %}
+<div class="content-div">
 
 <!-- Stats Section -->
 
 <section class="stats-section">
 
-    <div class="container">
-
-        <div class="stats-wrapper">
+    <div class="stats-wrapper">
 
             <div class="stats-header">
 
@@ -369,8 +368,6 @@
 
         </div>
 
-    </div>
-
 </section>
 
 
@@ -379,9 +376,7 @@
 
 <section class="search-section">
 
-    <div class="container">
-
-        <div class="search-wrapper">
+    <div class="search-wrapper">
 
             <div class="search-header">
 
@@ -443,14 +438,13 @@
 
         </div>
 
-    </div>
-
 </section>
 
 <!-- Tags Section -->
-<section class="container" style="margin-top: 4rem;">
+<section style="margin-top: 4rem;">
     {{ component(name="tag_cloud", title="Tags") | safe }}
 </section>
+</div>
 {% endblock %}
 
 {% block scripts %}
