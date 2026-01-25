@@ -99,9 +99,10 @@
         if (body) {
             body.innerHTML = snippet.content || '<p>No content available</p>';
             
-            // Check if content has math formulas and handle them
+            // Check if content has math formulas and handle them using KaTeX
             const hasMathFormulas = snippet.content && (
-                snippet.content.includes('class="math"') || 
+                snippet.content.includes('data-latex') || 
+                snippet.content.includes('class="math"') ||
                 snippet.content.includes('\\(') || 
                 snippet.content.includes('\\[') ||
                 snippet.content.includes('$$') ||
@@ -111,49 +112,72 @@
             );
             
             if (hasMathFormulas) {
-                console.log('Content has math formulas, ensuring MathJax is loaded...');
+                console.log('Content has math formulas, ensuring KaTeX is loaded...');
                 
-                // Ensure MathJax is loaded
-                if (!window.MathJax) {
-                    console.log('Loading MathJax...');
-                    const script = document.createElement('script');
-                    script.innerHTML = `
-                        window.MathJax = {
-                            tex: {
-                                inlineMath: [['\\\\(', '\\\\)'], ['[', ']']],
-                                displayMath: [['$$', '$$'], ['\\\\[', '\\\\]']],
-                                processEscapes: true
-                            },
-                            startup: {
-                                typeset: false
-                            }
-                        };
-                    `;
-                    document.head.appendChild(script);
-                    
-                    const mjScript = document.createElement('script');
-                    mjScript.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
-                    mjScript.onload = function() {
-                        console.log('MathJax loaded, re-rendering...');
-                        if (window.MathJax.typesetPromise) {
-                            window.MathJax.typesetPromise([body]).then(() => {
-                                console.log('MathJax re-rendered successfully');
-                            });
-                        } else {
-                            window.MathJax.Hub.Queue(["Typeset", body]);
-                        }
-                    };
-                    document.head.appendChild(mjScript);
-                } else {
-                    console.log('MathJax already available, re-rendering...');
-                    if (window.MathJax.typesetPromise) {
-                        window.MathJax.typesetPromise([body]).then(() => {
-                            console.log('MathJax re-rendered successfully');
+                // Use the same KaTeX system as main pages
+                if (typeof window.mathRendererLoaded === 'undefined') {
+                    window.mathRendererLoaded = false;
+                    window.pendingMathRender = false;
+                }
+                
+                function loadKaTeX() {
+                    if (window.mathRendererLoaded) {
+                        renderMathInElement(body, {
+                            delimiters: [
+                                {left: '$$', right: '$$', display: true},
+                                {left: '$', right: '$', display: false},
+                                {left: '\\[', right: '\\]', display: true},
+                                {left: '\\(', right: '\\)', display: false}
+                            ]
                         });
+                        return;
+                    }
+                    
+                    // Load KaTeX CSS if not already loaded
+                    if (!document.querySelector('link[href*="katex.min.css"]')) {
+                        const css = document.createElement('link');
+                        css.rel = 'stylesheet';
+                        css.href = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css';
+                        document.head.appendChild(css);
+                    }
+                    
+                    // Load KaTeX JS if not already loaded
+                    if (typeof window.katex === 'undefined') {
+                        const katex = document.createElement('script');
+                        katex.src = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js';
+                        katex.onload = function() {
+                            const autoRender = document.createElement('script');
+                            autoRender.src = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js';
+                            autoRender.onload = function() {
+                                window.mathRendererLoaded = true;
+                                renderMathInElement(body, {
+                                    delimiters: [
+                                        {left: '$$', right: '$$', display: true},
+                                        {left: '$', right: '$', display: false},
+                                        {left: '\\[', right: '\\]', display: true},
+                                        {left: '\\(', right: '\\)', display: false}
+                                    ]
+                                });
+                            };
+                            document.body.appendChild(autoRender);
+                        };
+                        document.body.appendChild(katex);
                     } else {
-                        window.MathJax.Hub.Queue(["Typeset", body]);
+                        // KaTeX already loaded, use auto-render
+                        if (typeof renderMathInElement !== 'undefined') {
+                            renderMathInElement(body, {
+                                delimiters: [
+                                    {left: '$$', right: '$$', display: true},
+                                    {left: '$', right: '$', display: false},
+                                    {left: '\\[', right: '\\]', display: true},
+                                    {left: '\\(', right: '\\)', display: false}
+                                ]
+                            });
+                        }
                     }
                 }
+                
+                loadKaTeX();
             }
         }
         
