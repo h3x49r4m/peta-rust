@@ -240,88 +240,381 @@ Ok(Self {
     
     /// Process RST directives
     
+    
+    
         fn process_directives(&mut self, content: &str) -> Result<String> {
     
-                // Use a simpler approach - split by directive patterns
     
-                let directive_start_regex = Regex::new(r"\.\. ([a-zA-Z0-9_-]+)::")
-                    .map_err(|e| crate::core::Error::rst_parse(format!("Failed to compile directive regex: {}", e)))?;
+    
+            let directive_start_regex = Regex::new(r"\.\. ([a-zA-Z0-9_-]+)::")
+    
+    
+    
+                .map_err(|e| crate::core::Error::rst_parse(format!("Failed to compile directive regex: {}", e)))?;
+    
+    
+    
+            
+    
+    
+    
+            let mut result = String::new();
+    
+    
+    
+            let mut last_pos = 0;
+    
+    
+    
+            
+    
+    
+    
+            // Find all directive starts
+    
+    
+    
+            let mut directive_starts = Vec::new();
+    
+    
+    
+            for mat in directive_start_regex.find_iter(content) {
+    
+    
+    
+                directive_starts.push((mat.start(), mat.end(), mat.as_str()));
+    
+    
+    
+            }
+    
+    
+    
+            
+    
+    
+    
+            // Process each directive
+    
+    
+    
+            for (i, &(start, end, directive_str)) in directive_starts.iter().enumerate() {
+    
+    
+    
+                // Add content before this directive
+    
+    
+    
+                result.push_str(&content[last_pos..start]);
+    
+    
     
                 
     
-                let mut result = content.to_string();
+    
+    
+                // Extract directive type
+    
+    
+    
+                let directive_type = directive_str
+    
+    
+    
+                    .trim_start_matches(".. ")
+    
+    
+    
+                    .trim_end_matches("::")
+    
+    
+    
+                    .trim();
+    
+    
     
                 
     
-                // Find all directive starts
     
-                let mut directive_starts = Vec::new();
     
-                for mat in directive_start_regex.find_iter(content) {
+                // Find directive content end based on indentation
     
-                    directive_starts.push((mat.start(), mat.end(), mat.as_str()));
     
-                }
+    
+                let content_start = end;
+    
+    
+    
+                let lines_after_directive: Vec<&str> = content[content_start..].lines().collect();
+    
+    
+    
+                let mut content_end = content.len();
+    
+    
+    
+                let mut found_indented_content = false;
+    
+    
     
                 
     
-                // Process each directive
     
-                for (i, &(start, end, directive_str)) in directive_starts.iter().enumerate() {
     
-                    // Extract directive type from the directive string
+                for (line_idx, line) in lines_after_directive.iter().enumerate() {
     
-                    let directive_type = directive_str
     
-                        .trim_start_matches(".. ")
     
-                        .trim_end_matches("::")
+                    let line_start_pos = content_start + if line_idx > 0 {
     
-                        .trim();
     
-                    
     
-                    // Find end of directive content (next directive or end of file)
+                        lines_after_directive[0..line_idx].join("\n").len() + 1
     
-                    let content_start = end;
     
-                    let content_end = if i + 1 < directive_starts.len() {
-    
-                        directive_starts[i + 1].0
     
                     } else {
     
-                        content.len()
+    
+    
+                        0
+    
+    
     
                     };
     
-                    
     
-                    let directive_content = &content[content_start..content_end];
     
                     
     
-                    // Process directive if we have a handler
     
-                    if let Some(handler) = self.directive_handlers.get_mut(directive_type) {
     
-                        let processed = handler.handle(directive_content)?;
+                    // Skip empty lines at the beginning
     
-                        let original = &content[start..content_end];
     
-                        result = result.replace(original, &processed);
     
-                    }
+                    
+    
+    
+    
+                                    if !found_indented_content && line.trim().is_empty() {
+    
+    
+    
+                    
+    
+    
+    
+                                        continue;
+    
+    
+    
+                    
+    
+    
+    
+                                    }
+    
+    
+    
+                    
+    
+    
+    
+                                    
+    
+    
+    
+                    
+    
+    
+    
+                                    // If we find an indented line, mark that we've found the content
+    
+    
+    
+                    
+    
+    
+    
+                                    if line.starts_with("    ") || line.starts_with("\t") {
+    
+    
+    
+                    
+    
+    
+    
+                                        found_indented_content = true;
+    
+    
+    
+                    
+    
+    
+    
+                                        continue;
+    
+    
+    
+                    
+    
+    
+    
+                                    }
+    
+    
+    
+                    
+    
+    
+    
+                                    
+    
+    
+    
+                    
+    
+    
+    
+                                    // If we found indented content and now hit a non-indented line, this is the end
+    
+    
+    
+                    
+    
+    
+    
+                                    if found_indented_content && !line.starts_with("    ") && !line.starts_with("\t") {
+    
+    
+    
+                    
+    
+    
+    
+                                        content_end = line_start_pos;
+    
+    
+    
+                    
+    
+    
+    
+                                        break;
+    
+    
+    
+                    
+    
+    
+    
+                                    }
+    
+    
     
                 }
     
-                
     
-                Ok(result)
     
                 
+    
+    
+    
+                // If there's another directive, don't go past it
+    
+    
+    
+                if i + 1 < directive_starts.len() {
+    
+    
+    
+                    let next_directive_start = directive_starts[i + 1].0;
+    
+    
+    
+                    if content_end > next_directive_start {
+    
+    
+    
+                        content_end = next_directive_start;
+    
+    
     
                     }
+    
+    
+    
+                }
+    
+    
+    
+                
+    
+    
+    
+                let directive_content = &content[content_start..content_end];
+    
+    
+    
+                
+    
+    
+    
+                // Process directive if we have a handler
+    
+    
+    
+                if let Some(handler) = self.directive_handlers.get_mut(directive_type) {
+    
+    
+    
+                    let processed = handler.handle(directive_content)?;
+    
+    
+    
+                    result.push_str(&processed);
+    
+    
+    
+                }
+    
+    
+    
+                
+    
+    
+    
+                last_pos = content_end;
+    
+    
+    
+            }
+    
+    
+    
+            
+    
+    
+    
+            // Add remaining content after the last directive
+    
+    
+    
+            result.push_str(&content[last_pos..]);
+    
+    
+    
+            
+    
+    
+    
+            Ok(result)
+    
+    
+    
+        }
     
     /// Convert RST markup to HTML
     fn convert_rst_to_html(&self, content: &str) -> Result<String> {

@@ -43,9 +43,15 @@ impl DirectiveHandler for CodeBlockHandler {
         
         // We're now using Prism.js for syntax highlighting, no need for custom highlighting
         
-        // Generate proper component HTML that matches the code_block component
+        // Generate proper component HTML that matches the code_block component with line numbers
+        let code_lines: Vec<&str> = code.lines().collect();
+        let numbered_code = code_lines.iter().enumerate().map(|(i, line)| {
+            let line_num = i + 1;
+            format!(r#"<span class="line-number" data-line="{}">{}</span>{}"#, line_num, line_num, line)
+        }).collect::<Vec<_>>().join("\n");
+        
         Ok(format!(
-            r#"<div class="code-block" data-language="{}">
+            r#"<div class="code-block" data-language="{}" data-line-numbers="true">
     <!-- Code Header -->
     <div class="code-header">
         <div class="code-info">
@@ -65,7 +71,7 @@ impl DirectiveHandler for CodeBlockHandler {
         <pre><code class="language-{}">{}</code></pre>
     </div>
 </div>"#,
-            language, language.to_uppercase(), language, code
+            language, language.to_uppercase(), language, numbered_code
         ))
     }
 }

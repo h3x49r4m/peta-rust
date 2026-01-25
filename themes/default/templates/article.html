@@ -132,12 +132,16 @@
         font-weight: var(--font-weight-medium);
     }
     
-    .line-number {
-        display: none;
-    }
+    
     
     .ansi-reset {
         color: inherit;
+    }
+    
+    /* Ensure code blocks maintain consistent font size */
+    .article-content .code-block pre {
+        font-size: 0.9rem;
+        font-family: 'SF Mono', Monaco, 'Inconsolata', 'Roboto Mono', 'Source Code Pro', monospace;
     }
     
     @media (max-width: 768px) {
