@@ -3,9 +3,7 @@
 {% block title %}Projects - {{ site.title }}{% endblock %}
 
 {% block content %}
-<div class="content-div">
 {{ component(name="page_tags", title="Projects") | safe }}
 
 {{ component(name="grid_cards", title="Projects", items=projects, columns=3, empty_message="No projects found.") | safe }}
-</div>
 {% endblock %}

@@ -24,15 +24,14 @@
     
     <!-- Main Content -->
     <main class="main-content">
-        {% block content %}{% endblock content %}
+        <div class="content-div">
+            {% block content %}{% endblock content %}
+        </div>
     </main>
     
     <!-- Footer -->
     {% include "footer.html" %}
     
-    <!-- Component Scripts -->
-    <script src="/js/components/snippet_card_modal.js"></script>
-        
     <!-- External JavaScript -->
     <script src="/js/main.js"></script>
 

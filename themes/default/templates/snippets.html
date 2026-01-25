@@ -3,11 +3,9 @@
 {% block title %}Snippets - {{ site.title }}{% endblock %}
 
 {% block content %}
-<div class="content-div">
 {{ component(name="page_tags", title="Snippets") | safe }}
 
 {{ component(name="grid_cards", title="Snippets", items=snippets, columns=3, empty_message="No snippets found.") | safe }}
-</div>
 
 <!-- Snippet Modal Component -->
 {{ component(name="snippet_card_modal") | safe }}
