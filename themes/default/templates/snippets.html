@@ -29,6 +29,58 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
+        // Check for modal parameter in URL (for direct snippet URL access)
+        const urlParams = new URLSearchParams(window.location.search);
+        const modalUrl = urlParams.get('modal');
+        
+        if (modalUrl && window.openSnippetModal) {
+            // Parse the modal URL to extract snippet info
+            const snippetPath = new URL(modalUrl, window.location.origin).pathname;
+            openSnippetFromUrl(snippetPath);
+        }
+        
+        // Function to open snippet from URL
+        async function openSnippetFromUrl(snippetUrl) {
+            // Create an iframe to load the snippet content
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = snippetUrl + '?modal=true';
+            
+            // Listen for messages from the iframe
+            const messageHandler = function(event) {
+                if (event.data && event.data.type === 'snippetModalReady') {
+                    // Remove event listener and iframe
+                    window.removeEventListener('message', messageHandler);
+                    document.body.removeChild(iframe);
+                    
+                    // Update URL to reflect the snippet
+                    history.pushState({modal: true}, '', snippetUrl);
+                    
+                    // Open modal with the received data
+                    window.openSnippetModal({
+                        title: event.data.title || 'Untitled Snippet',
+                        language: event.data.language || '',
+                        content: event.data.content || '',
+                        date: event.data.date || '',
+                        tags: event.data.tags || [],
+                        hasMathFormulas: event.data.content && (
+                            event.data.content.includes('data-latex') || 
+                            event.data.content.includes('class="math"') ||
+                            event.data.content.includes('\\(') || 
+                            event.data.content.includes('\\[') ||
+                            event.data.content.includes('$$') ||
+                            event.data.content.includes('\\begin{') ||
+                            event.data.content.includes('\\\\(') ||
+                            event.data.content.includes('\\\\[')
+                        )
+                    });
+                }
+            };
+            
+            window.addEventListener('message', messageHandler);
+            document.body.appendChild(iframe);
+        }
+        
         // Add click handlers to grid cards
         const gridCards = document.querySelectorAll('.grid-card');
         
@@ -37,84 +89,68 @@ document.addEventListener('DOMContentLoaded', function() {
             card.style.cursor = 'pointer';
             
             // Create a function to handle modal opening
-            const openModalForCard = async function() {
-                // Extract snippet data from the card
+            const openModalForCard = function() {
+                // Extract basic data from the card for immediate feedback
                 const titleElement = card.querySelector('.card-title a, .card-title');
                 const title = titleElement?.textContent?.trim() || 'Untitled Snippet';
                 const language = card.querySelector('.card-language')?.textContent || '';
-                const content = card.querySelector('.card-excerpt')?.textContent || '';
                 const date = card.querySelector('.meta-date')?.textContent || '';
                 const tags = Array.from(card.querySelectorAll('.card-tag')).map(tag => tag.textContent);
                 
-                // Get the full content for the modal
+                // Get the content URL for the snippet
                 const contentUrl = card.querySelector('.card-title a')?.getAttribute('href');
-                let fullContent = content;
-                let extractedLanguage = language;
-                
-                // Fetch the snippet.html page content
-                if (contentUrl && contentUrl !== '#') {
-                    try {
-                        const response = await fetch(contentUrl);
-                        if (response.ok) {
-                            const html = await response.text();
-                            
-                            // Extract the content from snippet.html
-                            const parser = new DOMParser();
-                            const doc = parser.parseFromString(html, 'text/html');
-                            const snippetContent = doc.querySelector('.snippet-content');
-                            
-                            if (snippetContent) {
-                                fullContent = snippetContent.innerHTML;
-                                
-                                // Extract language from code blocks if not already found
-                                if (!extractedLanguage) {
-                                    const codeBlock = snippetContent.querySelector('.code-block-component');
-                                    if (codeBlock) {
-                                        const langSpan = codeBlock.querySelector('.code-language');
-                                        if (langSpan) {
-                                            extractedLanguage = langSpan.textContent.trim();
-                                        } else {
-                                            const langAttr = codeBlock.getAttribute('data-language');
-                                            if (langAttr) {
-                                                extractedLanguage = langAttr;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } catch (err) {
-                        console.error('Failed to fetch snippet.html:', err);
-                    }
-                }
-                
-                // Clean up content - remove h1 title and empty paragraphs
-                fullContent = fullContent.replace(/<h1>.*?<\/h1>/, '').trim();
-                fullContent = fullContent.replace(/^<p>\s*<\/p>/, '').trim();
                 
                 // Always open modal for any card with a title
-                if (title && title.trim() !== '') {
+                if (title && title.trim() !== '' && contentUrl && contentUrl !== '#') {
                     if (window.openSnippetModal) {
-                        // Update URL to reflect the snippet
-                        if (contentUrl && contentUrl !== '#') {
-                            history.pushState({modal: true}, '', contentUrl);
-                        }
-                        
+                        // Show loading state in modal
                         window.openSnippetModal({
                             title: title,
-                            language: extractedLanguage,
-                            content: fullContent,
+                            language: language,
+                            content: '<p>Loading content...</p>',
                             date: date,
                             tags: tags,
-                            hasMathFormulas: fullContent.includes('data-latex') || 
-                                            fullContent.includes('class="math"') ||
-                                            fullContent.includes('\\(') || 
-                                            fullContent.includes('\\[') ||
-                                            fullContent.includes('$$') ||
-                                            fullContent.includes('\\begin{') ||
-                                            fullContent.includes('\\\\(') ||
-                                            fullContent.includes('\\\\[')
+                            hasMathFormulas: false
                         });
+                        
+                        // Load full content using iframe approach
+                        const iframe = document.createElement('iframe');
+                        iframe.style.display = 'none';
+                        iframe.src = contentUrl + '?modal=true';
+                        
+                        // Listen for messages from the iframe
+                        const messageHandler = function(event) {
+                            if (event.data && event.data.type === 'snippetModalReady') {
+                                // Remove event listener and iframe
+                                window.removeEventListener('message', messageHandler);
+                                document.body.removeChild(iframe);
+                                
+                                // Update URL to reflect the snippet
+                                history.pushState({modal: true}, '', contentUrl);
+                                
+                                // Update modal with the received data
+                                window.openSnippetModal({
+                                    title: event.data.title || title,
+                                    language: event.data.language || language,
+                                    content: event.data.content || '<p>Content not available</p>',
+                                    date: event.data.date || date,
+                                    tags: event.data.tags || tags,
+                                    hasMathFormulas: event.data.content && (
+                                        event.data.content.includes('data-latex') || 
+                                        event.data.content.includes('class="math"') ||
+                                        event.data.content.includes('\\(') || 
+                                        event.data.content.includes('\\[') ||
+                                        event.data.content.includes('$$') ||
+                                        event.data.content.includes('\\begin{') ||
+                                        event.data.content.includes('\\\\(') ||
+                                        event.data.content.includes('\\\\[')
+                                    )
+                                });
+                            }
+                        };
+                        
+                        window.addEventListener('message', messageHandler);
+                        document.body.appendChild(iframe);
                     } else {
                         console.error('openSnippetModal function not available');
                     }

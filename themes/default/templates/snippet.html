@@ -2,31 +2,306 @@
 
 {% block title %}{{ page.title }} - {{ site.title }}{% endblock %}
 
+{% block extra_styles %}
+<style>
+    .snippet-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: var(--spacing-8);
+    }
+    
+    .snippet-header {
+        text-align: center;
+        margin-bottom: var(--spacing-12);
+        padding-bottom: var(--spacing-8);
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .snippet-title {
+        font-size: var(--font-size-4xl);
+        font-weight: var(--font-weight-bold);
+        color: var(--text-color);
+        margin-bottom: var(--spacing-6);
+        line-height: 1.2;
+    }
+    
+    .snippet-meta {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: var(--spacing-6);
+        color: var(--text-secondary);
+        font-size: var(--font-size-base);
+        margin-bottom: var(--spacing-4);
+        flex-wrap: wrap;
+    }
+    
+    .snippet-language {
+        background: var(--color-primary-100, #dbeafe);
+        color: var(--color-primary-700, #1d4ed8);
+        padding: var(--spacing-2, 0.5rem) var(--spacing-4, 1rem);
+        border-radius: var(--radius-full, 9999px);
+        font-weight: var(--font-weight-semibold, 600);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-size: var(--font-size-sm, 0.875rem);
+    }
+    
+    .snippet-date {
+        color: var(--text-secondary, #64748b);
+    }
+    
+    .snippet-tags {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: var(--spacing-2);
+        margin-top: var(--spacing-4);
+    }
+    
+    .snippet-tag {
+        background: var(--background-secondary, #f8fafc);
+        color: var(--text-secondary, #64748b);
+        padding: var(--spacing-1, 0.25rem) var(--spacing-3, 0.75rem);
+        border-radius: var(--radius-md, 0.375rem);
+        font-size: var(--font-size-sm, 0.875rem);
+        font-weight: var(--font-weight-medium, 500);
+        border: 1px solid var(--border-color, #e2e8f0);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    .snippet-tag:hover {
+        background: var(--color-primary-50, #eff6ff);
+        color: var(--color-primary-600, #2563eb);
+        border-color: var(--color-primary-200, #bfdbfe);
+    }
+    
+    .snippet-content {
+        font-size: var(--font-size-lg);
+        line-height: 1.8;
+        color: var(--text-color);
+    }
+    
+    .snippet-content h1,
+    .snippet-content h2,
+    .snippet-content h3,
+    .snippet-content h4,
+    .snippet-content h5,
+    .snippet-content h6 {
+        margin: var(--spacing-8) 0 var(--spacing-4);
+        font-weight: var(--font-weight-bold);
+        color: var(--text-color);
+    }
+    
+    .snippet-content h2 {
+        font-size: var(--font-size-2xl);
+        border-bottom: 2px solid var(--color-primary-500);
+        padding-bottom: var(--spacing-2);
+    }
+    
+    .snippet-content h3 {
+        font-size: var(--font-size-xl);
+    }
+    
+    .snippet-content p {
+        margin-bottom: var(--spacing-6);
+    }
+    
+    .snippet-content ul,
+    .snippet-content ol {
+        margin: var(--spacing-4) 0;
+        padding-left: var(--spacing-8);
+    }
+    
+    .snippet-content li {
+        margin-bottom: var(--spacing-2);
+    }
+    
+    .snippet-navigation {
+        display: flex;
+        justify-content: space-between;
+        margin-top: var(--spacing-12);
+        padding-top: var(--spacing-8);
+        border-top: 1px solid var(--border-color);
+    }
+    
+    .snippet-navigation a {
+        color: var(--color-primary-500);
+        text-decoration: none;
+        font-weight: var(--font-weight-medium);
+        padding: var(--spacing-3) var(--spacing-4);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-2);
+    }
+    
+    .snippet-navigation a:hover {
+        background: var(--color-primary-500);
+        color: white;
+        border-color: var(--color-primary-500);
+    }
+    
+    .back-to-snippets {
+        text-align: center;
+        margin-top: var(--spacing-8);
+    }
+    
+    .back-to-snippets a {
+        color: var(--color-primary-500);
+        text-decoration: none;
+        font-weight: var(--font-weight-medium);
+        padding: var(--spacing-3) var(--spacing-6);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-2);
+    }
+    
+    .back-to-snippets a:hover {
+        background: var(--color-primary-50);
+        border-color: var(--color-primary-200);
+    }
+    
+    .math-display {
+        background: var(--background-secondary);
+        padding: var(--spacing-6);
+        border-radius: var(--radius-lg);
+        margin: var(--spacing-6) 0;
+        text-align: center;
+        border-left: 4px solid var(--color-primary-500);
+    }
+    
+    .math-inline {
+        color: var(--color-primary-500);
+        font-weight: var(--font-weight-medium);
+    }
+    
+    .line-number {
+        display: none;
+    }
+    
+    .ansi-reset {
+        color: inherit;
+    }
+    
+    /* Modal-specific styles (hidden by default) */
+    .snippet-modal-content-wrapper {
+        display: none;
+    }
+    
+    @media (max-width: 768px) {
+        .snippet-title {
+            font-size: var(--font-size-3xl);
+        }
+        
+        .snippet-navigation {
+            flex-direction: column;
+            gap: var(--spacing-4);
+        }
+        
+        .snippet-navigation a {
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-{{ component(name="page_tags", title="Snippets") | safe }}
-
-{% if snippets %}
-<div class="listing-grid">
-  {% for snippet in snippets %}
-  {{ component(name="grid_card", page=snippet) | safe }}
-  {% endfor %}
+<!-- Full page content -->
+<div class="snippet-container">
+    <header class="snippet-header">
+        <h1 class="snippet-title">{{ page.title }}</h1>
+        <div class="snippet-meta">
+            {% if page.language %}
+            <span class="snippet-language">{{ page.language }}</span>
+            {% endif %}
+            {% if page.date %}
+            <span class="snippet-date">{{ page.date }}</span>
+            {% endif %}
+        </div>
+        {% if page.tags %}
+        <div class="snippet-tags">
+            {% for tag in page.tags %}
+            <a href="/snippets.html#tag-{{ tag }}" class="snippet-tag">{{ tag }}</a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </header>
+    
+    <main>
+        <article class="snippet-content">
+            {{ content | safe }}
+        </article>
+        
+        {% if page.previous_snippet or page.next_snippet %}
+        <nav class="snippet-navigation">
+            {% if page.previous_snippet %}
+            <a href="{{ page.previous_snippet.url }}">← {{ page.previous_snippet.title }}</a>
+            {% endif %}
+            {% if page.next_snippet %}
+            <a href="{{ page.next_snippet.url }}">{{ page.next_snippet.title }} →</a>
+            {% endif %}
+        </nav>
+        {% endif %}
+    </main>
+    
+    <div class="back-to-snippets">
+        <a href="/snippets.html">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m12 19-7-7 7-7"/>
+                <path d="M19 12H5"/>
+            </svg>
+            Back to Snippets
+        </a>
+    </div>
 </div>
-{% else %}
-<div class="text-center" style="padding: var(--spacing-16) 0;">
-  <p style="color: var(--text-secondary); font-size: var(--font-size-lg);">No snippets found.</p>
-</div>
-{% endif %}
 
-<!-- Snippet Modal Component -->
-{{ component(name="snippet_card_modal") | safe }}
-
-<!-- Snippet Content Container (for modal) -->
-<div id="snippet-content-{{ page.extra.slug }}" class="snippet-content" style="display: none;">
-    <h1>{{ page.title }}</h1>
-    {% if page.language %}
-    <p><strong>Language:</strong> {{ page.language }}</p>
-    {% endif %}
-    {{ content | safe }}
+<!-- Modal content (hidden by default, used for modal requests) -->
+<div class="snippet-modal-content-wrapper">
+    <header class="snippet-modal-header">
+        <div class="snippet-modal-title-wrapper">
+            <h2 class="snippet-modal-title">{{ page.title }}</h2>
+            {% if page.language %}
+            <span class="snippet-modal-language">{{ page.language }}</span>
+            {% endif %}
+        </div>
+    </header>
+    
+    <main class="snippet-modal-content">
+        <div class="snippet-modal-body">
+            {{ content | safe }}
+        </div>
+    </main>
+    
+    <footer class="snippet-modal-footer">
+        <div class="snippet-modal-meta">
+            {% if page.date %}
+            <span class="snippet-modal-date">{{ page.date }}</span>
+            {% endif %}
+            {% if page.tags %}
+            <div class="snippet-modal-tags">
+                {% for tag in page.tags %}
+                <span class="snippet-modal-tag">{{ tag }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        <div class="snippet-modal-actions">
+            <button class="snippet-modal-copy-btn" data-copy-content="{{ content | striptags }}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                Copy
+            </button>
+        </div>
+    </footer>
 </div>
 {% endblock %}
 
@@ -40,47 +315,48 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
 
-
-
 <script>
+// Always redirect to snippets page with modal for consistent UX
 document.addEventListener('DOMContentLoaded', function() {
-    // Auto-open modal with current snippet content
-    const snippetContent = document.querySelector('.snippet-content');
-    if (snippetContent && window.openSnippetModal) {
-        // Extract language from code blocks if available
-        const codeBlock = snippetContent.querySelector('.code-block-component');
-        let language = '';
-        if (codeBlock) {
-            const langSpan = codeBlock.querySelector('.code-language');
-            if (langSpan) {
-                language = langSpan.textContent.trim();
-            } else {
-                const langAttr = codeBlock.getAttribute('data-language');
-                if (langAttr) {
-                    language = langAttr;
-                }
-            }
+    const urlParams = new URLSearchParams(window.location.search);
+    const isModalRequest = urlParams.get('modal') === 'true';
+    
+    if (isModalRequest) {
+        // This is a modal request from the snippets page
+        // Hide full page content and show modal content
+        const fullPageContent = document.querySelector('.snippet-container');
+        const modalContent = document.querySelector('.snippet-modal-content-wrapper');
+        
+        if (fullPageContent) fullPageContent.style.display = 'none';
+        if (modalContent) modalContent.style.display = 'block';
+        
+        // Remove base layout elements for modal view
+        const baseElements = document.querySelectorAll('header, nav, footer');
+        baseElements.forEach(el => el.style.display = 'none');
+        
+        // Add modal-specific styles to body
+        document.body.style.margin = '0';
+        document.body.style.padding = '0';
+        document.body.style.background = 'transparent';
+        
+        // Signal to parent that modal content is ready
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({
+                type: 'snippetModalReady',
+                title: document.querySelector('.snippet-modal-title')?.textContent,
+                language: document.querySelector('.snippet-modal-language')?.textContent,
+                content: document.querySelector('.snippet-modal-body')?.innerHTML,
+                date: document.querySelector('.snippet-modal-date')?.textContent,
+                tags: Array.from(document.querySelectorAll('.snippet-modal-tag')).map(tag => tag.textContent)
+            }, '*');
         }
-        
-        // Extract content properly - remove only the h1 title
-        let content = snippetContent.innerHTML.replace(/<h1>.*?<\/h1>/, '').trim();
-        
-        // Clean up any empty paragraphs at the beginning
-        content = content.replace(/^<p>\s*<\/p>/, '').trim();
-        
-        // Extract tags and date from page metadata if available
-        const tags = [{% if page.tags %}{% for tag in page.tags %}'{{ tag }}'{% if not loop.last %},{% endif %}{% endfor %}{% else %}{% endif %}];
-        const date = '{{ page.date | default(value="") }}';
-        
-        // Open modal immediately
-        window.openSnippetModal({
-            title: snippetContent.querySelector('h1')?.textContent || 'Snippet',
-            language: language,
-            content: content,
-            tags: tags,
-            date: date,
-            hasMathFormulas: {% if has_math_formulas %}true{% else %}false{% endif %}
-        });
+    } else {
+        // Always redirect to snippets page with modal parameter for consistent UX
+        if (window.location.pathname.includes('/snippets/')) {
+            // Redirect to snippets page with modal parameter
+            const currentUrl = window.location.pathname + window.location.search;
+            window.location.href = '/snippets.html?modal=' + encodeURIComponent(currentUrl);
+        }
     }
 });
 </script>

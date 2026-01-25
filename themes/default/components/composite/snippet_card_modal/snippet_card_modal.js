@@ -222,6 +222,11 @@
             modalOverlay.style.display = 'none';
             // Restore body scroll
             document.body.style.overflow = '';
+            
+            // Update URL back to snippets page
+            if (window.location.pathname !== '/snippets.html') {
+                history.replaceState({}, '', '/snippets.html');
+            }
         }, 300);
     }
     

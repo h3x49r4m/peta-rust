@@ -49,8 +49,52 @@ impl Function for NowFunction {
     }
 }
 
+/// Component scripts function
+pub struct ComponentScriptsFunction;
+
+impl Function for ComponentScriptsFunction {
+    fn call(&self, args: &HashMap<String, Value>) -> TeraResult<Value> {
+        let component_names = args.get("component_names")
+            .and_then(|v| v.as_array())
+            .ok_or_else(|| tera::Error::msg("Missing 'component_names' argument"))?;
+        
+        let mut all_scripts = String::new();
+        
+        for component_name_value in component_names {
+            if let Some(component_name) = component_name_value.as_str() {
+                let category = match component_name {
+                    "code_block" => "atomic",
+                    "navbar" => "atomic",
+                    "contacts" => "atomic",
+                    "tag_cloud" => "atomic",
+                    "grid_card" => "atomic",
+                    "content_div" => "atomic",
+                    "header" => "composite",
+                    "footer" => "composite",
+                    "page_tags" => "composite",
+                    "snippet_card_modal" => "composite",
+                    "grid_cards" => "composite",
+                    _ => continue,
+                };
+                
+                let script_path = format!("themes/default/components/{}/{}/{}.js", category, component_name, component_name);
+                
+                if std::path::Path::new(&script_path).exists() {
+                    if let Ok(script_content) = std::fs::read_to_string(&script_path) {
+                        all_scripts.push_str(&script_content);
+                        all_scripts.push('\n');
+                    }
+                }
+            }
+        }
+        
+        Ok(Value::String(all_scripts))
+    }
+}
+
 /// Register all functions with Tera
 pub fn register(tera: &mut Tera) {
     tera.register_function("url", UrlFunction);
     tera.register_function("now", NowFunction);
+    tera.register_function("component_scripts", ComponentScriptsFunction);
 }

@@ -1012,21 +1012,30 @@ impl TemplateEngine {
                 for component in component_names {
                     if let Some(name) = component.as_str() {
                         // Load the actual JS file if it exists
-                        let js_path = format!("themes/default/components/{}/{}.js", 
+                        let js_path = format!("{}/themes/default/components/{}/{}/{}.js", 
+                            std::env::current_dir().unwrap().to_string_lossy(),
                             match name {
+                                "code_block" => "atomic",
+                                "navbar" => "atomic",
+                                "contacts" => "atomic",
+                                "tag_cloud" => "atomic",
+                                "grid_card" => "atomic",
+                                "content_div" => "atomic",
                                 "header" => "composite",
                                 "footer" => "composite",
                                 "page_tags" => "composite",
                                 "snippet_card_modal" => "composite",
+                                "grid_cards" => "composite",
                                 _ => "atomic",
-                            }, name);
+                            }, name, name);
                         
                         if let Ok(js_content) = std::fs::read_to_string(&js_path) {
+                            scripts.push_str(&format!("// Loaded from: {}\n", js_path));
                             scripts.push_str(&js_content);
                             scripts.push('\n');
                         } else {
                             // Fallback to placeholder script
-                            scripts.push_str(&format!("// Script for component: {}\n", name));
+                            scripts.push_str(&format!("// Script for component: {} (file not found: {})\n", name, js_path));
                             scripts.push_str(&format!("document.addEventListener('DOMContentLoaded', () => {{\n"));
                             scripts.push_str(&format!("  // Initialize {} component\n", name));
                             scripts.push_str(&format!("}});\n"));
