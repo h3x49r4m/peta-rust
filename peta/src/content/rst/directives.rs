@@ -43,9 +43,10 @@ impl DirectiveHandler for CodeBlockHandler {
         
         // We're now using Prism.js for syntax highlighting, no need for custom highlighting
         
-        // Generate component HTML with the raw code for Prism.js
+        // Generate proper component HTML that matches the code_block component
         Ok(format!(
-            r#"<div class="code-block-component" data-language="{}" data-line-numbers="true">
+            r#"<div class="code-block" data-language="{}">
+    <!-- Code Header -->
     <div class="code-header">
         <div class="code-info">
             <span class="code-language">{}</span>
@@ -58,8 +59,10 @@ impl DirectiveHandler for CodeBlockHandler {
             <span class="copy-text">Copy</span>
         </button>
     </div>
-    <div class="code-content">
-        <pre class="line-numbers"><code class="language-{}">{}</code></pre>
+    
+    <!-- Code Content -->
+    <div class="code-content with-line-numbers">
+        <pre><code class="language-{}">{}</code></pre>
     </div>
 </div>"#,
             language, language.to_uppercase(), language, code
