@@ -679,6 +679,44 @@ Ok(Self {
     
     /// Convert RST emphasis to HTML
     fn convert_emphasis(&self, content: &str) -> Result<String> {
+        let mut result = String::new();
+        let mut pos = 0;
+        
+        // Regex to match HTML tags
+        let html_tag_regex = Regex::new(r"<[^>]*>")
+            .map_err(|e| crate::core::Error::rst_parse(format!("Failed to compile HTML tag regex: {}", e)))?;
+        
+        // Find all HTML tags
+        let mut html_tags = Vec::new();
+        for mat in html_tag_regex.find_iter(content) {
+            html_tags.push((mat.start(), mat.end()));
+        }
+        
+        // Process content, skipping HTML tags
+        for &(start, end) in &html_tags {
+            // Process text content before this HTML tag
+            let before_tag = &content[pos..start];
+            let processed_before = self.process_emphasis_text(before_tag)?;
+            result.push_str(&processed_before);
+            
+            // Add the HTML tag as-is (without processing emphasis)
+            result.push_str(&content[start..end]);
+            
+            pos = end;
+        }
+        
+        // Process remaining content after the last HTML tag
+        if pos < content.len() {
+            let remaining = &content[pos..];
+            let processed_remaining = self.process_emphasis_text(remaining)?;
+            result.push_str(&processed_remaining);
+        }
+        
+        Ok(result)
+    }
+    
+    /// Process emphasis conversion for regular text (not inside HTML tags)
+    fn process_emphasis_text(&self, content: &str) -> Result<String> {
         let mut html = content.to_string();
         
         // Bold text
