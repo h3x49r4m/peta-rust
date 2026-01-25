@@ -1,0 +1,28 @@
+<div class="grid-cards-container" data-component="grid_cards" data-columns="{{ columns | default(value=3) }}">
+  {% if title %}
+  <div class="grid-cards-header">
+    <h2 class="grid-cards-title">{{ title }}</h2>
+  </div>
+  {% endif %}
+  
+  {% if items and items | length > 0 %}
+  <div class="grid-cards-grid">
+    {% for item in items %}
+    {{ component(name="grid_card", page=item) | safe }}
+    {% endfor %}
+  </div>
+  {% else %}
+  {% if show_empty | default(value=true) %}
+  <div class="grid-cards-empty">
+    {% if slot_empty_state %}
+    {{ slot_empty_state | safe }}
+    {% else %}
+    <div class="empty-state-content">
+      <div class="empty-icon">📚</div>
+      <p class="empty-message">{{ empty_message | default(value="No items found.") }}</p>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+  {% endif %}
+</div>

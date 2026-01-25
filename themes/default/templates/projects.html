@@ -2,34 +2,8 @@
 
 {% block title %}Projects - {{ site.title }}{% endblock %}
 
-{% block extra_styles %}
-<style>
-.listing-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: var(--spacing-6, 1.5rem);
-}
-
-@media (max-width: 768px) {
-  .listing-grid {
-    grid-template-columns: 1fr;
-  }
-}
-</style>
-{% endblock %}
-
 {% block content %}
 {{ component(name="page_tags", title="Projects") | safe }}
 
-{% if projects %}
-<div class="listing-grid">
-  {% for project in projects %}
-  {{ component(name="grid_card", page=project) | safe }}
-  {% endfor %}
-</div>
-{% else %}
-<div class="text-center" style="padding: var(--spacing-16) 0;">
-  <p style="color: var(--text-secondary); font-size: var(--font-size-lg);">No projects found.</p>
-</div>
-{% endif %}
+{{ component(name="grid_cards", title="Projects", items=projects, columns=3, empty_message="No projects found.") | safe }}
 {% endblock %}
