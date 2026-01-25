@@ -421,46 +421,139 @@ Ok(Self {
         Ok(html)
     }
     
-    /// Convert RST lists to HTML
+    /// Convert RST lists to HTML with proper nesting support
     fn convert_lists(&self, content: &str) -> Result<String> {
-        // This is a simplified implementation
-        // A full implementation would handle nested lists and different list types
         let lines: Vec<&str> = content.lines().collect();
         let mut result = Vec::new();
-        let mut in_list = false;
-        let mut list_type = "";
+        let mut list_stack = Vec::new(); // Stack to track nested lists
+        let mut last_indent = 0;
         
         for line in lines {
-            if line.starts_with("- ") || line.starts_with("* ") {
-                if !in_list {
-                    result.push("<ul>".to_string());
-                    in_list = true;
-                    list_type = "ul";
-                }
-                let item = line.trim_start_matches("- ").trim_start_matches("* ");
-                result.push(format!("<li>{}</li>", item));
-            } else if line.starts_with(|c: char| c.is_numeric()) && line.contains('.') {
-                if !in_list {
-                    result.push("<ol>".to_string());
-                    in_list = true;
-                    list_type = "ol";
-                }
-                let item = line.split('.').nth(1).unwrap_or("").trim();
-                result.push(format!("<li>{}</li>", item));
-            } else {
-                if in_list {
+            let trimmed = line.trim();
+            
+            // Skip empty lines and lines that don't look like list items
+            if trimmed.is_empty() || !self.is_list_item(line) {
+                // Close all open lists when we encounter a non-list line
+                while !list_stack.is_empty() {
+                    let (list_type, _) = list_stack.pop().unwrap();
                     result.push(format!("</{}>", list_type));
-                    in_list = false;
                 }
+                last_indent = 0;
                 result.push(line.to_string());
+                continue;
             }
+            
+            // Calculate current indentation (in spaces)
+            let current_indent = self.calculate_indent(line);
+            let (list_type, item_content) = self.parse_list_item(line)?;
+            
+            // If we're at a different indentation level, adjust the list stack
+            if current_indent > last_indent {
+                // We're going deeper - open a new list
+                result.push(format!("<{}>", list_type));
+                list_stack.push((list_type, current_indent));
+            } else if current_indent < last_indent {
+                // We're going up - close lists until we're at the right level
+                while let Some((stack_type, stack_indent)) = list_stack.last() {
+                    if *stack_indent > current_indent {
+                        result.push(format!("</{}>", stack_type));
+                        list_stack.pop();
+                    } else {
+                        break;
+                    }
+                }
+                
+                // If the top list type is different, close it and open the new one
+                if let Some((stack_type, _)) = list_stack.last() {
+                    if *stack_type != list_type {
+                        result.push(format!("</{}>", stack_type));
+                        list_stack.pop();
+                        result.push(format!("<{}>", list_type));
+                        list_stack.push((list_type, current_indent));
+                    }
+                }
+            } else {
+                // Same indentation level
+                if let Some((stack_type, _)) = list_stack.last() {
+                    if *stack_type != list_type {
+                        result.push(format!("</{}>", stack_type));
+                        list_stack.pop();
+                        result.push(format!("<{}>", list_type));
+                        list_stack.push((list_type, current_indent));
+                    }
+                } else {
+                    // No open list, start a new one
+                    result.push(format!("<{}>", list_type));
+                    list_stack.push((list_type, current_indent));
+                }
+            }
+            
+            result.push(format!("<li>{}</li>", item_content));
+            last_indent = current_indent;
         }
         
-        if in_list {
+        // Close any remaining open lists
+        while !list_stack.is_empty() {
+            let (list_type, _) = list_stack.pop().unwrap();
             result.push(format!("</{}>", list_type));
         }
         
         Ok(result.join("\n"))
+    }
+    
+    /// Check if a line is a list item
+    fn is_list_item(&self, line: &str) -> bool {
+        let trimmed = line.trim();
+        // Check for unordered list items
+        if trimmed.starts_with("- ") || trimmed.starts_with("* ") {
+            return true;
+        }
+        
+        // Check for ordered list items
+        if let Some(first_char) = trimmed.chars().next() {
+            if first_char.is_numeric() {
+                if let Some(dot_pos) = trimmed.find('.') {
+                    // Check if everything before the dot is numeric
+                    let before_dot = &trimmed[..dot_pos];
+                    if before_dot.chars().all(|c| c.is_numeric()) {
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        false
+    }
+    
+    /// Calculate the indentation level of a line
+    fn calculate_indent(&self, line: &str) -> usize {
+        line.len() - line.trim_start().len()
+    }
+    
+    /// Parse a list item and return (list_type, content)
+    fn parse_list_item(&self, line: &str) -> Result<(String, String)> {
+        let trimmed = line.trim();
+        
+        // Check for unordered list items
+        if trimmed.starts_with("- ") || trimmed.starts_with("* ") {
+            let content = trimmed.trim_start_matches("- ").trim_start_matches("* ");
+            return Ok(("ul".to_string(), content.to_string()));
+        }
+        
+        // Check for ordered list items
+        if let Some(first_char) = trimmed.chars().next() {
+            if first_char.is_numeric() {
+                if let Some(dot_pos) = trimmed.find('.') {
+                    let before_dot = &trimmed[..dot_pos];
+                    if before_dot.chars().all(|c| c.is_numeric()) {
+                        let content = trimmed[dot_pos + 1..].trim();
+                        return Ok(("ol".to_string(), content.to_string()));
+                    }
+                }
+            }
+        }
+        
+        Err(crate::core::Error::rst_parse("Invalid list item format".to_string()))
     }
     
     /// Convert RST paragraphs to HTML
