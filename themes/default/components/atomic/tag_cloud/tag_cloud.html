@@ -1,88 +1,17 @@
 <div class="tag-cloud" data-component="tag_cloud">
     <h3 class="tag-cloud-title">Tags</h3>
     <div class="tag-cloud-container">
-        {% if site.page_type == "books" %}
-        <a href="#" class="tag-cloud-tag" style="font-size: 1.4rem;">
-            deep-learning
-            <span class="tag-count">(3)</span>
-        </a>
-        <a href="#" class="tag-cloud-tag" style="font-size: 1.3rem;">
-            python
-            <span class="tag-count">(3)</span>
-        </a>
-        <a href="#" class="tag-cloud-tag" style="font-size: 1.3rem;">
-            machine-learning
-            <span class="tag-count">(3)</span>
-        </a>
-        <a href="#" class="tag-cloud-tag" style="font-size: 1.2rem;">
-            quantum-computing
-            <span class="tag-count">(3)</span>
-        </a>
-        <a href="#" class="tag-cloud-tag" style="font-size: 1.1rem;">
-            algorithms
-            <span class="tag-count">(2)</span>
-        </a>
-        {% elif site.page_type == "articles" %}
-        <a href="#" class="tag-cloud-tag" style="font-size: 1.3rem;">
-            calculus
-            <span class="tag-count">(2)</span>
-        </a>
-        <a href="#" class="tag-cloud-tag" style="font-size: 1.3rem;">
-            mathematics
-            <span class="tag-count">(2)</span>
-        </a>
-        <a href="#" class="tag-cloud-tag" style="font-size: 1.1rem;">
-            physics
-            <span class="tag-count">(1)</span>
-        </a>
-        <a href="#" class="tag-cloud-tag" style="font-size: 1.1rem;">
-            quantum-mechanics
-            <span class="tag-count">(1)</span>
-        </a>
-        <a href="#" class="tag-cloud-tag" style="font-size: 1.0rem;">
-            tutorials
-            <span class="tag-count">(1)</span>
-        </a>
-        {% elif site.page_type == "snippets" %}
-        <a href="#" class="tag-cloud-tag" style="font-size: 1.1rem;">
-            cpp
-            <span class="tag-count">(1)</span>
-        </a>
-        <a href="#" class="tag-cloud-tag" style="font-size: 1.2rem;">
-            algorithms
-            <span class="tag-count">(2)</span>
-        </a>
-        <a href="#" class="tag-cloud-tag" style="font-size: 1.1rem;">
-            go
-            <span class="tag-count">(1)</span>
-        </a>
-        <a href="#" class="tag-cloud-tag" style="font-size: 1.1rem;">
-            python
-            <span class="tag-count">(1)</span>
-        </a>
-        <a href="#" class="tag-cloud-tag" style="font-size: 1.1rem;">
-            sql
-            <span class="tag-count">(1)</span>
-        </a>
-        {% elif site.page_type == "projects" %}
-        <a href="#" class="tag-cloud-tag" style="font-size: 1.3rem;">
-            mathematics
-            <span class="tag-count">(2)</span>
-        </a>
-        <a href="#" class="tag-cloud-tag" style="font-size: 1.1rem;">
-            visualization
-            <span class="tag-count">(1)</span>
-        </a>
-        <a href="#" class="tag-cloud-tag" style="font-size: 1.1rem;">
-            quantum-simulator
-            <span class="tag-count">(1)</span>
-        </a>
-        <a href="#" class="tag-cloud-tag" style="font-size: 1.1rem;">
-            code-showcase
-            <span class="tag-count">(1)</span>
-        </a>
+        {% if site.all_tags %}
+            {% for tag in site.all_tags %}
+            <a href="#" class="tag-cloud-tag" style="font-size: {{ 1.0 + (tag.count * 0.1) }}rem;">
+                {{ tag.name }}
+                {% if tag.count %}
+                <span class="tag-count">({{ tag.count }})</span>
+                {% endif %}
+            </a>
+            {% endfor %}
         {% else %}
-        <!-- Default tags -->
+        <!-- Default tags when no tags provided -->
         <a href="#" class="tag-cloud-tag" style="font-size: 1.4rem;">
             Mathematics
             <span class="tag-count">(5)</span>

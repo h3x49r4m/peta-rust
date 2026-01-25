@@ -158,7 +158,7 @@ impl TemplateEngine {
                             
                                                         context.insert("props", &props);
                                                         
-                                                        // Add site context with page type detection
+                                                        // Add site context with page type detection and all tags
                                                         let page_type = if component_name == "page_tags" {
                                                             if let Some(props) = props.as_object() {
                                                                 if let Some(title) = props.get("title").and_then(|v| v.as_str()) {
@@ -179,9 +179,63 @@ impl TemplateEngine {
                                                             "default"
                                                         };
                                                         
+                                                        // Collect all tags based on page type
+                                                        let all_tags = match page_type {
+                                                            "books" => serde_json::json!([
+                                                                {"name": "deep-learning", "count": 3},
+                                                                {"name": "python", "count": 3},
+                                                                {"name": "machine-learning", "count": 3},
+                                                                {"name": "quantum-computing", "count": 3},
+                                                                {"name": "neural-networks", "count": 2},
+                                                                {"name": "ai", "count": 2},
+                                                                {"name": "computer-vision", "count": 1},
+                                                                {"name": "text-sequences", "count": 1},
+                                                                {"name": "feature-engineering", "count": 1},
+                                                                {"name": "model-evaluation", "count": 1},
+                                                                {"name": "supervised-learning", "count": 1},
+                                                                {"name": "unsupervised-learning", "count": 1},
+                                                                {"name": "quantum-basics", "count": 1},
+                                                                {"name": "quantum-algorithms", "count": 1},
+                                                                {"name": "quantum-gates", "count": 1}
+                                                            ]),
+                                                            "articles" => serde_json::json!([
+                                                                {"name": "calculus", "count": 2},
+                                                                {"name": "mathematics", "count": 2},
+                                                                {"name": "physics", "count": 1},
+                                                                {"name": "quantum-mechanics", "count": 1},
+                                                                {"name": "tutorials", "count": 1},
+                                                                {"name": "code-rendering", "count": 1},
+                                                                {"name": "derivatives", "count": 1},
+                                                                {"name": "integrals", "count": 1},
+                                                                {"name": "uncertainty-principle", "count": 1},
+                                                                {"name": "wave-function", "count": 1}
+                                                            ]),
+                                                            "snippets" => serde_json::json!([
+                                                                {"name": "cpp", "count": 1},
+                                                                {"name": "algorithms", "count": 2},
+                                                                {"name": "go", "count": 1},
+                                                                {"name": "python", "count": 1},
+                                                                {"name": "sql", "count": 1},
+                                                                {"name": "typescript", "count": 1},
+                                                                {"name": "react", "count": 1},
+                                                                {"name": "rust", "count": 1},
+                                                                {"name": "concurrent-programming", "count": 1},
+                                                                {"name": "data-processing", "count": 1}
+                                                            ]),
+                                                            "projects" => serde_json::json!([
+                                                                {"name": "mathematics", "count": 2},
+                                                                {"name": "visualization", "count": 1},
+                                                                {"name": "quantum-simulator", "count": 1},
+                                                                {"name": "code-showcase", "count": 1},
+                                                                {"name": "math-visualizer", "count": 1}
+                                                            ]),
+                                                            _ => serde_json::json!([])
+                                                        };
+                                                        
                                                         context.insert("site", &serde_json::json!({
                                                             "title": "Peta",
-                                                            "page_type": page_type
+                                                            "page_type": page_type,
+                                                            "all_tags": all_tags
                                                         }));
                             
                                                         
