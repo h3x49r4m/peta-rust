@@ -1,0 +1,28 @@
+name: content_div
+version: 1.0.0
+category: Atomic
+description: A wrapper component that provides consistent width constraints for page content
+enabled: true
+dependencies: []
+props:
+  class:
+    type: string
+    required: false
+    description: Additional CSS classes for the content div
+  max_width:
+    type: string
+    required: false
+    description: Maximum width for the content container
+    default: "1200px"
+slots: []
+templates:
+  - content_div.html
+styles:
+  - content_div.css
+scripts:
+  - content_div.js
+static_data: []
+config_schema: {}
+default_config: {}
+seo: null
+state: []

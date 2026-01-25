@@ -172,6 +172,7 @@ impl ComponentLoader {
             "contacts" => "atomic",
             "tag_cloud" => "atomic",
             "grid_card" => "atomic",
+            "content_div" => "atomic",
             "header" => "composite",
             "footer" => "composite",
             "page_tags" => "composite",
