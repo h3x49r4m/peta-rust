@@ -1,25 +1,58 @@
-<div class="grid-cards-container" data-component="grid_cards" data-columns="{{ columns | default(value=3) }}">
-  {% if title %}
+<div class="grid-cards-container" data-component="grid_cards" data-columns="{{ props.columns | default(value=3) }}">
+  {% if props.title %}
   <div class="grid-cards-header">
-    <h2 class="grid-cards-title">{{ title }}</h2>
+    <h2 class="grid-cards-title">{{ props.title }}</h2>
   </div>
   {% endif %}
   
-  {% if items and items | length > 0 %}
+  {% if props.items and props.items | length > 0 %}
   <div class="grid-cards-grid">
-    {% for item in items %}
-    {{ component(name="grid_card", page=item) | safe }}
+    {% for item in props.items %}
+    <div class="grid-card" data-content-type="{{ item.content_type | default(value="Content") | lower }}">
+      <div class="card-header">
+        <div class="content-type-badge">{{ item.content_type | default(value="Content") }}</div>
+      </div>
+      
+      <div class="card-content">
+        <h3 class="card-title">
+          <a href="{{ item.url | default(value="#") }}">{{ item.title | default(value="Untitled") }}</a>
+        </h3>
+        
+        <div class="card-meta">
+          {% if item.author %}
+          <span class="meta-author">by {{ item.author }}</span>
+          {% endif %}
+          {% if item.date %}
+          <span class="meta-date">{{ item.date }}</span>
+          {% endif %}
+        </div>
+        
+        <p class="card-excerpt">{{ item.excerpt | default(value="No excerpt available") }}</p>
+        
+        {% if item.tags %}
+        <div class="card-tags">
+          {% for tag in item.tags %}
+          <span class="card-tag">{{ tag }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      
+      <div class="card-footer">
+        <a href="{{ item.url | default(value="#") }}" class="card-link">Read More →</a>
+      </div>
+    </div>
     {% endfor %}
   </div>
   {% else %}
-  {% if show_empty | default(value=true) %}
+  {% if props.show_empty | default(value=true) %}
   <div class="grid-cards-empty">
     {% if slot_empty_state %}
     {{ slot_empty_state | safe }}
     {% else %}
     <div class="empty-state-content">
       <div class="empty-icon">📚</div>
-      <p class="empty-message">{{ empty_message | default(value="No items found.") }}</p>
+      <p class="empty-message">{{ props.empty_message | default(value="No items found.") }}</p>
     </div>
     {% endif %}
   </div>

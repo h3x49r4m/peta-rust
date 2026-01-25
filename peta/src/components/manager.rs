@@ -220,6 +220,7 @@ Ok(Component {
         match name {
             "code_block" => "atomic",
             "footer" => "composite",
+            "grid_cards" => "composite",
             _ => "content",
         }
     }

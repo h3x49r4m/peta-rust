@@ -32,6 +32,7 @@ props:
 slots:
   - name: empty_state
     description: Custom empty state content
+    required: false
 templates:
   - grid_cards.html
 styles:
