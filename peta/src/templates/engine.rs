@@ -21,6 +21,146 @@ pub struct TemplateEngine {
     current_theme: Option<String>,
 }
 
+/// Collect all tags from content files
+fn collect_all_tags() -> serde_json::Value {
+    use std::collections::HashMap;
+    use std::fs;
+    
+    let mut tag_counts: HashMap<String, usize> = HashMap::new();
+    
+    // Define content directories to scan
+    let content_dirs = [
+        "_content/articles",
+        "_content/books",
+        "_content/snippets",
+        "_content/projects"
+    ];
+    
+    for dir in &content_dirs {
+        if let Ok(entries) = fs::read_dir(dir) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.is_dir() {
+                    // First check for index.rst in the directory
+                    let index_path = path.join("index.rst");
+                    if index_path.exists() {
+                        // Read index.rst and extract tags
+                        if let Ok(content) = fs::read_to_string(&index_path) {
+                            extract_tags_from_content(&content, &mut tag_counts);
+                        }
+                    }
+                    
+                    // Then scan all .rst files in the directory
+                    if let Ok(file_entries) = fs::read_dir(&path) {
+                        for file_entry in file_entries.flatten() {
+                            let file_path = file_entry.path();
+                            if file_path.is_file() && 
+                               file_path.extension().unwrap_or_default() == "rst" &&
+                               file_path.file_name().unwrap() != "index.rst" {
+                                // Read the file and extract tags
+                                if let Ok(content) = fs::read_to_string(&file_path) {
+                                    extract_tags_from_content(&content, &mut tag_counts);
+                                }
+                            }
+                        }
+                    }
+                } else if path.is_file() && path.extension().unwrap_or_default() == "rst" {
+                    // Direct .rst file in the content directory
+                    if let Ok(content) = fs::read_to_string(&path) {
+                        extract_tags_from_content(&content, &mut tag_counts);
+                    }
+                }
+            }
+        }
+    }
+    
+    // Convert to JSON array sorted by count
+    let mut tags: Vec<_> = tag_counts.into_iter().collect();
+    tags.sort_by(|a, b| b.1.cmp(&a.1));
+    
+    serde_json::Value::Array(
+        tags.into_iter()
+            .map(|(name, count)| serde_json::json!({
+                "name": name,
+                "count": count
+            }))
+            .collect()
+    )
+}
+
+// Helper function to collect tags from a specific directory
+fn collect_tags_from_directory(dir_path: &str) -> serde_json::Value {
+    use std::collections::HashMap;
+    use std::fs;
+    
+    let mut tag_counts: HashMap<String, usize> = HashMap::new();
+    
+    // Recursively scan the specified directory
+    if let Ok(entries) = fs::read_dir(dir_path) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_dir() {
+                // Recursively scan subdirectories
+                if let Ok(sub_entries) = fs::read_dir(&path) {
+                    for sub_entry in sub_entries.flatten() {
+                        let sub_path = sub_entry.path();
+                        if sub_path.is_file() && 
+                           sub_path.extension().unwrap_or_default() == "rst" {
+                            // Read the file and extract tags
+                            if let Ok(content) = fs::read_to_string(&sub_path) {
+                                extract_tags_from_content(&content, &mut tag_counts);
+                            }
+                        }
+                    }
+                }
+            } else if path.is_file() && 
+                      path.extension().unwrap_or_default() == "rst" {
+                // Read the file and extract tags
+                if let Ok(content) = fs::read_to_string(&path) {
+                    extract_tags_from_content(&content, &mut tag_counts);
+                }
+            }
+        }
+    }
+    
+    // Convert to JSON array sorted by count
+    let mut tags: Vec<_> = tag_counts.into_iter().collect();
+    tags.sort_by(|a, b| b.1.cmp(&a.1));
+    
+    serde_json::Value::Array(
+        tags.into_iter()
+            .map(|(name, count)| serde_json::json!({
+                "name": name,
+                "count": count
+            }))
+            .collect()
+    )
+}
+
+// Helper function to extract tags from content
+fn extract_tags_from_content(content: &str, tag_counts: &mut HashMap<String, usize>) {
+    // Look for tags in the frontmatter
+    if let Some(start) = content.find("---") {
+        if let Some(end) = content[start + 3..].find("---") {
+            let frontmatter = &content[start + 3..start + 3 + end];
+            // Extract tags from frontmatter
+            for line in frontmatter.lines() {
+                if line.trim().starts_with("tags:") {
+                    let tags_line = line.trim()[6..].trim();
+                    // Parse tags array
+                    let tags_str = tags_line.trim_start_matches('[').trim_end_matches(']');
+                    for tag in tags_str.split(',') {
+                        let tag = tag.trim().trim_matches('"').trim();
+                        if !tag.is_empty() {
+                            *tag_counts.entry(tag.to_string()).or_insert(0) += 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 impl TemplateEngine {
     /// Create a new template engine
     pub fn new(theme: &Theme) -> Result<Self> {
@@ -158,7 +298,7 @@ impl TemplateEngine {
                             
                                                         context.insert("props", &props);
                                                         
-                                                        // Add site context with page type detection and all tags
+                                                        // Add site context with page type detection
                                                         let page_type = if component_name == "page_tags" {
                                                             if let Some(props) = props.as_object() {
                                                                 if let Some(title) = props.get("title").and_then(|v| v.as_str()) {
@@ -179,57 +319,13 @@ impl TemplateEngine {
                                                             "default"
                                                         };
                                                         
-                                                        // Collect all tags based on page type
+                                                        // Collect tags based on page type
                                                         let all_tags = match page_type {
-                                                            "books" => serde_json::json!([
-                                                                {"name": "deep-learning", "count": 3},
-                                                                {"name": "python", "count": 3},
-                                                                {"name": "machine-learning", "count": 3},
-                                                                {"name": "quantum-computing", "count": 3},
-                                                                {"name": "neural-networks", "count": 2},
-                                                                {"name": "ai", "count": 2},
-                                                                {"name": "computer-vision", "count": 1},
-                                                                {"name": "text-sequences", "count": 1},
-                                                                {"name": "feature-engineering", "count": 1},
-                                                                {"name": "model-evaluation", "count": 1},
-                                                                {"name": "supervised-learning", "count": 1},
-                                                                {"name": "unsupervised-learning", "count": 1},
-                                                                {"name": "quantum-basics", "count": 1},
-                                                                {"name": "quantum-algorithms", "count": 1},
-                                                                {"name": "quantum-gates", "count": 1}
-                                                            ]),
-                                                            "articles" => serde_json::json!([
-                                                                {"name": "calculus", "count": 2},
-                                                                {"name": "mathematics", "count": 2},
-                                                                {"name": "physics", "count": 1},
-                                                                {"name": "quantum-mechanics", "count": 1},
-                                                                {"name": "tutorials", "count": 1},
-                                                                {"name": "code-rendering", "count": 1},
-                                                                {"name": "derivatives", "count": 1},
-                                                                {"name": "integrals", "count": 1},
-                                                                {"name": "uncertainty-principle", "count": 1},
-                                                                {"name": "wave-function", "count": 1}
-                                                            ]),
-                                                            "snippets" => serde_json::json!([
-                                                                {"name": "cpp", "count": 1},
-                                                                {"name": "algorithms", "count": 2},
-                                                                {"name": "go", "count": 1},
-                                                                {"name": "python", "count": 1},
-                                                                {"name": "sql", "count": 1},
-                                                                {"name": "typescript", "count": 1},
-                                                                {"name": "react", "count": 1},
-                                                                {"name": "rust", "count": 1},
-                                                                {"name": "concurrent-programming", "count": 1},
-                                                                {"name": "data-processing", "count": 1}
-                                                            ]),
-                                                            "projects" => serde_json::json!([
-                                                                {"name": "mathematics", "count": 2},
-                                                                {"name": "visualization", "count": 1},
-                                                                {"name": "quantum-simulator", "count": 1},
-                                                                {"name": "code-showcase", "count": 1},
-                                                                {"name": "math-visualizer", "count": 1}
-                                                            ]),
-                                                            _ => serde_json::json!([])
+                                                            "books" => collect_tags_from_directory("_content/books"),
+                                                            "articles" => collect_tags_from_directory("_content/articles"),
+                                                            "snippets" => collect_tags_from_directory("_content/snippets"),
+                                                            "projects" => collect_tags_from_directory("_content/projects"),
+                                                            _ => collect_all_tags() // For index page and default, show all tags
                                                         };
                                                         
                                                         context.insert("site", &serde_json::json!({
@@ -316,7 +412,7 @@ impl TemplateEngine {
                             
                                                         
                             
-                                                                                                                                                        
+                                                                                                                                                // Render tag_cloud component with tags from page_tags props
                             
                                                         
                             
@@ -324,15 +420,7 @@ impl TemplateEngine {
                             
                                                         
                             
-                                                                                                                                                        // Render tag_cloud component with tags from page_tags props
-                            
-                                                        
-                            
-                                                                                                                            
-                            
-                                                        
-                            
-                                                                                                                                                        if let Ok(tag_cloud_template) = std::fs::read_to_string("themes/default/components/atomic/tag_cloud/tag_cloud.html") {
+                                                                                                                                                if let Ok(tag_cloud_template) = std::fs::read_to_string("themes/default/components/atomic/tag_cloud/tag_cloud.html") {
                             
                                                         
                             
@@ -404,7 +492,7 @@ impl TemplateEngine {
                             
                                                         
                             
-                                                                                                                                                            if let Some(props) = props.as_object() {
+                                                                                                                                                            
                             
                                                         
                             
@@ -412,7 +500,7 @@ impl TemplateEngine {
                             
                                                         
                             
-                                                                                                                                                                if let Some(tags) = props.get("tags") {
+                                                                                                                                                                                        if let Some(props) = props.as_object() {
                             
                                                         
                             
@@ -420,7 +508,7 @@ impl TemplateEngine {
                             
                                                         
                             
-                                                                                                                                                                    tag_cloud_props.insert("tags".to_string(), tags.clone());
+                                                                                                                                                            
                             
                                                         
                             
@@ -428,7 +516,231 @@ impl TemplateEngine {
                             
                                                         
                             
-                                                                                                                                                                }
+                                                                                                                                                                                            if let Some(title) = props.get("title").and_then(|v| v.as_str()) {
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                                                                                                // Collect tags based on page type
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                                                                                                let tags = match title.to_lowercase().as_str() {
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                                                                                                    "books" => collect_tags_from_directory("_content/books"),
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                                                                                                    "articles" => collect_tags_from_directory("_content/articles"),
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                                                                                                    "snippets" => collect_tags_from_directory("_content/snippets"),
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                                                                                                    "projects" => collect_tags_from_directory("_content/projects"),
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                                                                                                    _ => collect_all_tags()
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                                                                                                };
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                                                                                                
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                                                                                                tag_cloud_props.insert("tags".to_string(), tags);
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                                                            }
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                                                            if let Some(tags) = props.get("tags") {
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                                                                tag_cloud_props.insert("tags".to_string(), tags.clone());
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                                                            }
                             
                                                         
                             
@@ -619,6 +931,7 @@ impl TemplateEngine {
                     "navbar" => "atomic",
                     "contacts" => "atomic",
                     "tag_cloud" => "atomic",
+                    "tag_cloud_all" => "atomic",
                     "grid_card" => "atomic",
                     "header" => "composite",
                     "footer" => "composite",
