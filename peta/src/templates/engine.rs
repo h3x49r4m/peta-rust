@@ -76,18 +76,34 @@ impl TemplateEngine {
                     .and_then(|v| v.as_str())
                     .ok_or_else(|| tera::Error::msg("Component name is required"))?;
                 
-                let props = args.get("1")
-                    .or_else(|| args.get("props"))
-                    .cloned()
-                    .unwrap_or_else(|| Value::Object(serde_json::Map::new()));
+                // Handle both positional and named arguments
+                let props = if let Some(positional_props) = args.get("1") {
+                    // Positional arguments: component("name", {"prop": "value"})
+                    positional_props.clone()
+                } else if let Some(named_props) = args.get("props") {
+                    // Named props argument: component(name="...", props={...})
+                    named_props.clone()
+                } else {
+                    // Individual named arguments: component(name="...", title="...", description="...")
+                    let mut props_map = serde_json::Map::new();
+                    for (key, value) in args {
+                        if key != "0" && key != "name" {
+                            props_map.insert(key.clone(), value.clone());
+                        }
+                    }
+                    Value::Object(props_map)
+                };
                 
                 // Try to load and render the component directly
                 let category = match component_name {
                     "code_block" => "atomic",
                     "navbar" => "atomic",
                     "contacts" => "atomic",
+                    "tag_cloud" => "atomic",
+                    "grid_card" => "atomic",
                     "header" => "composite",
                     "footer" => "composite",
+                    "page_tags" => "composite",
                     _ => "content",
                 };
                 let component_path = format!("themes/default/components/{}/{}", category, component_name);
@@ -141,8 +157,32 @@ impl TemplateEngine {
                                                         let mut context = tera::Context::new();
                             
                                                         context.insert("props", &props);
-                            
-                                                        context.insert("site", &serde_json::json!({"title": "Peta"})); // Add site context
+                                                        
+                                                        // Add site context with page type detection
+                                                        let page_type = if component_name == "page_tags" {
+                                                            if let Some(props) = props.as_object() {
+                                                                if let Some(title) = props.get("title").and_then(|v| v.as_str()) {
+                                                                    match title.to_lowercase().as_str() {
+                                                                        "books" => "books",
+                                                                        "articles" => "articles",
+                                                                        "snippets" => "snippets",
+                                                                        "projects" => "projects",
+                                                                        _ => "default"
+                                                                    }
+                                                                } else {
+                                                                    "default"
+                                                                }
+                                                            } else {
+                                                                "default"
+                                                            }
+                                                        } else {
+                                                            "default"
+                                                        };
+                                                        
+                                                        context.insert("site", &serde_json::json!({
+                                                            "title": "Peta",
+                                                            "page_type": page_type
+                                                        }));
                             
                                                         
                             
@@ -162,31 +202,283 @@ impl TemplateEngine {
                             
                                                         
                             
-                                                                                                // Render navbar component
+                                                                                                                            
                             
                                                         
                             
-                                                                                                if let Ok(navbar_template) = std::fs::read_to_string("themes/default/components/atomic/navbar/navbar.html") {
+                                                                                                                            // Render navbar component
                             
                                                         
                             
-                                                                                                    if let Ok(navbar_rendered) = Self::render_nested_component("navbar", &navbar_template, &mut tera, &context) {
+                                                                                                                            
                             
                                                         
                             
-                                                                                                        rendered = rendered.replace("<!-- Navbar component will be injected here -->\n      <div id=\"navbar-placeholder\"></div>", &navbar_rendered);
+                                                                                                                            if let Ok(navbar_template) = std::fs::read_to_string("themes/default/components/atomic/navbar/navbar.html") {
                             
                                                         
                             
-                                                                                                    }
+                                                                                                                                
                             
                                                         
                             
-                                                                                                }
+                                                                                                                                if let Ok(navbar_rendered) = Self::render_nested_component("navbar", &navbar_template, &mut tera, &context) {
                             
                                                         
                             
-                                                                                            }
+                                                                                                                                    
+                            
+                                                        
+                            
+                                                                                                                                    rendered = rendered.replace("<!-- Navbar component will be injected here -->\n      <div id=\"navbar-placeholder\"></div>", &navbar_rendered);
+                            
+                                                        
+                            
+                                                                                                                                    
+                            
+                                                        
+                            
+                                                                                                                                }
+                            
+                                                        
+                            
+                                                                                                                                
+                            
+                                                        
+                            
+                                                                                                                            }
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                        } else if component_name == "page_tags" {
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                        
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                        // Render tag_cloud component with tags from page_tags props
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                        if let Ok(tag_cloud_template) = std::fs::read_to_string("themes/default/components/atomic/tag_cloud/tag_cloud.html") {
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            // Create a new context for tag_cloud that includes the tags
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            let mut tag_cloud_context = context.clone();
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            // Create a props object for tag_cloud containing the tags
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            let mut tag_cloud_props = serde_json::Map::new();
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            // Extract tags from page_tags props and pass them to tag_cloud
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            if let Some(props) = props.as_object() {
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                                if let Some(tags) = props.get("tags") {
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                                    tag_cloud_props.insert("tags".to_string(), tags.clone());
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                                }
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            }
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            tag_cloud_context.insert("props", &tag_cloud_props);
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            if let Ok(tag_cloud_rendered) = Self::render_nested_component("tag_cloud", &tag_cloud_template, &mut tera, &tag_cloud_context) {
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                                
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                                rendered = rendered.replace("<!-- Tag cloud component will be injected here -->", &tag_cloud_rendered);
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                                
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            }
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                        }
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                        
+                            
+                                                        
+                            
+                                                                                                                            
+                            
+                                                        
+                            
+                                                                                                                                                    }
                             
                                                         
                             
@@ -202,15 +494,51 @@ impl TemplateEngine {
                             
                                                         
                             
-                                                                                            eprintln!("Component render error for {}: {}", component_name, e);
+                                                                                                                    
                             
                                                         
                             
-                                                                                            Ok(Value::String(format!("Component render error: {}", e)))
+                                                                                                                    
                             
                                                         
                             
-                                                                                        },
+                                                                                                                                                                                    eprintln!("Component render error for {}: {}", component_name, e);
+                            
+                                                        
+                            
+                                                                                                                                                                                    eprintln!("Kind: {:?}", e.kind);
+                            
+                                                        
+                            
+                                                                                                                                                                                    eprintln!("Props: {:?}", props);
+                            
+                                                        
+                            
+                                                                                                                                                                                    eprintln!("Context: {:?}", context);
+                            
+                                                        
+                            
+                                                                                                                    
+                            
+                                                        
+                            
+                                                                                                                    
+                            
+                                                        
+                            
+                                                                                                                                                                                    Ok(Value::String(format!("Component render error: {}", e)))
+                            
+                                                        
+                            
+                                                                                                                    
+                            
+                                                        
+                            
+                                                                                                                    
+                            
+                                                        
+                            
+                                                                                                                                                                                },
                             
                                                         
                             
@@ -236,8 +564,11 @@ impl TemplateEngine {
                     "code_block" => "atomic",
                     "navbar" => "atomic",
                     "contacts" => "atomic",
+                    "tag_cloud" => "atomic",
+                    "grid_card" => "atomic",
                     "header" => "composite",
                     "footer" => "composite",
+                    "page_tags" => "composite",
                     _ => "content",
                 };
                 

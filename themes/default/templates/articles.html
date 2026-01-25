@@ -2,40 +2,34 @@
 
 {% block title %}Articles - {{ site.title }}{% endblock %}
 
+{% block extra_styles %}
+<style>
+.listing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--spacing-6, 1.5rem);
+}
+
+@media (max-width: 768px) {
+  .listing-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="page-header">
-    <h1 class="page-title">Articles</h1>
-    <p class="page-description">Explore our collection of technical articles and tutorials</p>
-</div>
+{{ component(name="page_tags", title="Articles") | safe }}
 
 {% if articles %}
-<div class="content-grid">
-    {% for article in articles %}
-    <div class="content-card">
-        <div class="content-type-badge">Article</div>
-        <h3><a href="{{ article.url }}">{{ article.title }}</a></h3>
-        <div class="meta">
-            <time>{{ article.date }}</time>
-            {% if article.author %}
-            <span> by {{ article.author }}</span>
-            {% endif %}
-        </div>
-        {% if article.excerpt %}
-        <p>{{ article.excerpt }}</p>
-        {% endif %}
-        {% if article.tags %}
-        <div class="tags">
-            {% for tag in article.tags %}
-            <span class="tag">{{ tag }}</span>
-            {% endfor %}
-        </div>
-        {% endif %}
-    </div>
-    {% endfor %}
+<div class="listing-grid">
+  {% for article in articles %}
+  {{ component(name="grid_card") | safe }}
+  {% endfor %}
 </div>
 {% else %}
 <div class="text-center" style="padding: var(--spacing-16) 0;">
-    <p style="color: var(--text-secondary); font-size: var(--font-size-lg);">No articles found.</p>
+  <p style="color: var(--text-secondary); font-size: var(--font-size-lg);">No articles found.</p>
 </div>
 {% endif %}
 {% endblock %}

@@ -170,8 +170,11 @@ impl ComponentLoader {
             "code_block" => "atomic",
             "navbar" => "atomic",
             "contacts" => "atomic",
+            "tag_cloud" => "atomic",
+            "grid_card" => "atomic",
             "header" => "composite",
             "footer" => "composite",
+            "page_tags" => "composite",
             _ => "content",
         }
     }

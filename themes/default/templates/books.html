@@ -2,33 +2,34 @@
 
 {% block title %}Books - {{ site.title }}{% endblock %}
 
+{% block extra_styles %}
+<style>
+.listing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--spacing-6, 1.5rem);
+}
+
+@media (max-width: 768px) {
+  .listing-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="page-header">
-    <h1 class="page-title">Books</h1>
-    <p class="page-description">Comprehensive guides and books on various technical topics</p>
-</div>
+{{ component(name="page_tags", title="Books") | safe }}
 
 {% if books %}
-<div class="content-grid">
-    {% for book in books %}
-    <div class="content-card">
-        <div class="content-type-badge">Book</div>
-        <h3><a href="{{ book.url }}">{{ book.title }}</a></h3>
-        <div class="meta">
-            <span>Book</span>
-            {% if book.author %}
-            <span> by {{ book.author }}</span>
-            {% endif %}
-        </div>
-        {% if book.excerpt %}
-        <p>{{ book.excerpt }}</p>
-        {% endif %}
-    </div>
-    {% endfor %}
+<div class="listing-grid">
+  {% for book in books %}
+  {{ component(name="grid_card") | safe }}
+  {% endfor %}
 </div>
 {% else %}
 <div class="text-center" style="padding: var(--spacing-16) 0;">
-    <p style="color: var(--text-secondary); font-size: var(--font-size-lg);">No books found.</p>
+  <p style="color: var(--text-secondary); font-size: var(--font-size-lg);">No books found.</p>
 </div>
 {% endif %}
 {% endblock %}

@@ -1,0 +1,37 @@
+name: tag_cloud
+version: 1.0.0
+category: Atomic
+description: Tag cloud component for displaying categories and tags
+enabled: true
+dependencies: []
+props:
+  title:
+    type: string
+    required: true
+    description: Title for the tag cloud section
+  tags:
+    type: array
+    required: true
+    description: Array of tag objects with name, count, and url
+  max_tags:
+    type: number
+    required: false
+    default: 20
+    description: Maximum number of tags to display
+  show_count:
+    type: boolean
+    required: false
+    default: true
+    description: Whether to show tag count
+slots: []
+templates:
+  - tag_cloud.html
+styles:
+  - tag_cloud.css
+scripts:
+  - tag_cloud.js
+static_data: []
+config_schema: {}
+default_config: {}
+seo: null
+state: []

@@ -2,33 +2,34 @@
 
 {% block title %}Snippets - {{ site.title }}{% endblock %}
 
+{% block extra_styles %}
+<style>
+.listing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--spacing-6, 1.5rem);
+}
+
+@media (max-width: 768px) {
+  .listing-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="page-header">
-    <h1 class="page-title">Snippets</h1>
-    <p class="page-description">Quick code examples and useful programming snippets</p>
-</div>
+{{ component(name="page_tags", title="Snippets") | safe }}
 
 {% if snippets %}
-<div class="content-grid">
-    {% for snippet in snippets %}
-    <div class="content-card">
-        <div class="content-type-badge">Snippet</div>
-        <h3><a href="{{ snippet.url }}">{{ snippet.title }}</a></h3>
-        <div class="meta">
-            <span>Snippet</span>
-            {% if snippet.language %}
-            <span> in {{ snippet.language }}</span>
-            {% endif %}
-        </div>
-        {% if snippet.excerpt %}
-        <p>{{ snippet.excerpt }}</p>
-        {% endif %}
-    </div>
-    {% endfor %}
+<div class="listing-grid">
+  {% for snippet in snippets %}
+  {{ component(name="grid_card") | safe }}
+  {% endfor %}
 </div>
 {% else %}
 <div class="text-center" style="padding: var(--spacing-16) 0;">
-    <p style="color: var(--text-secondary); font-size: var(--font-size-lg);">No snippets found.</p>
+  <p style="color: var(--text-secondary); font-size: var(--font-size-lg);">No snippets found.</p>
 </div>
 {% endif %}
 {% endblock %}
