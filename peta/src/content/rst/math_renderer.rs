@@ -101,10 +101,10 @@ impl MathRenderer {
             const elements = document.querySelectorAll('[data-latex]');
             elements.forEach(el => {{
                 const latex = el.getAttribute('data-latex');
-                if (latex && katex) {{
+                if (latex && window.katex) {{
                     try {{
                         el.innerHTML = '';
-                        katex.render(latex, el, {{
+                        window.katex.render(latex, el, {{
                             displayMode: el.classList.contains('math-display'),
                             throwOnError: false
                         }});
@@ -143,8 +143,9 @@ impl MathRenderer {
     /// Render display math equations
     fn render_display_math(&mut self, content: &str) -> Result<String> {
         // Pre-compile regex patterns once
+        // Use non-greedy matching to correctly capture content between delimiters
         static DISPLAY_REGEX: once_cell::sync::Lazy<regex::Regex> = 
-            once_cell::sync::Lazy::new(|| regex::Regex::new(r"\$\$([^$]+)\$\$").unwrap());
+            once_cell::sync::Lazy::new(|| regex::Regex::new(r"\$\$(.*?)\$\$").unwrap());
         static LATEX_REGEX: once_cell::sync::Lazy<regex::Regex> = 
             once_cell::sync::Lazy::new(|| regex::Regex::new(r"\\\[(.*?)\\\]").unwrap());
         
@@ -152,13 +153,13 @@ impl MathRenderer {
         
         // Handle $$...$$ delimiters
         result = DISPLAY_REGEX.replace_all(&result, |caps: &regex::Captures| {
-            let equation = caps.get(1).unwrap().as_str();
+            let equation = caps.get(1).unwrap().as_str().trim();
             self.render_equation(equation, true).unwrap_or_else(|_| format!("<span class=\"math-error\">{}</span>", equation))
         }).to_string();
         
         // Handle \[...\] delimiters
         result = LATEX_REGEX.replace_all(&result, |caps: &regex::Captures| {
-            let equation = caps.get(1).unwrap().as_str();
+            let equation = caps.get(1).unwrap().as_str().trim();
             self.render_equation(equation, true).unwrap_or_else(|_| format!("<span class=\"math-error\">{}</span>", equation))
         }).to_string();
         
@@ -168,24 +169,41 @@ impl MathRenderer {
     /// Render inline math equations
     fn render_inline_math(&mut self, content: &str) -> Result<String> {
         // Pre-compile regex patterns once
-        static INLINE_REGEX: once_cell::sync::Lazy<regex::Regex> = 
-            once_cell::sync::Lazy::new(|| regex::Regex::new(r"\$([^$]+)\$").unwrap());
         static LATEX_INLINE_REGEX: once_cell::sync::Lazy<regex::Regex> = 
             once_cell::sync::Lazy::new(|| regex::Regex::new(r"\\\((.*?)\\\)").unwrap());
         
         let mut result = content.to_string();
         
-        // Handle $...$ delimiters (but avoid $$...$$ which are already handled)
-        result = INLINE_REGEX.replace_all(&result, |caps: &regex::Captures| {
-            let equation = caps.get(1).unwrap().as_str();
+        // Handle \(...\) delimiters first
+        result = LATEX_INLINE_REGEX.replace_all(&result, |caps: &regex::Captures| {
+            let equation = caps.get(1).unwrap().as_str().trim();
             self.render_equation(equation, false).unwrap_or_else(|_| format!("<span class=\"math-error\">{}</span>", equation))
         }).to_string();
         
-        // Handle \(...\) delimiters
-        result = LATEX_INLINE_REGEX.replace_all(&result, |caps: &regex::Captures| {
-            let equation = caps.get(1).unwrap().as_str();
+        // Handle $...$ delimiters with a custom approach to avoid $$...$$
+        // First, we'll mark all display math blocks temporarily
+        let display_marker = uuid::Uuid::new_v4().to_string();
+        static DISPLAY_TEMP_REGEX: once_cell::sync::Lazy<regex::Regex> = 
+            once_cell::sync::Lazy::new(|| regex::Regex::new(r"\$\$(.*?)\$\$").unwrap());
+        
+        result = DISPLAY_TEMP_REGEX.replace_all(&result, |caps: &regex::Captures| {
+            format!("__DISPLAY_MATH_{}__{}", display_marker, caps.get(0).unwrap().as_str())
+        }).to_string();
+        
+        // Now process inline math (display math is temporarily removed)
+        static INLINE_REGEX: once_cell::sync::Lazy<regex::Regex> = 
+            once_cell::sync::Lazy::new(|| regex::Regex::new(r"\$([^$\n]+?)\$").unwrap());
+        
+        result = INLINE_REGEX.replace_all(&result, |caps: &regex::Captures| {
+            let equation = caps.get(1).unwrap().as_str().trim();
             self.render_equation(equation, false).unwrap_or_else(|_| format!("<span class=\"math-error\">{}</span>", equation))
         }).to_string();
+        
+        // Restore display math blocks
+        static RESTORE_REGEX: once_cell::sync::Lazy<regex::Regex> = 
+            once_cell::sync::Lazy::new(|| regex::Regex::new(r"__DISPLAY_MATH_[^_]+__\$\$(.*?)\$\$").unwrap());
+        
+        result = RESTORE_REGEX.replace_all(&result, "$$$1$$").to_string();
         
         Ok(result)
     }

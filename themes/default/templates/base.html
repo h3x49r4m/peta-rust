@@ -166,13 +166,21 @@
                     
                     function loadKaTeX() {
                         if (window.mathRendererLoaded) {
-                            renderMathInElement(body, {
-                                delimiters: [
-                                    {left: '$$', right: '$$', display: true},
-                                    {left: '$', right: '$', display: false},
-                                    {left: '\\[', right: '\\]', display: true},
-                                    {left: '\\(', right: '\\)', display: false}
-                                ]
+                            // Render math elements with data-latex attributes
+                            const elements = body.querySelectorAll('[data-latex]');
+                            elements.forEach(el => {
+                                const latex = el.getAttribute('data-latex');
+                                if (latex && window.katex) {
+                                    try {
+                                        el.innerHTML = '';
+                                        window.katex.render(latex, el, {
+                                            displayMode: el.classList.contains('math-display'),
+                                            throwOnError: false
+                                        });
+                                    } catch (e) {
+                                        console.error('Math rendering error:', e);
+                                    }
+                                }
                             });
                             return;
                         }
@@ -194,30 +202,43 @@
                                 autoRender.src = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js';
                                 autoRender.onload = function() {
                                     window.mathRendererLoaded = true;
-                                    renderMathInElement(body, {
-                                        delimiters: [
-                                            {left: '$$', right: '$$', display: true},
-                                            {left: '$', right: '$', display: false},
-                                            {left: '\\[', right: '\\]', display: true},
-                                            {left: '\\(', right: '\\)', display: false}
-                                        ]
+                                    // Render math elements with data-latex attributes
+                                    const elements = body.querySelectorAll('[data-latex]');
+                                    elements.forEach(el => {
+                                        const latex = el.getAttribute('data-latex');
+                                        if (latex && window.katex) {
+                                            try {
+                                                el.innerHTML = '';
+                                                window.katex.render(latex, el, {
+                                                    displayMode: el.classList.contains('math-display'),
+                                                    throwOnError: false
+                                                });
+                                            } catch (e) {
+                                                console.error('Math rendering error:', e);
+                                            }
+                                        }
                                     });
                                 };
                                 document.body.appendChild(autoRender);
                             };
                             document.body.appendChild(katex);
                         } else {
-                            // KaTeX already loaded, use auto-render
-                            if (typeof renderMathInElement !== 'undefined') {
-                                renderMathInElement(body, {
-                                    delimiters: [
-                                        {left: '$$', right: '$$', display: true},
-                                        {left: '$', right: '$', display: false},
-                                        {left: '\\[', right: '\\]', display: true},
-                                        {left: '\\(', right: '\\)', display: false}
-                                    ]
-                                });
-                            }
+                            // KaTeX already loaded, render directly
+                            const elements = body.querySelectorAll('[data-latex]');
+                            elements.forEach(el => {
+                                const latex = el.getAttribute('data-latex');
+                                if (latex && window.katex) {
+                                    try {
+                                        el.innerHTML = '';
+                                        window.katex.render(latex, el, {
+                                            displayMode: el.classList.contains('math-display'),
+                                            throwOnError: false
+                                        });
+                                    } catch (e) {
+                                        console.error('Math rendering error:', e);
+                                    }
+                                }
+                            });
                         }
                     }
                     
