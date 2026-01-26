@@ -11,6 +11,11 @@ pub struct MetadataExtractor;
 impl MetadataExtractor {
     /// Extract metadata from frontmatter
     pub fn extract(frontmatter: &HashMap<String, serde_json::Value>) -> Result<ContentMetadata> {
+        Self::extract_with_path(frontmatter, None)
+    }
+    
+    /// Extract metadata from frontmatter with optional file path for book chapters
+    pub fn extract_with_path(frontmatter: &HashMap<String, serde_json::Value>, file_path: Option<&std::path::Path>) -> Result<ContentMetadata> {
         let title = frontmatter.get("title")
             .and_then(|v| v.as_str())
             .unwrap_or("Untitled")
@@ -44,8 +49,8 @@ impl MetadataExtractor {
             .and_then(|v| v.as_str())
             .map(|s| s.to_string());
         
-        // Generate URL from title
-        let url = Self::generate_url(&title, &content_type);
+        // Generate URL from title, considering file path for book chapters
+        let url = Self::generate_url_with_path(&title, &content_type, file_path);
         
         // Generate ID from title
         let id = Self::generate_id(&title);
@@ -65,13 +70,43 @@ impl MetadataExtractor {
     
     /// Generate URL from title and content type
     fn generate_url(title: &str, content_type: &ContentType) -> String {
+        Self::generate_url_with_path(title, content_type, None)
+    }
+    
+    /// Generate URL from title, content type, and optional file path
+    fn generate_url_with_path(title: &str, content_type: &ContentType, file_path: Option<&std::path::Path>) -> String {
         let slug = Self::slugify(title);
+        
+        // For books, check if this is a chapter file
+        if *content_type == ContentType::Book {
+            if let Some(path) = file_path {
+                if let Some(file_name) = path.file_name().and_then(|n| n.to_str()) {
+                    if file_name != "index.rst" {
+                        // This is a chapter file
+                        if let Some(parent) = path.parent() {
+                            if let Some(book_dir_name) = parent.file_name().and_then(|n| n.to_str()) {
+                                let book_slug = Self::slugify(book_dir_name);
+                                // Generate URL: books/{book-name}/{chapter-name}.html
+                                return format!("books/{}/{}.html", book_slug, slug);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Default URL generation
         match content_type {
             ContentType::Article => format!("articles/{}.html", slug),
             ContentType::Book => format!("books/{}/index.html", slug),
             ContentType::Snippet => format!("snippets/{}.html", slug),
             ContentType::Project => format!("projects/{}.html", slug),
         }
+    }
+    
+    /// Generate URL for book chapters
+    pub fn generate_chapter_url(book_slug: &str, chapter_slug: &str) -> String {
+        format!("books/{}/{}.html", book_slug, chapter_slug)
     }
     
     /// Generate ID from title

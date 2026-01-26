@@ -43,11 +43,16 @@ Ok(Self {
     
     /// Parse RST content with optional content type override
     pub fn parse_with_type(&mut self, content: &str, content_type_override: Option<ContentType>) -> Result<RstContent> {
+        self.parse_with_type_and_path(content, content_type_override, None)
+    }
+    
+    /// Parse RST content with optional content type override and file path
+    pub fn parse_with_type_and_path(&mut self, content: &str, content_type_override: Option<ContentType>, file_path: Option<&std::path::Path>) -> Result<RstContent> {
         // 1. Extract frontmatter
         let (frontmatter, rst_content) = self.extract_frontmatter(content)?;
         
-        // 2. Extract metadata from frontmatter with optional type override
-        let metadata = self.extract_metadata_with_type(&frontmatter, content_type_override)?;
+        // 2. Extract metadata from frontmatter with optional type override and file path
+        let metadata = self.extract_metadata_with_type_and_path(&frontmatter, content_type_override, file_path)?;
         
         // 3. Parse RST structure and process directives
         let processed_html = self.process_rst_content(&rst_content)?;
@@ -110,57 +115,18 @@ Ok(Self {
     }
     
     fn extract_metadata_with_type(&self, frontmatter: &HashMap<String, serde_json::Value>, content_type_override: Option<ContentType>) -> Result<ContentMetadata> {
-        let title = frontmatter.get("title")
-            .and_then(|v| v.as_str())
-            .unwrap_or("Untitled")
-            .to_string();
+        self.extract_metadata_with_type_and_path(frontmatter, content_type_override, None)
+    }
+    
+    fn extract_metadata_with_type_and_path(&self, frontmatter: &HashMap<String, serde_json::Value>, content_type_override: Option<ContentType>, file_path: Option<&std::path::Path>) -> Result<ContentMetadata> {
+        // If content_type_override is provided, add it to frontmatter
+        let mut frontmatter_clone = frontmatter.clone();
+        if let Some(ct) = content_type_override {
+            frontmatter_clone.insert("type".to_string(), serde_json::Value::String(ct.to_string()));
+        }
         
-        let content_type = content_type_override.or_else(|| {
-            frontmatter.get("type")
-                .and_then(|v| v.as_str())
-                .map(|s| ContentType::from_string(s))
-        }).unwrap_or(ContentType::Article);
-        
-        let date = frontmatter.get("date")
-            .and_then(|v| v.as_str())
-            .unwrap_or("")
-            .to_string();
-        
-        let tags = frontmatter.get("tags")
-            .and_then(|v| v.as_array())
-            .map(|arr| {
-                arr.iter()
-                    .filter_map(|v| v.as_str())
-                    .map(|s| s.to_string())
-                    .collect()
-            })
-            .unwrap_or_default();
-        
-        let author = frontmatter.get("author")
-            .and_then(|v| v.as_str())
-            .map(|s| s.to_string());
-        
-        let excerpt = frontmatter.get("excerpt")
-            .and_then(|v| v.as_str())
-            .map(|s| s.to_string());
-        
-        // Generate URL from title
-        let url = self.generate_url(&title, &content_type);
-        
-        // Generate ID from title
-        let id = self.generate_id(&title);
-        
-        Ok(ContentMetadata {
-            id,
-            title,
-            content_type,
-            date,
-            tags,
-            author,
-            excerpt,
-            url,
-            extra: HashMap::new(),
-        })
+        // Use MetadataExtractor to extract metadata
+        crate::content::metadata::MetadataExtractor::extract_with_path(&frontmatter_clone, file_path)
     }
     
     /// Generate URL from title and content type

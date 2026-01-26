@@ -108,6 +108,22 @@ impl SiteBuilder {
             }
         }
         
+        // For books, also load non-index .rst files in subdirectories (chapters)
+        if content_type == ContentType::Book {
+            let pattern = dir.join("**/*.rst");
+            
+            if let Ok(paths) = glob(pattern.to_str().unwrap()) {
+                for path in paths.flatten() {
+                    // Skip index.rst files as they were already loaded
+                    if path.file_name().and_then(|n| n.to_str()) != Some("index.rst") {
+                        if let Ok(content) = self.load_rst_file(&path, content_type.clone()).await {
+                            self.rst_content.push(content);
+                        }
+                    }
+                }
+            }
+        }
+        
         Ok(())
     }
     
@@ -116,9 +132,9 @@ impl SiteBuilder {
         let content = std::fs::read_to_string(path)
             .map_err(|e| Error::content(format!("Failed to read file {}: {}", path.display(), e)))?;
         
-        // Parse RST content using the RST parser with content type override
+        // Parse RST content using the RST parser with content type override and file path
         let mut parser = crate::content::rst::parser::RstParser::new()?;
-        parser.parse_with_type(&content, Some(content_type))
+        parser.parse_with_type_and_path(&content, Some(content_type), Some(path))
             .map_err(|e| Error::rst_parse(format!("Failed to parse RST file {}: {}", path.display(), e)))
     }
     

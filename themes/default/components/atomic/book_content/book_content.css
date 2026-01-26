@@ -63,6 +63,19 @@
   margin: 0 auto;
 }
 
+/* Loading and error states */
+.book-content-wrapper .loading,
+.book-content-wrapper .error {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary, #4a5568);
+  font-size: 1rem;
+}
+
+.book-content-wrapper .error {
+  color: var(--color-red-600, #dc2626);
+}
+
 /* TOC Sidebar - Floating on the right */
 .book-toc-sidebar {
   position: fixed;
@@ -109,6 +122,16 @@
 
 .book-toc-content li {
   margin-bottom: 0.25rem;
+}
+
+.book-toc-content .toc-caption-item {
+  padding: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
 }
 
 .book-toc-content a {
