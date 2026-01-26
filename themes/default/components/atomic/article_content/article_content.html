@@ -3,111 +3,410 @@
   <div class="reading-progress" aria-hidden="true"></div>
 
   <!-- Article header with enhanced metadata -->
-  <header class="article-header">
-    <div class="header-content">
-      <!-- Publication info -->
-      <div class="publication-info">
-        {% if props.meta.date or page.date %}
-        <time
-          datetime="{{ props.meta.date | default(value=page.date) }}"
-          class="publication-date"
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="16" y1="2" x2="16" y2="6"></line>
-            <line x1="8" y1="2" x2="8" y2="6"></line>
-            <line x1="3" y1="10" x2="21" y2="10"></line>
-          </svg>
-          {{ props.meta.date | default(value=page.date) }}
-        </time>
-        {% endif %}
 
-        {% if props.meta.author or page.author %}
-        <div class="author-info">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+    <header class="article-header">
+
+      <div class="header-content">
+
+        <!-- Article title -->
+
+        <h1 class="article-title">
+
+          {{ props.title | default(value=page.title) }}
+
+        </h1>
+
+  
+
+        <!-- Publication info -->
+
+        <div class="publication-info">
+
+          {% if props.page and props.page.date %}
+
+          <time
+
+            datetime="{{ props.page.date }}"
+
+            class="publication-date"
+
           >
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-          <span class="author-name">{{
-            props.meta.author | default(value=page.author)
-          }}</span>
+
+            <svg
+
+              width="16"
+
+              height="16"
+
+              viewBox="0 0 24 24"
+
+              fill="none"
+
+              stroke="currentColor"
+
+              stroke-width="2"
+
+              stroke-linecap="round"
+
+              stroke-linejoin="round"
+
+            >
+
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+
+            </svg>
+
+            {{ props.page.date }}
+
+          </time>
+
+          {% elif page and page.date %}
+
+          <time
+
+            datetime="{{ page.date }}"
+
+            class="publication-date"
+
+          >
+
+            <svg
+
+              width="16"
+
+              height="16"
+
+              viewBox="0 0 24 24"
+
+              fill="none"
+
+              stroke="currentColor"
+
+              stroke-width="2"
+
+              stroke-linecap="round"
+
+              stroke-linejoin="round"
+
+            >
+
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+
+            </svg>
+
+            {{ page.date }}
+
+          </time>
+
+          {% endif %}
+
+  
+
+          {% if props.page and props.page.author %}
+
+          <div class="author-info">
+
+            <svg
+
+              width="16"
+
+              height="16"
+
+              viewBox="0 0 24 24"
+
+              fill="none"
+
+              stroke="currentColor"
+
+              stroke-width="2"
+
+              stroke-linecap="round"
+
+              stroke-linejoin="round"
+
+            >
+
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+
+              <circle cx="12" cy="7" r="4"></circle>
+
+            </svg>
+
+            <span class="author-name">{{
+
+              props.page.author
+
+            }}</span>
+
+          </div>
+
+          {% elif page and page.author %}
+
+          <div class="author-info">
+
+            <svg
+
+              width="16"
+
+              height="16"
+
+              viewBox="0 0 24 24"
+
+              fill="none"
+
+              stroke="currentColor"
+
+              stroke-width="2"
+
+              stroke-linecap="round"
+
+              stroke-linejoin="round"
+
+            >
+
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+
+              <circle cx="12" cy="7" r="4"></circle>
+
+            </svg>
+
+            <span class="author-name">{{
+
+              page.author
+
+            }}</span>
+
+          </div>
+
+          {% endif %}
+
+  
+
+          <!-- Tags inline with date and author -->
+
+  
+
+                  {% if props.page and props.page.tags %}
+
+  
+
+                  <div class="article-tags-inline">
+
+  
+
+                    {% for tag in props.page.tags %}
+
+  
+
+                    <a href="/tags/{{ tag | slugify }}.html" class="tag">
+
+  
+
+                      <svg
+
+  
+
+                        width="12"
+
+  
+
+                        height="12"
+
+  
+
+                        viewBox="0 0 24 24"
+
+  
+
+                        fill="none"
+
+  
+
+                        stroke="currentColor"
+
+  
+
+                        stroke-width="2"
+
+  
+
+                        stroke-linecap="round"
+
+  
+
+                        stroke-linejoin="round"
+
+  
+
+                      >
+
+  
+
+                        <path
+
+  
+
+                          d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"
+
+  
+
+                        ></path>
+
+  
+
+                        <line x1="7" y1="7" x2="7.01" y2="7"></line>
+
+  
+
+                      </svg>
+
+  
+
+                      {{ tag }}
+
+  
+
+                    </a>
+
+  
+
+                    {% endfor %}
+
+  
+
+                  </div>
+
+  
+
+                  {% elif page and page.tags %}
+
+  
+
+                  <div class="article-tags-inline">
+
+  
+
+                    {% for tag in page.tags %}
+
+  
+
+                    <a href="/tags/{{ tag | slugify }}.html" class="tag">
+
+  
+
+                      <svg
+
+  
+
+                        width="12"
+
+  
+
+                        height="12"
+
+  
+
+                        viewBox="0 0 24 24"
+
+  
+
+                        fill="none"
+
+  
+
+                        stroke="currentColor"
+
+  
+
+                        stroke-width="2"
+
+  
+
+                        stroke-linecap="round"
+
+  
+
+                      stroke-linejoin="round"
+
+  
+
+                      >
+
+  
+
+                        <path
+
+  
+
+                          d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"
+
+  
+
+                        ></path>
+
+  
+
+                        <line x1="7" y1="7" x2="7.01" y2="7"></line>
+
+  
+
+                      </svg>
+
+  
+
+                      {{ tag }}
+
+  
+
+                    </a>
+
+  
+
+                    {% endfor %}
+
+  
+
+                  </div>
+
+  
+
+                  {% endif %}
+
         </div>
+
+  
+
+        <!-- Article excerpt if available -->
+
+        {% if props.page and props.page.excerpt %}
+
+        <p class="article-excerpt">
+
+          {{ props.page.excerpt }}
+
+        </p>
+
+        {% elif page and page.excerpt %}
+
+        <p class="article-excerpt">
+
+          {{ page.excerpt }}
+
+        </p>
+
         {% endif %}
-
-        <!-- Reading time estimate -->
-        <div class="reading-time">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-          </svg>
-          <span class="reading-estimate">5 min read</span>
-        </div>
-      </div>
-
-      <!-- Article title -->
-      <h1 class="article-title">
-        {{ props.title | default(value=page.title) }}
-      </h1>
-
-      <!-- Article excerpt if available -->
-      {% if props.meta.excerpt or page.excerpt %}
-      <p class="article-excerpt">
-        {{ props.meta.excerpt | default(value=page.excerpt) }}
-      </p>
-      {% endif %}
-
-      <!-- Tags -->
-      {% if props.meta.tags or page.tags %}
-      <div class="article-tags">
-        {% for tag in (props.meta.tags | default(value=page.tags)) %}
-        <a href="/tags/{{ tag | slugify }}.html" class="tag">
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path
-              d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"
-            ></path>
-            <line x1="7" y1="7" x2="7.01" y2="7"></line>
-          </svg>
-          {{ tag }}
-        </a>
-        {% endfor %}
-      </div>
-      {% endif %}
     </div>
   </header>
 
