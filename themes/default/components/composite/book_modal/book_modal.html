@@ -31,7 +31,11 @@
             <h3 class="book-toc-title">Contents</h3>
           </div>
           <div class="book-toc-content" id="book-toc-content">
-            <!-- TOC will be populated by JavaScript -->
+            {% if book_toc %}
+            {{ book_toc | safe }}
+            {% else %}
+            <p class="toc-empty">No chapters available</p>
+            {% endif %}
           </div>
         </div>
       </div>

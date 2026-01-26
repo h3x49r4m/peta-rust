@@ -6,5 +6,5 @@
 {{ component(name="page_tags", title="Books", page_url=page.url) | safe }}
 
 <!-- Book Modal Component -->
-{{ component(name="book_modal", book_title=page.title, book_author=page.author, content=content) | safe }}
+{{ component(name="book_modal", book_title=page.title, book_author=page.author, content=content, book_toc=book_toc | safe) | safe }}
 {% endblock %}

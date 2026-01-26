@@ -523,6 +523,13 @@ impl SiteBuilder {
             context.insert("math_render_script", script);
         }
         
+        // Generate book TOC for book pages
+        if content.metadata.content_type == ContentType::Book {
+            if let Ok(book_toc) = self.generate_book_toc(&content) {
+                context.insert("book_toc", &book_toc);
+            }
+        }
+        
         // Add all snippets data if this is a snippet page
         if content.metadata.content_type == ContentType::Snippet {
             let mut snippets = Vec::new();
@@ -576,6 +583,33 @@ impl SiteBuilder {
         }));
         
         context
+    }
+    
+    /// Generate book table of contents for a book page
+    fn generate_book_toc(&self, content: &RstContent) -> Result<String> {
+        use crate::content::rst::book_toc_generator::BookTocGenerator;
+        
+        // Extract book directory from URL
+        let url_parts: Vec<&str> = content.metadata.url.split('/').collect();
+        if url_parts.len() < 2 || url_parts[0] != "books" {
+            return Ok(String::new());
+        }
+        
+        let book_dir_name = url_parts[1];
+        let book_dir = Path::new("_content/books").join(book_dir_name);
+        
+        if !book_dir.exists() {
+            return Ok(String::new());
+        }
+        
+        // Generate book TOC
+        let generator = BookTocGenerator::new();
+        let chapters = generator.generate(&book_dir)?;
+        
+        // Render TOC as HTML
+        let toc_html = generator.render_html(&chapters);
+        
+        Ok(toc_html)
     }
     
     /// Generate contexts data files (site.json, search.json, tags.json)

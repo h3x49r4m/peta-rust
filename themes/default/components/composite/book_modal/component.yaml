@@ -25,6 +25,10 @@ props:
     type: string
     required: false
     description: HTML content of the book
+  book_toc:
+    type: string
+    required: false
+    description: HTML table of contents for the book
   chapters:
     type: array
     required: false
