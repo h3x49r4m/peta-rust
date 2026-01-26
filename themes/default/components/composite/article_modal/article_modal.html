@@ -1,51 +1,50 @@
 <div class="article-modal" data-component="article_modal">
-    <div class="article-layout">
-        <aside class="article-sidebar">
-            <div class="article-toc">
-                <h3>Table of Contents</h3>
-                {% if toc_html %}
-                {{ toc_html | safe }}
-                {% elif props.toc_html %}
-                {{ props.toc_html | safe }}
-                {% elif props.toc %}
-                {% if props.toc is string %}
-                {{ props.toc | safe }}
-                {% else %}
-                <ul>
-                {% for entry in props.toc %}
-                    <li><a href="#{{ entry.anchor }}">{{ entry.title }}</a></li>
-                    {% if entry.children %}
-                    <ul>
-                    {% for child in entry.children %}
-                        <li><a href="#{{ child.anchor }}">{{ child.title }}</a></li>
-                    {% endfor %}
-                    </ul>
-                    {% endif %}
-                {% endfor %}
-                </ul>
-                {% endif %}
-                {% else %}
-                <p>No table of contents available</p>
-                {% endif %}
-            </div>
-        </aside>
-        
-        <main class="article-main">
-            <article class="article-content">
-                <header class="article-header">
-                    <h1 class="article-title">{{ props.title }}</h1>
-                    {% if props.meta %}
-                    <div class="article-meta">
-                        {% if props.meta.date %}<time>{{ props.meta.date }}</time>{% endif %}
-                        {% if props.meta.author %} by {{ props.meta.author }}{% endif %}
-                    </div>
-                    {% endif %}
-                </header>
-                
-                <div class="article-body">
-                    {{ props.content | safe }}
-                </div>
-            </article>
-        </main>
-    </div>
+  <div class="article-layout">
+    <aside class="article-sidebar">
+      <div class="article-toc">
+        <h3>Table of Contents</h3>
+        {% if toc_html %}
+        {{ toc_html | safe }}
+        {% elif props.toc_html %}
+        {{ props.toc_html | safe }}
+        {% elif props.toc %}
+        {% if props.toc is string %}
+        {{ props.toc | safe }}
+        {% else %}
+        <ul>
+          {% for entry in props.toc %}
+          <li><a href="#{{ entry.anchor }}">{{ entry.title }}</a></li>
+          {% if entry.children %}
+          <ul>
+            {% for child in entry.children %}
+            <li><a href="#{{ child.anchor }}">{{ child.title }}</a></li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+          {% endfor %}
+        </ul>
+        {% endif %}
+        {% else %}
+        <p>No table of contents available</p>
+        {% endif %}
+      </div>
+    </aside>
+
+    <main class="article-main">
+      <article class="article-content">
+        <header class="article-header">
+          <h1 class="article-title">{{ props.title }}</h1>
+          {% if props.meta %}
+          <div class="article-meta">
+            {% if props.meta.date %}<time>{{ props.meta.date }}</time
+            >{% endif %} {% if props.meta.author %} by
+            {{ props.meta.author }}{% endif %}
+          </div>
+          {% endif %}
+        </header>
+
+        <div class="article-body">{{ props.content | safe }}</div>
+      </article>
+    </main>
+  </div>
 </div>
