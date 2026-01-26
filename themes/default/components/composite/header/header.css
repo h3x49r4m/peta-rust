@@ -1,51 +1,82 @@
 .header {
-  background-color: var(--header-bg-color, #ffffff);
-  border-bottom: 1px solid var(--border-color, #e2e8f0);
-  padding: 1rem 0;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 1.25rem 0;
   position: sticky;
   top: 0;
   z-index: 100;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease;
+}
+
+.header:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .header-container {
-  max-width: var(--container-max-width, 1200px);
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--container-padding, 1rem);
+  padding: 0 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .header-left {
-  flex: 1;
+  flex: 0 0 auto;
 }
 
 .header-right {
-  flex: 2;
+  flex: 1;
   display: flex;
   justify-content: flex-end;
+  align-items: center;
 }
 
 .site-name {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 1.5rem;
   font-weight: 700;
+  letter-spacing: -0.025em;
   text-decoration: none;
-  color: var(--primary-color, #007acc);
-  transition: color 0.2s ease;
+  color: #3b82f6;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
 }
 
 .site-name:hover {
-  color: var(--primary-hover-color, #005a9e);
+  color: #2563eb;
+  transform: translateY(-1px);
+}
+
+.site-name::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #3b82f6, #a855f7);
+  transition: width 0.3s ease;
+}
+
+.site-name:hover::after {
+  width: 100%;
 }
 
 .header-children {
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--border-color, #e2e8f0);
+  border-top: 1px solid #e2e8f0;
 }
 
 /* Responsive design */
 @media (max-width: 768px) {
+  .header {
+    padding: 1rem 0;
+  }
+  
   .header-container {
     flex-direction: column;
     align-items: flex-start;
@@ -53,12 +84,12 @@
   }
   
   .header-left {
-    flex: none;
+    width: 100%;
   }
   
   .header-right {
-    flex: none;
     width: 100%;
+    justify-content: center;
   }
   
   .site-name {
