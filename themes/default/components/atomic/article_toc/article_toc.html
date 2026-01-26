@@ -1,0 +1,14 @@
+<div class="article-toc" data-component="article_toc">
+  <div class="toc-header">
+    <h3 class="toc-title">{{ props.title | default(value="Table of Contents") }}</h3>
+  </div>
+  <div class="toc-content">
+    {% if props.toc %}
+      {{ props.toc | safe }}
+    {% elif toc %}
+      {{ toc | safe }}
+    {% else %}
+      <p class="toc-empty">No table of contents available</p>
+    {% endif %}
+  </div>
+</div>

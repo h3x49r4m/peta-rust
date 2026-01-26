@@ -54,6 +54,7 @@ Ok(Self {
         
         // 4. Generate table of contents
         let toc = self.toc_generator.generate(&processed_html)?;
+        let toc_html = self.toc_generator.render_html(&toc);
         
         // 5. Detect math formulas and generate rendering script
         let math_detection = self.math_processor.auto_detect_math_content(&processed_html)?;
@@ -67,6 +68,7 @@ Ok(Self {
             metadata,
             html: processed_html,
             toc,
+            toc_html,
             frontmatter,
             has_math_formulas: math_detection.has_formulas,
             math_formula_count: math_detection.formula_count,
@@ -342,19 +344,11 @@ Ok(Self {
     
     
     
-                let content_start = end;
+                
     
     
     
-                let lines_after_directive: Vec<&str> = content[content_start..].lines().collect();
-    
-    
-    
-                let mut content_end = content.len();
-    
-    
-    
-                let mut found_indented_content = false;
+                                let content_start = end;
     
     
     
@@ -362,143 +356,115 @@ Ok(Self {
     
     
     
-                for (line_idx, line) in lines_after_directive.iter().enumerate() {
+                                let lines_after_directive: Vec<&str> = content[content_start..].lines().collect();
     
     
     
-                    let line_start_pos = content_start + if line_idx > 0 {
+                
     
     
     
-                        lines_after_directive[0..line_idx].join("\n").len() + 1
+                                let mut content_end = content.len();
     
     
     
-                    } else {
+                
     
     
     
-                        0
+                                let mut found_indented_content = false;
     
     
     
-                    };
+                
     
     
     
-                    
+                                
     
     
     
-                    // Skip empty lines at the beginning
+                
     
     
     
-                    
+                                // Special handling for snippet-card directive - only take the first line
     
     
     
-                                    if !found_indented_content && line.trim().is_empty() {
+                
     
     
     
-                    
+                                if directive_type == "snippet-card" {
     
     
     
-                                        continue;
+                
     
     
     
-                    
+                                    // Find the first non-empty line
     
     
     
-                                    }
+                
     
     
     
-                    
+                                    for line in lines_after_directive.iter() {
     
     
     
-                                    
+                
     
     
     
-                    
+                                        if line.trim().is_empty() {
     
     
     
-                                    // If we find an indented line, mark that we've found the content
+                
     
     
     
-                    
+                                            continue;
     
     
     
-                                    if line.starts_with("    ") || line.starts_with("\t") {
+                
     
     
     
-                    
+                                        }
     
     
     
-                                        found_indented_content = true;
+                
     
     
     
-                    
+                                        // Only take the first non-empty line as the snippet name
     
     
     
-                                        continue;
+                
     
     
     
-                    
+                                        let line_end = content_start + line.len();
     
     
     
-                                    }
+                
     
     
     
-                    
+                                        content_end = line_end;
     
     
     
-                                    
-    
-    
-    
-                    
-    
-    
-    
-                                    // If we found indented content and now hit a non-indented line, this is the end
-    
-    
-    
-                    
-    
-    
-    
-                                    if found_indented_content && !line.starts_with("    ") && !line.starts_with("\t") {
-    
-    
-    
-                    
-    
-    
-    
-                                        content_end = line_start_pos;
-    
-    
-    
-                    
+                
     
     
     
@@ -506,7 +472,7 @@ Ok(Self {
     
     
     
-                    
+                
     
     
     
@@ -514,7 +480,11 @@ Ok(Self {
     
     
     
-                }
+                
+    
+    
+    
+                                } else {
     
     
     
@@ -522,31 +492,7 @@ Ok(Self {
     
     
     
-                // If there's another directive, don't go past it
-    
-    
-    
-                if i + 1 < directive_starts.len() {
-    
-    
-    
-                    let next_directive_start = directive_starts[i + 1].0;
-    
-    
-    
-                    if content_end > next_directive_start {
-    
-    
-    
-                        content_end = next_directive_start;
-    
-    
-    
-                    }
-    
-    
-    
-                }
+                                    // Original logic for other directives
     
     
     
@@ -554,7 +500,279 @@ Ok(Self {
     
     
     
-                let directive_content = &content[content_start..content_end];
+                                    for (line_idx, line) in lines_after_directive.iter().enumerate() {
+    
+    
+    
+                
+    
+    
+    
+                                        let line_start_pos = content_start + if line_idx > 0 {
+    
+    
+    
+                
+    
+    
+    
+                                            lines_after_directive[0..line_idx].join("\n").len() + 1
+    
+    
+    
+                
+    
+    
+    
+                                        } else {
+    
+    
+    
+                
+    
+    
+    
+                                            0
+    
+    
+    
+                
+    
+    
+    
+                                        };
+    
+    
+    
+                
+    
+    
+    
+                                        
+    
+    
+    
+                
+    
+    
+    
+                                        // Skip empty lines at the beginning
+    
+    
+    
+                
+    
+    
+    
+                                        if !found_indented_content && line.trim().is_empty() {
+    
+    
+    
+                
+    
+    
+    
+                                            continue;
+    
+    
+    
+                
+    
+    
+    
+                                        }
+    
+    
+    
+                
+    
+    
+    
+                                        
+    
+    
+    
+                
+    
+    
+    
+                                        // If we find an indented line, mark that we've found the content
+    
+    
+    
+                
+    
+    
+    
+                                        if line.starts_with("    ") || line.starts_with("\t") {
+    
+    
+    
+                
+    
+    
+    
+                                            found_indented_content = true;
+    
+    
+    
+                
+    
+    
+    
+                                            continue;
+    
+    
+    
+                
+    
+    
+    
+                                        }
+    
+    
+    
+                
+    
+    
+    
+                                        
+    
+    
+    
+                
+    
+    
+    
+                                        // If we found indented content and now hit a non-indented line, this is the end
+    
+    
+    
+                
+    
+    
+    
+                                        if found_indented_content && !line.starts_with("    ") && !line.starts_with("\t") {
+    
+    
+    
+                
+    
+    
+    
+                                            content_end = line_start_pos;
+    
+    
+    
+                
+    
+    
+    
+                                            break;
+    
+    
+    
+                
+    
+    
+    
+                                        }
+    
+    
+    
+                
+    
+    
+    
+                                    }
+    
+    
+    
+                
+    
+    
+    
+                                    
+    
+    
+    
+                
+    
+    
+    
+                                    // If there's another directive, don't go past it
+    
+    
+    
+                
+    
+    
+    
+                                    if i + 1 < directive_starts.len() {
+    
+    
+    
+                
+    
+    
+    
+                                        let next_directive_start = directive_starts[i + 1].0;
+    
+    
+    
+                
+    
+    
+    
+                                        if content_end > next_directive_start {
+    
+    
+    
+                
+    
+    
+    
+                                            content_end = next_directive_start;
+    
+    
+    
+                
+    
+    
+    
+                                        }
+    
+    
+    
+                
+    
+    
+    
+                                    }
+    
+    
+    
+                
+    
+    
+    
+                                }
+    
+    
+    
+                
+    
+    
+    
+                                
+    
+    
+    
+                
+    
+    
+    
+                                let directive_content = &content[content_start..content_end];
     
     
     
@@ -650,10 +868,14 @@ Ok(Self {
             // Check for RST-style underlined headers
             if i + 1 < lines.len() {
                 let next_line = lines[i + 1];
+                let current_line = line.trim();
+                // RST underline should be at least as long as the text
                 if (next_line.chars().all(|c| c == '=') || next_line.chars().all(|c| c == '-')) && 
-                   next_line.len() >= line.len() / 2 {
+                   next_line.len() >= current_line.len() &&
+                   !current_line.is_empty() {
                     let level = if next_line.chars().all(|c| c == '=') { "2" } else { "3" };
-                    result.push(format!("<h{}>{}</h{}>", level, line.trim(), level));
+                    let anchor = self.slugify(current_line);
+                    result.push(format!("<h{} id=\"{}\">{}</h{}>", level, anchor, current_line, level));
                     i += 2; // Skip both the title and underline
                     continue;
                 }
@@ -668,6 +890,24 @@ Ok(Self {
                 let anchor = self.slugify(title);
                 result.push(format!("<h{} id=\"{}\">{}</h{}>", level, anchor, title, level));
                 i += 1;
+            } else if line.trim().len() > 0 && !line.starts_with(' ') && !line.contains('[') && !line.contains('`') {
+                // Check if this line could be a standalone header (not empty, not indented, no markup)
+                let trimmed = line.trim();
+                // Skip lines that are just RST underline characters or too long (likely sentences)
+                if trimmed.len() > 0 && 
+                   !trimmed.chars().all(|c| c == '=' || c == '-' || c == '~' || c == '^' || c == '*' || c == '+' || c == '"' || c == '#' || c == '`') &&
+                   trimmed.len() <= 50 && // Shorter than 50 characters
+                   !trimmed.contains('.') && // No periods (not a sentence)
+                   !trimmed.contains(',') && // No commas
+                   trimmed.chars().all(|c| c.is_alphanumeric() || c == ' ' || c == '-' || c == '_') {
+                    // Treat as a level 3 header
+                    let anchor = self.slugify(trimmed);
+                    result.push(format!("<h3 id=\"{}\">{}</h3>", anchor, trimmed));
+                    i += 1;
+                } else {
+                    result.push(line.to_string());
+                    i += 1;
+                }
             } else {
                 result.push(line.to_string());
                 i += 1;

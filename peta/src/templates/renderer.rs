@@ -29,7 +29,8 @@ impl HtmlRenderer {
         // Add content metadata
         context.insert("page", &content.metadata);
         context.insert("content", &content.html);
-        context.insert("toc", &content.toc);
+        context.insert("toc", &content.toc_html);
+        context.insert("toc_html", &content.toc_html);
         
         // Choose template based on content type
         let template_name = match content.metadata.content_type {

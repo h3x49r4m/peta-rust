@@ -1,0 +1,30 @@
+name: article_toc
+version: 1.0.0
+category: Atomic
+description: Atomic component for displaying article table of contents
+enabled: true
+dependencies: []
+props:
+  title:
+    type: string
+    required: false
+    description: Title for the TOC section
+  toc:
+    type: string
+    required: false
+    description: Table of contents HTML
+slots:
+  - name: children
+    required: false
+    description: Additional content to display
+templates:
+  - article_toc.html
+styles:
+  - article_toc.css
+scripts:
+  - article_toc.js
+static_data: []
+config_schema: {}
+default_config: {}
+seo: null
+state: []

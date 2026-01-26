@@ -1,0 +1,52 @@
+/* Article Modal Component Styles */
+.article-modal {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+.article-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: var(--spacing-8, 2rem);
+  align-items: start;
+  width: 100%;
+}
+
+.article-sidebar {
+  position: sticky;
+  top: var(--spacing-8, 2rem);
+  height: fit-content;
+  max-height: calc(100vh - var(--spacing-16, 4rem));
+  overflow-y: auto;
+}
+
+.article-main {
+  min-width: 0; /* Prevent grid item from overflowing */
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .article-layout {
+    grid-template-columns: 280px 1fr;
+    gap: var(--spacing-6, 1.5rem);
+  }
+}
+
+@media (max-width: 768px) {
+  .article-layout {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-6, 1.5rem);
+  }
+  
+  .article-sidebar {
+    position: static;
+    max-height: none;
+    order: 2;
+  }
+  
+  .article-main {
+    order: 1;
+  }
+}

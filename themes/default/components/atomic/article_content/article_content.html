@@ -1,0 +1,154 @@
+<article class="article-content" data-component="article_content">
+  <!-- Reading progress indicator -->
+  <div class="reading-progress" aria-hidden="true"></div>
+  
+  <!-- Article header with enhanced metadata -->
+  <header class="article-header">
+    <div class="header-content">
+      <!-- Publication info -->
+      <div class="publication-info">
+        {% if props.meta.date or page.date %}
+        <time datetime="{{ props.meta.date | default(value=page.date) }}" class="publication-date">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          {{ props.meta.date | default(value=page.date) }}
+        </time>
+        {% endif %}
+        
+        {% if props.meta.author or page.author %}
+        <div class="author-info">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span class="author-name">{{ props.meta.author | default(value=page.author) }}</span>
+        </div>
+        {% endif %}
+        
+        <!-- Reading time estimate -->
+        <div class="reading-time">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span class="reading-estimate">5 min read</span>
+        </div>
+      </div>
+      
+      <!-- Article title -->
+      <h1 class="article-title">{{ props.title | default(value=page.title) }}</h1>
+      
+      <!-- Article excerpt if available -->
+      {% if props.meta.excerpt or page.excerpt %}
+      <p class="article-excerpt">{{ props.meta.excerpt | default(value=page.excerpt) }}</p>
+      {% endif %}
+      
+      <!-- Tags -->
+      {% if props.meta.tags or page.tags %}
+      <div class="article-tags">
+        {% for tag in (props.meta.tags | default(value=page.tags)) %}
+        <a href="/tags/{{ tag | slugify }}.html" class="tag">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+            <line x1="7" y1="7" x2="7.01" y2="7"></line>
+          </svg>
+          {{ tag }}
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </header>
+  
+  <!-- Table of contents placeholder (will be populated by TOC component) -->
+  <div class="toc-placeholder" id="table-of-contents" style="display: none;">
+    <div class="toc-container">
+      <h2 class="toc-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+        Table of Contents
+      </h2>
+      <nav class="toc-nav" id="toc-nav"></nav>
+    </div>
+  </div>
+  
+  <!-- Main article content -->
+  <main class="article-body">
+    <div class="content-wrapper">
+      {% if props.content %}
+        {{ props.content | safe }}
+      {% else %}
+        {{ content | safe }}
+      {% endif %}
+    </div>
+  </main>
+  
+  <!-- Article footer with navigation -->
+  <footer class="article-footer">
+    <!-- Share buttons -->
+    <div class="share-section">
+      <h3>Share this article</h3>
+      <div class="share-buttons">
+        <button class="share-button" data-platform="twitter">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+          </svg>
+          Twitter
+        </button>
+        <button class="share-button" data-platform="linkedin">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+          </svg>
+          LinkedIn
+        </button>
+        <button class="share-button" data-platform="copy">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          Copy Link
+        </button>
+      </div>
+    </div>
+    
+    <!-- Navigation -->
+    {% if props.meta.navigation or page.previous_article or page.next_article %}
+    <nav class="article-navigation" aria-label="Article navigation">
+      {% if props.meta.navigation.previous or page.previous_article %}
+      <a href="{{ props.meta.navigation.previous.url | default(value=page.previous_article.url) }}" class="nav-link nav-prev">
+        <div class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </div>
+        <div class="nav-content">
+          <span class="nav-label">Previous</span>
+          <span class="nav-title">{{ props.meta.navigation.previous.title | default(value=page.previous_article.title) }}</span>
+        </div>
+      </a>
+      {% endif %}
+      
+      {% if props.meta.navigation.next or page.next_article %}
+      <a href="{{ props.meta.navigation.next.url | default(value=page.next_article.url) }}" class="nav-link nav-next">
+        <div class="nav-content">
+          <span class="nav-label">Next</span>
+          <span class="nav-title">{{ props.meta.navigation.next.title | default(value=page.next_article.title) }}</span>
+        </div>
+        <div class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </div>
+      </a>
+      {% endif %}
+    </nav>
+    {% endif %}
+  </footer>
+</article>

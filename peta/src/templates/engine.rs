@@ -241,11 +241,15 @@ impl TemplateEngine {
                     "contacts" => "atomic",
                     "tag_cloud" => "atomic",
                     "grid_card" => "atomic",
+                    "content_div" => "atomic",
+                    "article_toc" => "atomic",
+                    "article_content" => "atomic",
                     "header" => "composite",
                     "footer" => "composite",
                     "page_tags" => "composite",
                     "snippet_card_modal" => "composite",
                     "grid_cards" => "composite",
+                    "article_modal" => "composite",
                     _ => "content",
                 };
                 let component_path = format!("themes/default/components/{}/{}", category, component_name);
