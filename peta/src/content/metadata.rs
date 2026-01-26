@@ -109,12 +109,33 @@ impl MetadataExtractor {
         }
         
         // Default URL generation for index pages and other content types
-        let slug = Self::slugify(title);
         match content_type {
-            ContentType::Article => format!("articles/{}.html", slug),
-            ContentType::Book => format!("books/{}/index.html", slug),
-            ContentType::Snippet => format!("snippets/{}.html", slug),
-            ContentType::Project => format!("projects/{}.html", slug),
+            ContentType::Article => {
+                let slug = Self::slugify(title);
+                format!("articles/{}.html", slug)
+            }
+            ContentType::Book => {
+                // For book index pages, use directory name instead of title for URL
+                if let Some(path) = file_path {
+                    if let Some(parent) = path.parent() {
+                        if let Some(book_dir_name) = parent.file_name().and_then(|n| n.to_str()) {
+                            let book_slug = Self::slugify(book_dir_name);
+                            return format!("books/{}/index.html", book_slug);
+                        }
+                    }
+                }
+                // Fallback to title-based slug
+                let slug = Self::slugify(title);
+                format!("books/{}/index.html", slug)
+            }
+            ContentType::Snippet => {
+                let slug = Self::slugify(title);
+                format!("snippets/{}.html", slug)
+            }
+            ContentType::Project => {
+                let slug = Self::slugify(title);
+                format!("projects/{}.html", slug)
+            }
         }
     }
     
