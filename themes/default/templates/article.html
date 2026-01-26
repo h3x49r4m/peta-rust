@@ -162,6 +162,8 @@
 {% endblock %}
 
 {% block content %}
+{{ component(name="page_tags", title="Articles", page_url="/articles.html") | safe }}
+
 <div class="article-container">
     <header class="article-header">
         <h1 class="article-title">{{ page.title }}</h1>
