@@ -40,13 +40,8 @@ impl TocGenerator {
                     continue;
                 }
                 
-                // Generate an anchor from the title
-                let anchor = title
-                    .to_lowercase()
-                    .replace(' ', "-")
-                    .chars()
-                    .filter(|c| c.is_alphanumeric() || *c == '-')
-                    .collect::<String>();
+                // Generate an anchor from the title using the same slugify logic as the parser
+                let anchor = self.slugify(&title);
                 
                 entries.push(TocEntry {
                     level,
@@ -58,6 +53,53 @@ impl TocGenerator {
         }
         
         Ok(entries)
+    }
+    
+    /// Convert title to URL-friendly slug (matches parser's slugify logic)
+    fn slugify(&self, title: &str) -> String {
+        let mut result = title.to_lowercase();
+        
+        // Handle common programming language notations first
+        result = result.replace("c++", "cpp");
+        result = result.replace("c#", "csharp");
+        result = result.replace("f#", "fsharp");
+        result = result.replace("c++/cli", "cpp-cli");
+        result = result.replace(".net", "dotnet");
+        result = result.replace("node.js", "nodejs");
+        result = result.replace("react.js", "reactjs");
+        result = result.replace("vue.js", "vuejs");
+        result = result.replace("angular.js", "angularjs");
+        
+        // Replace common symbols with words
+        result = result.replace("++", "plus");
+        result = result.replace("--", "minus");
+        result = result.replace("==", "equals");
+        result = result.replace("!=", "not-equals");
+        result = result.replace("<=", "less-equal");
+        result = result.replace(">=", "greater-equal");
+        result = result.replace("->", "arrow");
+        result = result.replace("=>", "fat-arrow");
+        result = result.replace("&&", "and");
+        result = result.replace("||", "or");
+        
+        // Replace spaces and punctuation with dashes
+        result = result.replace(&[' ', '-', '_', '.', ',', ';', ':', '!', '?', '@', '#', '$', '%', '^', '&', '*', '(', ')', '=', '[', ']', '{', '}', '\\', '|', '<', '>', '/', '"', '\''][..], "-");
+        
+        // Remove quotes completely
+        result = result.replace(['"', '\''], "");
+        
+        // Filter to only keep alphanumeric characters and dashes
+        result = result.chars()
+            .filter(|c| c.is_alphanumeric() || *c == '-')
+            .collect::<String>();
+        
+        // Collapse multiple dashes into single dashes
+        while result.contains("--") {
+            result = result.replace("--", "-");
+        }
+        
+        // Trim leading/trailing dashes
+        result.trim_matches('-').to_string()
     }
 }
 
