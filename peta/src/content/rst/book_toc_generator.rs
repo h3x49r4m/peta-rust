@@ -128,14 +128,23 @@ impl BookTocGenerator {
             }
         }
 
-        // Fallback: Extract title from first heading
-        if let Some(heading_start) = content.find("\n=") {
-            let before_equals = &content[..heading_start];
-            if let Some(title_end) = before_equals.rfind('\n') {
-                let title = before_equals[title_end + 1..].trim();
-                if !title.is_empty() {
-                    return Ok(title.to_string());
+        // Fallback: Extract title from first heading (underlined with =)
+        // RST headings are followed by = signs on the next line
+        for line in content.lines() {
+            let trimmed = line.trim();
+            if !trimmed.is_empty() && !trimmed.starts_with("=") && !trimmed.starts_with("-") {
+                // Check if the next line starts with = or - (heading underline)
+                let lines: Vec<&str> = content.lines().collect();
+                if let Some(pos) = lines.iter().position(|l| l.trim() == trimmed) {
+                    if pos + 1 < lines.len() {
+                        let next_line = lines[pos + 1].trim();
+                        if next_line.starts_with("=") || next_line.starts_with("-") {
+                            // This is a heading
+                            return Ok(trimmed.to_string());
+                        }
+                    }
                 }
+                break;
             }
         }
 
