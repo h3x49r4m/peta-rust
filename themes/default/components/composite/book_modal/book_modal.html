@@ -1,12 +1,12 @@
 <!-- Book Modal Component -->
-<div class="book-modal-overlay" id="book-modal-overlay-{{ props.book_id | default(value='default') }}" data-component="book_modal">
+<div class="book-modal-overlay" id="book-modal-overlay" data-component="book_modal">
   <div class="book-modal-container">
     <!-- Modal Header -->
     <div class="book-modal-header">
       <div class="book-modal-header-content">
-        <h2 class="book-modal-title">{{ props.book_title }}</h2>
-        {% if props.book_author %}
-        <p class="book-modal-author">by {{ props.book_author }}</p>
+        <h2 class="book-modal-title">{{ book_title }}</h2>
+        {% if book_author %}
+        <p class="book-modal-author">by {{ book_author }}</p>
         {% endif %}
       </div>
       <button class="book-modal-close" aria-label="Close modal">
@@ -16,49 +16,15 @@
 
     <!-- Modal Body -->
     <div class="book-modal-body">
-      <!-- Sidebar: Chapter Navigation -->
+      <!-- Book TOC Component -->
       <aside class="book-modal-sidebar">
-        <div class="chapter-list">
-          <h3 class="chapter-list-title">Chapters</h3>
-          <ul class="chapter-items">
-            {% if props.chapters %}
-            {% for chapter in props.chapters %}
-            <li class="chapter-item">
-              <a href="#" class="chapter-link" data-chapter-index="{{ loop.index0 }}" data-chapter-url="{{ chapter.anchor }}.html" data-chapter-title="{{ chapter.title }}">
-                <span class="chapter-number">{{ loop.index }}.</span>
-                <span class="chapter-name">{{ chapter.title }}</span>
-              </a>
-            </li>
-            {% endfor %}
-            {% else %}
-            <li class="chapter-item">
-              <p class="no-chapters">No chapters available</p>
-            </li>
-            {% endif %}
-          </ul>
-        </div>
+        {{ component(name="book_toc", book_title=book_title) | safe }}
       </aside>
-
-      <!-- Main Content Area -->
+      
+      <!-- Book Content Component -->
       <main class="book-modal-content">
-        {% if props.current_chapter %}
-        <div class="chapter-content">
-          <h3 class="current-chapter-title">{{ props.current_chapter.title }}</h3>
-          <div class="current-chapter-body">
-            {{ props.current_chapter.content | safe }}
-          </div>
-        </div>
-        {% elif props.content %}
-        <div class="book-full-content">
-          {{ props.content | safe }}
-        </div>
-        {% else %}
-        <div class="book-description">
-          {% if props.book_description %}
-          <p>{{ props.book_description }}</p>
-          {% endif %}
-          <p class="select-chapter-hint">Select a chapter from the sidebar to begin reading.</p>
-        </div>
+        {% if content %}
+        {{ component(name="book_content", content=content) | safe }}
         {% endif %}
       </main>
     </div>

@@ -5,9 +5,6 @@
 {% block content %}
 {{ component(name="page_tags", title="Books", page_url=page.url) | safe }}
 
-<!-- Book TOC Component -->
-{{ component(name="book_toc", book_title=page.title) | safe }}
-
-<!-- Book Modal Component -->
-{{ component(name="book_modal", book_title=page.title, content=content) | safe }}
+<!-- Book Content Component -->
+{{ component(name="book_content", book_title=page.title, content=content) | safe }}
 {% endblock %}

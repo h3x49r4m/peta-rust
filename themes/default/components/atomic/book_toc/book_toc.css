@@ -1,152 +1,58 @@
-/* Book TOC Component Styles */
+/* Book TOC Component Styles - Sidebar Layout */
 .book-toc-wrapper {
-  position: fixed;
-  right: 2rem;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 1000;
-}
-
-.book-toc-button {
-  position: relative;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: var(--color-primary-500, #3b82f6);
-  color: white;
-  border: none;
-  cursor: pointer;
+  position: sticky;
+  top: 2rem;
+  max-height: calc(100vh - 4rem);
   display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
-}
-
-.book-toc-button:hover {
-  background: var(--color-primary-600, #2563eb);
-  transform: scale(1.1);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-}
-
-.book-toc-button:active {
-  transform: scale(0.95);
-}
-
-.book-toc-icon {
-  width: 28px;
-  height: 28px;
-  stroke-width: 2;
-}
-
-.book-toc-tooltip {
-  position: absolute;
-  right: 70px;
-  background: var(--text-color, #1e293b);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.2s ease;
-  pointer-events: none;
-}
-
-.book-toc-button:hover .book-toc-tooltip {
-  opacity: 1;
-  visibility: visible;
-  right: 72px;
-}
-
-.book-toc-popup {
-  position: fixed;
-  right: 80px;
-  top: 50%;
-  transform: translateY(-50%) translateX(20px);
-  width: 400px;
-  max-width: 80vw;
-  max-height: 80vh;
-  background: var(--background-primary, #ffffff);
-  border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: var(--radius-lg, 0.75rem);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-direction: column;
+  background: #f8f9fa;
+  border-radius: 8px;
   overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.book-toc-popup.active {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(-50%) translateX(0);
+.book-toc-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .book-toc-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border-color, #e2e8f0);
-  background: var(--background-secondary, #f8fafc);
+  padding: 1.25rem;
+  background: #ffffff;
+  border-bottom: 2px solid #e9ecef;
+  flex-shrink: 0;
 }
 
 .book-toc-title {
   margin: 0;
   font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text-color, #1e293b);
-}
-
-.book-toc-close {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary, #64748b);
-  transition: all 0.2s ease;
-}
-
-.book-toc-close:hover {
-  background: var(--background-tertiary, #e2e8f0);
-  color: var(--text-color, #1e293b);
-}
-
-.close-icon {
-  font-size: 24px;
-  line-height: 1;
+  font-weight: 700;
+  color: #212529;
 }
 
 .book-toc-content {
-  padding: 1.5rem;
+  flex: 1;
   overflow-y: auto;
-  max-height: calc(80vh - 80px);
+  padding: 1rem;
 }
 
 .book-toc-content::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 .book-toc-content::-webkit-scrollbar-track {
-  background: var(--background-secondary, #f8fafc);
-  border-radius: 4px;
+  background: #f1f3f5;
+  border-radius: 3px;
 }
 
 .book-toc-content::-webkit-scrollbar-thumb {
-  background: var(--border-color, #e2e8f0);
-  border-radius: 4px;
+  background: #adb5bd;
+  border-radius: 3px;
 }
 
 .book-toc-content::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary, #64748b);
+  background: #868e96;
 }
 
 /* TOC List Styling */
@@ -157,64 +63,111 @@
 }
 
 .book-toc-content li {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
 
 .book-toc-content a {
   display: block;
-  padding: 0.5rem 0.75rem;
-  color: var(--text-secondary, #64748b);
+  padding: 0.625rem 0.75rem;
+  color: #495057;
   text-decoration: none;
-  border-radius: var(--radius-md, 0.375rem);
+  border-radius: 6px;
   transition: all 0.2s ease;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   line-height: 1.5;
+  border-left: 3px solid transparent;
 }
 
 .book-toc-content a:hover {
-  background: var(--background-secondary, #f8fafc);
-  color: var(--color-primary-500, #3b82f6);
+  background: #ffffff;
+  color: #0d6efd;
+  border-left-color: #0d6efd;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .book-toc-content a.active {
-  background: var(--color-primary-50, #eff6ff);
-  color: var(--color-primary-600, #2563eb);
-  font-weight: 500;
+  background: #ffffff;
+  color: #0d6efd;
+  border-left-color: #0d6efd;
+  font-weight: 600;
+}
+
+/* TOC Caption */
+.book-toc-content .toc-caption {
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: #e9ecef;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* Nested TOC items */
 .book-toc-content ul ul {
-  margin-left: 1.25rem;
-  margin-top: 0.5rem;
+  margin-left: 1rem;
+  margin-top: 0.25rem;
 }
 
 .book-toc-content ul ul a {
-  font-size: 0.9rem;
-  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  color: #6c757d;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+.book-toc-content ul ul a:hover {
+  color: #0d6efd;
+}
+
+/* Chapter links */
+.book-toc-content .toc-item a[data-chapter-link] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.book-toc-content .toc-item a[data-chapter-link]::after {
+  content: '→';
+  font-size: 0.8rem;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.book-toc-content .toc-item a[data-chapter-link]:hover::after {
+  opacity: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
   .book-toc-wrapper {
-    right: 1rem;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    border-radius: 0;
+    z-index: 100;
   }
   
-  .book-toc-button {
-    width: 48px;
-    height: 48px;
+  .book-toc-header {
+    padding: 1rem;
   }
   
-  .book-toc-icon {
-    width: 24px;
-    height: 24px;
+  .book-toc-content {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .book-toc-title {
+    font-size: 1rem;
   }
   
-  .book-toc-popup {
-    right: 70px;
-    width: 320px;
-  }
-  
-  .book-toc-tooltip {
-    display: none;
+  .book-toc-content a {
+    padding: 0.75rem;
+    font-size: 0.95rem;
   }
 }

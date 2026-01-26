@@ -1,0 +1,27 @@
+name: book_content
+version: 1.0.0
+category: Atomic
+description: Displays book content with header and toggle button
+enabled: true
+dependencies: []
+props:
+  book_title:
+    type: string
+    required: true
+    description: Title of the book
+  content:
+    type: string
+    required: true
+    description: The book content HTML
+slots: []
+templates:
+  - book_content.html
+styles:
+  - book_content.css
+scripts:
+  - book_content.js
+static_data: []
+config_schema: {}
+default_config: {}
+seo: null
+state: []

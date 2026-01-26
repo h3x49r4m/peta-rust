@@ -7,8 +7,8 @@ dependencies: []
 props:
   toc_html:
     type: string
-    required: true
-    description: HTML content of the table of contents
+    required: false
+    description: HTML content of the table of contents (deprecated - extracted from DOM by JavaScript)
   book_title:
     type: string
     required: false
