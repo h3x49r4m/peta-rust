@@ -13,10 +13,10 @@ props:
     type: string
     required: false
     description: Article content HTML
-  meta:
+  page:
     type: object
     required: false
-    description: Article metadata (date, author, tags)
+    description: Page metadata object (date, author, tags, etc.)
 slots:
   - name: children
     required: false

@@ -6,11 +6,30 @@
   </div>
   <div class="toc-content">
     {% if props.toc %}
-    {{ props.toc | safe }}
+      {% if props.toc is string %}
+        {{ props.toc | safe }}
+      {% else %}
+        <ul class="toc-list">
+          {% for entry in props.toc %}
+          <li class="toc-item toc-level-{{ entry.level }}">
+            <a href="#{{ entry.anchor }}" class="toc-link">{{ entry.title }}</a>
+            {% if entry.children %}
+            <ul class="toc-sublist">
+              {% for child in entry.children %}
+              <li class="toc-item toc-level-{{ child.level }}">
+                <a href="#{{ child.anchor }}" class="toc-link">{{ child.title }}</a>
+              </li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
     {% elif toc %}
-    {{ toc | safe }}
+      {{ toc | safe }}
     {% else %}
-    <p class="toc-empty">No table of contents available</p>
+      <p class="toc-empty">No table of contents available</p>
     {% endif %}
   </div>
 </div>

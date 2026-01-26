@@ -8,11 +8,16 @@ props:
   title:
     type: string
     required: false
+    default: "Table of Contents"
     description: Title for the TOC section
   toc:
     type: string
     required: false
     description: Table of contents HTML
+  page:
+    type: object
+    required: false
+    description: Page metadata object
 slots:
   - name: children
     required: false
