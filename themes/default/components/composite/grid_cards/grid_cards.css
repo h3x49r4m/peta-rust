@@ -92,6 +92,13 @@
   min-height: 350px;
   width: 100%;
   box-sizing: border-box;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.grid-cards-grid .grid-card.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .grid-cards-grid .grid-card::before {

@@ -55,6 +55,9 @@
 
       // Extract chapters from DOM
       this.extractChapters();
+
+      // Open modal by default to show full book content
+      this.open();
     }
 
     extractChapters() {
@@ -103,15 +106,24 @@
       }
     }
 
-    loadChapterContent(url) {
+    loadChapterContent(chapterUrl) {
       const contentArea = this.modal.querySelector('.book-modal-content');
       if (!contentArea) return;
 
       // Show loading state
       contentArea.innerHTML = '<p class="loading">Loading chapter...</p>';
 
+      // Build the full URL for the chapter
+      // The chapterUrl is like "introduction.html", need to prepend book path
+      const currentPath = window.location.pathname;
+      // If we're on book index (ends with index.html or just /), use same directory
+      let baseUrl = currentPath.replace(/\/[^\/]*$/, '/');
+      const fullUrl = baseUrl + chapterUrl;
+
+      console.log('Loading chapter from:', fullUrl);
+
       // Fetch chapter content
-      fetch(url)
+      fetch(fullUrl)
         .then(response => {
           if (!response.ok) {
             throw new Error(`Failed to load chapter: ${response.statusText}`);
@@ -124,16 +136,21 @@
           const doc = parser.parseFromString(html, 'text/html');
           const mainContent = doc.querySelector('.book-content');
           const articleContent = doc.querySelector('article.article-content');
+          const contentDiv = doc.querySelector('.content-div');
 
+          let contentHtml = '';
           if (mainContent) {
-            this.renderChapterContent(mainContent.innerHTML);
+            contentHtml = mainContent.innerHTML;
           } else if (articleContent) {
-            this.renderChapterContent(articleContent.innerHTML);
+            contentHtml = articleContent.innerHTML;
+          } else if (contentDiv) {
+            contentHtml = contentDiv.innerHTML;
           } else {
             // Fallback: use entire body content
-            const bodyContent = doc.body.innerHTML;
-            this.renderChapterContent(bodyContent);
+            contentHtml = doc.body.innerHTML;
           }
+
+          this.renderChapterContent(contentHtml);
         })
         .catch(error => {
           console.error('Error loading chapter:', error);
@@ -141,6 +158,7 @@
             <div class="error-message">
               <h3>Error Loading Chapter</h3>
               <p>${error.message}</p>
+              <p>URL: ${fullUrl}</p>
               <p>Please try again or check your connection.</p>
             </div>
           `;
@@ -230,8 +248,8 @@
   window.BookModal = BookModal;
 
   // Add styles for loading and error states
-  const style = document.createElement('style');
-  style.textContent = `
+  const bookModalStyle = document.createElement('style');
+  bookModalStyle.textContent = `
     .loading {
       text-align: center;
       padding: 2rem;
@@ -255,6 +273,6 @@
       color: var(--text-secondary, #718096);
     }
   `;
-  document.head.appendChild(style);
+  document.head.appendChild(bookModalStyle);
 
 })();

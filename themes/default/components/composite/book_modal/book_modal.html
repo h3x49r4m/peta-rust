@@ -24,7 +24,7 @@
             {% if props.chapters %}
             {% for chapter in props.chapters %}
             <li class="chapter-item">
-              <a href="#" class="chapter-link" data-chapter-index="{{ loop.index0 }}" data-chapter-url="{{ chapter.url }}">
+              <a href="#" class="chapter-link" data-chapter-index="{{ loop.index0 }}" data-chapter-url="{{ chapter.anchor }}.html" data-chapter-title="{{ chapter.title }}">
                 <span class="chapter-number">{{ loop.index }}.</span>
                 <span class="chapter-name">{{ chapter.title }}</span>
               </a>
@@ -41,12 +41,25 @@
 
       <!-- Main Content Area -->
       <main class="book-modal-content">
+        {% if props.current_chapter %}
+        <div class="chapter-content">
+          <h3 class="current-chapter-title">{{ props.current_chapter.title }}</h3>
+          <div class="current-chapter-body">
+            {{ props.current_chapter.content | safe }}
+          </div>
+        </div>
+        {% elif props.content %}
+        <div class="book-full-content">
+          {{ props.content | safe }}
+        </div>
+        {% else %}
         <div class="book-description">
           {% if props.book_description %}
           <p>{{ props.book_description }}</p>
           {% endif %}
           <p class="select-chapter-hint">Select a chapter from the sidebar to begin reading.</p>
         </div>
+        {% endif %}
       </main>
     </div>
   </div>

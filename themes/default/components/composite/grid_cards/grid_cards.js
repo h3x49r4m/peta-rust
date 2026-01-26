@@ -66,7 +66,7 @@ class GridCardsComponent {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          entry.target.style.animationPlayState = 'running';
+          entry.target.classList.add('visible');
           observer.unobserve(entry.target);
         }
       });
@@ -74,7 +74,6 @@ class GridCardsComponent {
 
     const cards = this.gridElement?.querySelectorAll('.grid-card');
     cards?.forEach(card => {
-      card.style.animationPlayState = 'paused';
       observer.observe(card);
     });
   }

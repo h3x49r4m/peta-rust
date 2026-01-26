@@ -17,10 +17,18 @@ props:
     type: string
     required: false
     description: Description of the book
+  book_url:
+    type: string
+    required: false
+    description: URL of the book's index page
+  content:
+    type: string
+    required: false
+    description: HTML content of the book
   chapters:
     type: array
     required: false
-    description: Array of chapter objects with title, content, and url
+    description: Array of chapter objects with title, anchor, and url
   current_chapter:
     type: object
     required: false

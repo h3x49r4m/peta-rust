@@ -71,8 +71,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Add visible class animation
-const style = document.createElement('style');
-style.textContent = `
+const gridCardStyle = document.createElement('style');
+  gridCardStyle.textContent = `
   .grid-card {
     opacity: 0;
     transform: translateY(20px);
@@ -83,5 +83,5 @@ style.textContent = `
     opacity: 1;
     transform: translateY(0);
   }
-`;
-document.head.appendChild(style);
+  `;
+  document.head.appendChild(gridCardStyle);

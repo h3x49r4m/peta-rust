@@ -63,13 +63,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Add ripple animation to styles
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes ripple {
-    to {
-      transform: translate(-50%, -50%) scale(4);
-      opacity: 0;
+const tagCloudStyle = document.createElement('style');
+  tagCloudStyle.textContent = `
+    @keyframes ripple {
+      to {
+        transform: translate(-50%, -50%) scale(4);
+        opacity: 0;
+      }
     }
-  }
-`;
-document.head.appendChild(style);
+  `;
+  document.head.appendChild(tagCloudStyle);

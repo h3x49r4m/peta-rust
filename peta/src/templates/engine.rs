@@ -244,6 +244,7 @@ impl TemplateEngine {
                     "content_div" => "atomic",
                     "article_toc" => "atomic",
                     "article_content" => "atomic",
+                    "book_toc" => "atomic",
                     "header" => "composite",
                     "footer" => "composite",
                     "page_tags" => "composite",
@@ -6533,7 +6534,10 @@ impl TemplateEngine {
         
         // Render template
         self.tera.render(template, &enhanced_context)
-            .map_err(|e| Error::template(e.to_string()))
+            .map_err(|e| {
+                eprintln!("Template rendering error for '{}': {}", template, e);
+                Error::template(e.to_string())
+            })
     }
     
     /// Render a component directly

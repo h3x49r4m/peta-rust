@@ -175,6 +175,7 @@ impl ComponentLoader {
             "content_div" => "atomic",
             "article_toc" => "atomic",
             "article_content" => "atomic",
+            "book_toc" => "atomic",
             "header" => "composite",
             "footer" => "composite",
             "page_tags" => "composite",

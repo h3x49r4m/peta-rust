@@ -1,0 +1,23 @@
+<div class="book-toc-wrapper" data-component="book_toc">
+  <!-- TOC Icon Button -->
+  <button class="book-toc-button" aria-label="Table of Contents">
+    <svg class="book-toc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M3 5h18M3 12h18M3 19h18"/>
+      <path d="M9 5v14M9 12h12"/>
+    </svg>
+    <span class="book-toc-tooltip">Table of Contents</span>
+  </button>
+  
+  <!-- TOC Popup -->
+  <div class="book-toc-popup">
+    <div class="book-toc-header">
+      <h3 class="book-toc-title">{% if props.book_title %}{{ props.book_title }}{% endif %}</h3>
+      <button class="book-toc-close" aria-label="Close">
+        <span class="close-icon">&times;</span>
+      </button>
+    </div>
+    <div class="book-toc-content">
+      {% if props.toc_html %}{{ props.toc_html | safe }}{% else %}<p>No table of contents available</p>{% endif %}
+    </div>
+  </div>
+</div>

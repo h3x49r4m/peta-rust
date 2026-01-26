@@ -14,8 +14,7 @@ function initializeArticleContent(component) {
   // Initialize reading progress
   initializeReadingProgress(component);
 
-  // Initialize table of contents
-  initializeTableOfContents(component);
+  
 
   // Initialize code block copy functionality
   initializeCodeBlocks(component);

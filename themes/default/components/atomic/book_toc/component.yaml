@@ -1,0 +1,27 @@
+name: book_toc
+version: 1.0.0
+category: Atomic
+description: Book table of contents icon with popup functionality
+enabled: true
+dependencies: []
+props:
+  toc_html:
+    type: string
+    required: true
+    description: HTML content of the table of contents
+  book_title:
+    type: string
+    required: false
+    description: Title of the book
+slots: []
+templates:
+  - book_toc.html
+styles:
+  - book_toc.css
+scripts:
+  - book_toc.js
+static_data: []
+config_schema: {}
+default_config: {}
+seo: null
+state: []

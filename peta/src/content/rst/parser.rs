@@ -1,6 +1,6 @@
 //! Main RST parser implementation following RST-first architecture
 
-use crate::content::{RstContent, ContentMetadata, ContentType};
+use crate::content::{RstContent, ContentMetadata, ContentType, TocEntry};
 use crate::content::rst::{MathRenderer, CodeHighlighter, DirectiveHandler, toc_generator::TocGenerator, MathProcessor, MathDetectionResult};
 use crate::core::Result;
 use crate::core::Error;
@@ -52,9 +52,16 @@ Ok(Self {
         // 3. Parse RST structure and process directives
         let processed_html = self.process_rst_content(&rst_content)?;
         
-        // 4. Generate table of contents
-        let toc = self.toc_generator.generate(&processed_html)?;
-        let toc_html = self.toc_generator.render_html(&toc);
+        // 4. Generate table of contents based on content type
+        let (toc, toc_html) = if metadata.content_type == ContentType::Book {
+            // For books, extract TOC from toctree directive
+            self.extract_toc_from_toctree(&processed_html)?
+        } else {
+            // For articles and other types, generate TOC from headings
+            let toc_entries = self.toc_generator.generate(&processed_html)?;
+            let toc_html = self.toc_generator.render_html(&toc_entries);
+            (toc_entries, toc_html)
+        };
         
         // 5. Detect math formulas and generate rendering script
         let math_detection = self.math_processor.auto_detect_math_content(&processed_html)?;
@@ -1216,6 +1223,55 @@ Ok(Self {
         rst_content.metadata.extra.insert("math_formula_count".to_string(), math_detection.formula_count.to_string());
         
         Ok((rst_content, math_detection))
+    }
+    
+    /// Extract TOC from toctree directive output in HTML
+    fn extract_toc_from_toctree(&self, html: &str) -> Result<(Vec<TocEntry>, String)> {
+        use regex::Regex;
+        
+        // Try to find toctree-generated HTML
+        let toc_tree_pattern = r#"<div class="toc-tree">(.+?)</div>"#;
+        let toc_caption_pattern = r#"<div class="toc-caption">(.+?)</div>"#;
+        let toc_tree_regex = Regex::new(toc_tree_pattern)?;
+        let toc_caption_regex = Regex::new(toc_caption_pattern)?;
+        
+        let mut toc_html = String::new();
+        let mut entries = Vec::new();
+        
+        // Extract caption if present
+        if let Some(caps) = toc_caption_regex.captures(html) {
+            if let Some(caption) = caps.get(1) {
+                toc_html.push_str(&format!("<div class=\"toc-caption\">{}</div>", caption.as_str()));
+            }
+        }
+        
+        // Extract toc-tree content
+        if let Some(caps) = toc_tree_regex.captures(html) {
+            let toc_content = caps.get(1).map(|m| m.as_str()).unwrap_or("");
+            
+            // Parse individual toc-item elements
+            let item_pattern = r#"<div class="toc-item"><a href="([^"]+)">([^<]+)</a></div>"#;
+            let item_regex = Regex::new(item_pattern)?;
+            for item_caps in item_regex.captures_iter(toc_content) {
+                if let (Some(url), Some(title)) = (item_caps.get(1), item_caps.get(2)) {
+                    let title_text = title.as_str().trim().to_string();
+                    let anchor = title_text.to_lowercase().replace(' ', "-");
+                    
+                    entries.push(TocEntry {
+                        level: 1,
+                        title: title_text,
+                        anchor,
+                        children: Vec::new(),
+                    });
+                }
+            }
+            
+            toc_html.push_str("<div class=\"toc-tree\">");
+            toc_html.push_str(toc_content);
+            toc_html.push_str("</div>");
+        }
+        
+        Ok((entries, toc_html))
     }
 }
 
