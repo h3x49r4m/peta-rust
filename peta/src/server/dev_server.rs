@@ -105,7 +105,7 @@ let addr = SocketAddr::from(([127, 0, 0, 1], self.port));
 }
 
 /// Serve static files
-async fn serve_file(path: axum::extract::Path<String>) -> axum::response::Result<axum::response::Response, axum::http::StatusCode> {
+async fn serve_file(path: axum::extract::Path<String>) -> axum::response::Response {
     let path = path.0;
     let output_dir = std::path::Path::new("_out/dist");
     
@@ -126,14 +126,53 @@ async fn serve_file(path: axum::extract::Path<String>) -> axum::response::Result
                 .as_ref()
                 .to_string();
             
-            Ok(axum::response::Response::builder()
+            axum::response::Response::builder()
                 .status(axum::http::StatusCode::OK)
                 .header("Content-Type", mime_type)
                 .body(axum::body::Body::from(contents))
-                .unwrap())
+                .unwrap()
         }
         Err(_) => {
-            Err(axum::http::StatusCode::NOT_FOUND)
+            // Return 404 page instead of NOT_FOUND status
+            match std::fs::read_to_string("_out/dist/404.html") {
+                Ok(content) => {
+                    axum::response::Response::builder()
+                        .status(axum::http::StatusCode::NOT_FOUND)
+                        .header("Content-Type", "text/html")
+                        .body(axum::body::Body::from(content))
+                        .unwrap()
+                }
+                Err(_) => {
+                    // Fallback if 404.html is not available
+                    let fallback_html = r#"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; text-align: center; padding: 2rem; }
+        h1 { font-size: 4rem; color: #3b82f6; margin-bottom: 1rem; }
+        p { color: #64748b; margin-bottom: 2rem; }
+        a { color: #3b82f6; text-decoration: none; font-weight: 600; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>404</h1>
+    <p>Page not found. <a href="/">Go home</a></p>
+</body>
+</html>
+                    "#;
+                    
+                    axum::response::Response::builder()
+                        .status(axum::http::StatusCode::NOT_FOUND)
+                        .header("Content-Type", "text/html")
+                        .body(axum::body::Body::from(fallback_html))
+                        .unwrap()
+                }
+            }
         }
     }
 }

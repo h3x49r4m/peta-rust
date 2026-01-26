@@ -203,17 +203,41 @@ impl SiteBuilder {
     
             // Generate search functionality
     
-            if self.config.search.enabled {
+            
     
-                self.generate_search_page(&template_engine, &output_dir)?;
-    
-            }
+                        if self.config.search.enabled {
     
             
     
-            // Copy and process assets
+                            self.generate_search_page(&template_engine, &output_dir)?;
     
-            self.process_assets(&output_dir)?;
+            
+    
+                        }
+    
+            
+    
+                        
+    
+            
+    
+                        // Generate 404 page
+    
+            
+    
+                        self.generate_404_page(&template_engine, &output_dir)?;
+    
+            
+    
+                        
+    
+            
+    
+                        // Copy and process assets
+    
+            
+    
+                        self.process_assets(&output_dir)?;
     
             
     
@@ -353,6 +377,15 @@ impl SiteBuilder {
         // Generate search.json for client-side search
         let search_json = self.search_index.generate_client_search()?;
         std::fs::write(output_dir.join("search.json"), search_json)?;
+        
+        Ok(())
+    }
+    
+    /// Generate 404 page
+    fn generate_404_page(&self, template_engine: &TemplateEngine, output_dir: &PathBuf) -> Result<()> {
+        // Generate 404.html
+        let not_found_html = template_engine.render("404.html", &self.create_base_context())?;
+        std::fs::write(output_dir.join("404.html"), not_found_html)?;
         
         Ok(())
     }
