@@ -9,23 +9,36 @@ document.addEventListener('DOMContentLoaded', function() {
     // Get the page title link and ensure it has the correct URL
     const pageTitleLink = component.querySelector('.page-title-link');
     if (pageTitleLink) {
-      // If no href is set, determine it based on the current page
-      if (!pageTitleLink.getAttribute('href') || pageTitleLink.getAttribute('href') === '#') {
-        const pageTitle = component.querySelector('.page-title').textContent.trim().toLowerCase();
-        const pageUrls = {
-          'articles': '/articles.html',
-          'books': '/books.html',
-          'projects': '/projects.html',
-          'snippets': '/snippets.html'
-        };
-        
-        if (pageUrls[pageTitle]) {
-          pageTitleLink.setAttribute('href', pageUrls[pageTitle]);
-        } else {
-          // Default to home if page is not recognized
-          pageTitleLink.setAttribute('href', '/');
-        }
+      const currentHref = pageTitleLink.getAttribute('href');
+      
+      // Determine the correct URL based on the page title
+      const pageTitle = component.querySelector('.page-title').textContent.trim().toLowerCase();
+      const pageUrls = {
+        'articles': '/articles.html',
+        'books': '/books.html',
+        'projects': '/projects.html',
+        'snippets': '/snippets.html'
+      };
+      
+      let targetUrl = currentHref;
+      
+      // If current href is a book page (contains /books/), redirect to books.html
+      if (currentHref && currentHref.includes('/books/')) {
+        targetUrl = '/books.html';
+      } else if (currentHref && currentHref.includes('/articles/')) {
+        targetUrl = '/articles.html';
+      } else if (currentHref && currentHref.includes('/projects/')) {
+        targetUrl = '/projects.html';
+      } else if (currentHref && currentHref.includes('/snippets/')) {
+        targetUrl = '/snippets.html';
+      } else if (pageUrls[pageTitle]) {
+        targetUrl = pageUrls[pageTitle];
+      } else if (!currentHref || currentHref === '#') {
+        // Default to home if page is not recognized
+        targetUrl = '/';
       }
+      
+      pageTitleLink.setAttribute('href', targetUrl);
     }
     
     // Add any interactive behavior here
