@@ -266,11 +266,61 @@ impl TemplateEngine {
                             let mut tera = tera::Tera::default();
                             tera.autoescape_on(vec![]); // Disable autoescape for HTML components
                             
-                            // Add the main component template
-                            if let Err(e) = tera.add_raw_template(component_name, &template_content) {
-                                eprintln!("Failed to add template {}: {}", component_name, e);
-                                return Ok(Value::String(format!("Failed to add template {}: {}", component_name, e)));
+                            // Add all component templates first
+                            let component_categories = ["atomic", "composite"];
+                            for category in &component_categories {
+                                let components_dir = format!("themes/default/components/{}", category);
+                                if let Ok(entries) = std::fs::read_dir(&components_dir) {
+                                    for entry in entries.flatten() {
+                                        if let Some(component_dir_name) = entry.file_name().to_str() {
+                                            let component_template_path = format!("{}/{}/{}.html", components_dir, component_dir_name, component_dir_name);
+                                            if std::path::Path::new(&component_template_path).exists() {
+                                                if let Ok(template_content) = std::fs::read_to_string(&component_template_path) {
+                                                    let _ = tera.add_raw_template(component_dir_name, &template_content);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
+                            
+                            // Now register component function to support nested component rendering
+                            tera.register_function("component", Box::new(move |args: &HashMap<String, Value>| -> tera::Result<Value> {
+                                let nested_component_name = args.get("0")
+                                    .or_else(|| args.get("name"))
+                                    .and_then(|v| v.as_str())
+                                    .ok_or_else(|| tera::Error::msg("Component name is required"))?;
+                                
+                                // Handle nested component props
+                                let nested_props = if let Some(positional_props) = args.get("1") {
+                                    positional_props.clone()
+                                } else if let Some(named_props) = args.get("props") {
+                                    named_props.clone()
+                                } else {
+                                    let mut props_map = serde_json::Map::new();
+                                    for (key, value) in args {
+                                        if key != "0" && key != "name" {
+                                            props_map.insert(key.clone(), value.clone());
+                                        }
+                                    }
+                                    Value::Object(props_map)
+                                };
+                                
+                                // Create nested context
+                                let mut nested_context = tera::Context::new();
+                                if let Some(props_obj) = nested_props.as_object() {
+                                    for (key, value) in props_obj {
+                                        nested_context.insert(key, value);
+                                    }
+                                }
+                                
+                                // Render nested component
+                                if let Ok(nested_rendered) = tera.render(nested_component_name, &nested_context) {
+                                    return Ok(Value::String(nested_rendered));
+                                }
+                                
+                                Ok(Value::String(String::new()))
+                            }));
                             
                                                         
                             
