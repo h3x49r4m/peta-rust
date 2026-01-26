@@ -33,18 +33,6 @@
   position: relative;
 }
 
-.article-header::before {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 200px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--primary_color, #3b82f6), transparent);
-  opacity: 0.5;
-}
-
 .header-content {
   max-width: 800px;
   margin: 0 auto;
