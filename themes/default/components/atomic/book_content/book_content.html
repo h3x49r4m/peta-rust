@@ -2,13 +2,6 @@
   <!-- Book Header -->
   <header class="book-page-header">
     <h1 class="book-title">{{ props.book_title }}</h1>
-    <!-- TOC Toggle Button -->
-    <button class="book-toc-toggle-btn" id="book-toc-toggle" aria-label="Toggle Table of Contents">
-      <svg class="toc-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-      <span class="toc-text">Contents</span>
-    </button>
   </header>
   
   <!-- Main Book Content - 100% width -->
@@ -17,16 +10,4 @@
       {{ props.content | safe }}
     </div>
   </main>
-  
-  <!-- Floating TOC Sidebar - completely separate from layout -->
-  <aside class="book-toc-sidebar" id="book-toc-sidebar">
-    <div class="book-toc-wrapper">
-      <div class="book-toc-header">
-        <h3>Table of Contents</h3>
-      </div>
-      <div class="book-toc-content">
-        <!-- TOC will be populated by JavaScript -->
-      </div>
-    </div>
-  </aside>
 </div>

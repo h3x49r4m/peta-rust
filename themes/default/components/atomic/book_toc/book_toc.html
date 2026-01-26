@@ -1,9 +1,17 @@
 <div class="book-toc-wrapper" data-component="book_toc">
-  <div class="book-toc-container">
+  <!-- Toggle Button -->
+  <button class="book-toc-toggle-btn" id="book-toc-toggle" aria-label="Toggle Table of Contents" aria-expanded="false">
+    <svg class="toc-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+    </svg>
+  </button>
+  
+  <!-- TOC Content Panel -->
+  <div class="book-toc-panel" id="book-toc-panel">
     <div class="book-toc-header">
       <h3 class="book-toc-title">Contents</h3>
     </div>
-    <div class="book-toc-content">
+    <div class="book-toc-content" id="book-toc-content">
       <!-- TOC will be populated by JavaScript -->
     </div>
   </div>

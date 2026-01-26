@@ -3,11 +3,29 @@ document.addEventListener('DOMContentLoaded', function() {
   const bookTocComponents = document.querySelectorAll('[data-component="book_toc"]');
   
   bookTocComponents.forEach(function(component) {
-    const tocContent = component.querySelector('.book-toc-content');
-    if (!tocContent) {
-      console.error('Book TOC content element not found');
+    const toggleBtn = component.querySelector('#book-toc-toggle');
+    const tocPanel = component.querySelector('.book-toc-panel');
+    const tocContent = component.querySelector('#book-toc-content');
+    
+    if (!toggleBtn || !tocPanel || !tocContent) {
+      console.error('Book TOC toggle button, panel, or content not found');
       return;
     }
+    
+    // Toggle button functionality
+    toggleBtn.addEventListener('click', function() {
+      const isExpanded = this.getAttribute('aria-expanded') === 'true';
+      
+      // Toggle the expanded state
+      this.setAttribute('aria-expanded', !isExpanded);
+      
+      // Toggle icon rotation
+      if (isExpanded) {
+        this.style.transform = 'rotate(0deg)';
+      } else {
+        this.style.transform = 'rotate(180deg)';
+      }
+    });
     
     // Find parent book modal
     const bookModal = component.closest('[data-component="book_modal"]');
@@ -46,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Get the chapter URL
         const chapterUrl = link.getAttribute('href');
         
-        // Navigate to the chapter page
+        // Navigate to chapter page
         if (chapterUrl) {
           // Get current book path
           const currentPath = window.location.pathname;

@@ -16,15 +16,28 @@
 
     <!-- Modal Body -->
     <div class="book-modal-body">
-      <!-- Book TOC Component -->
-      <aside class="book-modal-sidebar">
-        {{ component(name="book_toc", book_title=book_title) | safe }}
+      <!-- Book TOC - Floating component -->
+      <aside class="book-modal-toc-wrapper">
+        <div class="book-toc-wrapper" data-component="book_toc">
+          <div class="book-toc-container">
+            <div class="book-toc-header">
+              <h3 class="book-toc-title">Contents</h3>
+            </div>
+            <div class="book-toc-content" id="book-toc-content">
+              <!-- TOC will be populated by JavaScript -->
+            </div>
+          </div>
+        </div>
       </aside>
       
-      <!-- Book Content Component -->
+      <!-- Book Content -->
       <main class="book-modal-content">
         {% if content %}
-        {{ component(name="book_content", content=content) | safe }}
+        <div class="book-content" data-component="book_content">
+          <div class="book-content-wrapper">
+            {{ content | safe }}
+          </div>
+        </div>
         {% endif %}
       </main>
     </div>

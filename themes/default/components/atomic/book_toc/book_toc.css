@@ -1,40 +1,101 @@
-/* Book TOC Component Styles - Sidebar Layout */
+/* Book TOC Component Styles - Floating Icon with Panel */
 .book-toc-wrapper {
-  position: sticky;
-  top: 2rem;
-  max-height: calc(100vh - 4rem);
+  position: fixed;
+  right: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
   display: flex;
   flex-direction: column;
-  background: #f8f9fa;
-  border-radius: 8px;
+  align-items: flex-end;
+}
+
+/* Toggle Button */
+.book-toc-toggle-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--background-secondary, #f8f9fa);
+  border: 2px solid var(--border-color, #e2e8f0);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  color: var(--text-secondary, #4a5568);
+}
+
+.book-toc-toggle-btn:hover {
+  background: var(--color-primary, #3b82f6);
+  border-color: var(--color-primary, #3b82f6);
+  color: white;
+  transform: scale(1.1);
+}
+
+.toc-icon {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.3s ease;
+}
+
+.book-toc-toggle-btn[aria-expanded="true"] .toc-icon {
+  transform: rotate(-90deg);
+}
+
+/* TOC Panel */
+.book-toc-panel {
+  position: absolute;
+  right: 60px;
+  top: 50%;
+  transform: translateY(-50%) translateX(20px);
+  width: 300px;
+  max-width: 400px;
+  max-height: 70vh;
+  background: var(--background-primary, #ffffff);
+  border-radius: var(--radius-md, 0.375rem);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
 }
 
-.book-toc-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+.book-toc-toggle-btn[aria-expanded="true"] + .book-toc-panel,
+.book-toc-panel.expanded {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(0);
 }
 
+.book-toc-panel.collapsed {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-50%) translateX(20px);
+}
+
+/* TOC Header */
 .book-toc-header {
-  padding: 1.25rem;
-  background: #ffffff;
-  border-bottom: 2px solid #e9ecef;
-  flex-shrink: 0;
+  padding: var(--spacing-4, 1rem);
+  background: var(--background-secondary, #f8f9fa);
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .book-toc-title {
   margin: 0;
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: #212529;
+  font-size: var(--font-size-base, 1rem);
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--text-color, #1a202c);
 }
 
+/* TOC Content */
 .book-toc-content {
-  flex: 1;
+  padding: var(--spacing-4, 1rem);
   overflow-y: auto;
-  padding: 1rem;
+  max-height: calc(70vh - 50px);
 }
 
 .book-toc-content::-webkit-scrollbar {
@@ -42,17 +103,17 @@
 }
 
 .book-toc-content::-webkit-scrollbar-track {
-  background: #f1f3f5;
+  background: var(--background-secondary, #f1f3f5);
   border-radius: 3px;
 }
 
 .book-toc-content::-webkit-scrollbar-thumb {
-  background: #adb5bd;
+  background: var(--border-color, #adb5bd);
   border-radius: 3px;
 }
 
 .book-toc-content::-webkit-scrollbar-thumb:hover {
-  background: #868e96;
+  background: var(--text-secondary, #868e96);
 }
 
 /* TOC List Styling */
@@ -69,38 +130,38 @@
 .book-toc-content a {
   display: block;
   padding: 0.625rem 0.75rem;
-  color: #495057;
+  color: var(--text-secondary, #4a5568);
   text-decoration: none;
-  border-radius: 6px;
+  border-radius: var(--radius-sm, 0.25rem);
   transition: all 0.2s ease;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   line-height: 1.5;
   border-left: 3px solid transparent;
 }
 
 .book-toc-content a:hover {
-  background: #ffffff;
-  color: #0d6efd;
-  border-left-color: #0d6efd;
+  background: var(--background-secondary, #f8f9fa);
+  color: var(--color-primary, #3b82f6);
+  border-left-color: var(--color-primary, #3b82f6);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .book-toc-content a.active {
-  background: #ffffff;
-  color: #0d6efd;
-  border-left-color: #0d6efd;
+  background: var(--background-secondary, #f8f9fa);
+  color: var(--color-primary, #3b82f6);
+  border-left-color: var(--color-primary, #3b82f6);
   font-weight: 600;
 }
 
 /* TOC Caption */
 .book-toc-content .toc-caption {
   font-weight: 600;
-  color: #212529;
+  color: var(--text-color, #1a202c);
   margin-bottom: 0.75rem;
   padding: 0.5rem 0.75rem;
-  background: #e9ecef;
-  border-radius: 4px;
-  font-size: 0.85rem;
+  background: var(--background-tertiary, #e9ecef);
+  border-radius: var(--radius-sm, 0.25rem);
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -112,62 +173,33 @@
 }
 
 .book-toc-content ul ul a {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   padding: 0.5rem 0.75rem;
-  color: #6c757d;
+  color: var(--text-secondary, #6c757d);
 }
 
 .book-toc-content ul ul a:hover {
-  color: #0d6efd;
-}
-
-/* Chapter links */
-.book-toc-content .toc-item a[data-chapter-link] {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.book-toc-content .toc-item a[data-chapter-link]::after {
-  content: '→';
-  font-size: 0.8rem;
-  opacity: 0.5;
-  transition: opacity 0.2s ease;
-}
-
-.book-toc-content .toc-item a[data-chapter-link]:hover::after {
-  opacity: 1;
+  color: var(--color-primary, #3b82f6);
 }
 
 /* Responsive adjustments */
-@media (max-width: 1024px) {
-  .book-toc-wrapper {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    max-height: none;
-    border-radius: 0;
-    z-index: 100;
-  }
-  
-  .book-toc-header {
-    padding: 1rem;
-  }
-  
-  .book-toc-content {
-    padding: 1rem;
-  }
-}
-
 @media (max-width: 768px) {
-  .book-toc-title {
-    font-size: 1rem;
+  .book-toc-wrapper {
+    right: 10px;
   }
   
-  .book-toc-content a {
-    padding: 0.75rem;
-    font-size: 0.95rem;
+  .book-toc-panel {
+    width: 280px;
+    max-width: 90vw;
+  }
+  
+  .book-toc-toggle-btn {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .toc-icon {
+    width: 20px;
+    height: 20px;
   }
 }
