@@ -17,6 +17,10 @@ props:
     type: array
     required: false
     description: Array of tags for the tag cloud
+  page_url:
+    type: string
+    required: false
+    description: URL for the page when title is clicked
 slots:
   - name: children
     required: false

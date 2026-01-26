@@ -28,6 +28,21 @@
   background: linear-gradient(90deg, transparent, var(--border-color, #e2e8f0), transparent);
 }
 
+.page-title-link {
+  text-decoration: none;
+  color: inherit;
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.page-title-link:hover {
+  transform: translateX(4px);
+}
+
+.page-title-link:hover .page-title {
+  color: #3b82f6;
+}
+
 .page-title {
   font-size: var(--font-size-4xl, 3.75rem);
   font-weight: 800;
@@ -35,6 +50,7 @@
   color: var(--text-primary, #1a202c);
   margin: 0;
   position: relative;
+  transition: color 0.2s ease;
 }
 
 .page-title::after {

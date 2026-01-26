@@ -1,6 +1,8 @@
 <div class="page-tags" data-component="page_tags">
   <div class="page-info">
-    <h1 class="page-title">{{ props.title | default(value="Page Title") }}</h1>
+    <a href="{{ page_url | default(value='#') }}" class="page-title-link">
+      <h1 class="page-title">{{ props.title | default(value="Page Title") }}</h1>
+    </a>
   </div>
   
   <div class="tag-cloud-wrapper">

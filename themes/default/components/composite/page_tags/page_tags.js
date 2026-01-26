@@ -6,6 +6,28 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize page tags component
     console.log('Page tags component initialized');
     
+    // Get the page title link and ensure it has the correct URL
+    const pageTitleLink = component.querySelector('.page-title-link');
+    if (pageTitleLink) {
+      // If no href is set, determine it based on the current page
+      if (!pageTitleLink.getAttribute('href') || pageTitleLink.getAttribute('href') === '#') {
+        const pageTitle = component.querySelector('.page-title').textContent.trim().toLowerCase();
+        const pageUrls = {
+          'articles': '/articles.html',
+          'books': '/books.html',
+          'projects': '/projects.html',
+          'snippets': '/snippets.html'
+        };
+        
+        if (pageUrls[pageTitle]) {
+          pageTitleLink.setAttribute('href', pageUrls[pageTitle]);
+        } else {
+          // Default to home if page is not recognized
+          pageTitleLink.setAttribute('href', '/');
+        }
+      }
+    }
+    
     // Add any interactive behavior here
     component.addEventListener('click', function(e) {
       // Handle clicks within the component

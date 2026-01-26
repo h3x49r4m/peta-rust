@@ -3,7 +3,7 @@
 {% block title %}Articles - {{ site.title }}{% endblock %}
 
 {% block content %}
-{{ component(name="page_tags", title="Articles") | safe }}
+{{ component(name="page_tags", title="Articles", page_url="/articles.html") | safe }}
 
 {{ component(name="grid_cards", title="Articles", items=articles, columns=3, empty_message="No articles found.") | safe }}
 {% endblock %}

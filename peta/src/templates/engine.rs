@@ -297,13 +297,58 @@ impl TemplateEngine {
                                                         
                             
                                                         let mut context = tera::Context::new();
-                                                                                                                
-                                                                                                                context.insert("props", &props);
-                                                                                                                
-                                                                                                                // If page is passed as a prop, also insert it as page
-                                                                                                                if let Some(page) = props.get("page") {
-                                                                                                                    context.insert("page", page);
-                                                                                                                }                                                        
+                            
+                                                        
+                            
+                                                                                                        context.insert("props", &props);
+                            
+                                                        
+                            
+                                                                                                        
+                            
+                                                        
+                            
+                                                                                                        // Pass all props as top-level variables for easy access
+                            
+                                                        
+                            
+                                                                                                        if let Some(props_obj) = props.as_object() {
+                            
+                                                        
+                            
+                                                                                                            for (key, value) in props_obj {
+                            
+                                                        
+                            
+                                                                                                                context.insert(key, value);
+                            
+                                                        
+                            
+                                                                                                            }
+                            
+                                                        
+                            
+                                                                                                        }
+                            
+                                                        
+                            
+                                                                                                        
+                            
+                                                        
+                            
+                                                                                                        // If page is passed as a prop, also insert it as page
+                            
+                                                        
+                            
+                                                                                                        if let Some(page) = props.get("page") {
+                            
+                                                        
+                            
+                                                                                                            context.insert("page", page);
+                            
+                                                        
+                            
+                                                                                                        }                                                        
                                                         // Add site context with page type detection
                                                         let page_type = if component_name == "page_tags" {
                                                             if let Some(props) = props.as_object() {
