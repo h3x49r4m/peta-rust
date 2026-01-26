@@ -1,0 +1,53 @@
+<!-- Book Modal Component -->
+<div class="book-modal-overlay" id="book-modal-overlay-{{ props.book_id | default(value='default') }}" data-component="book_modal">
+  <div class="book-modal-container">
+    <!-- Modal Header -->
+    <div class="book-modal-header">
+      <div class="book-modal-header-content">
+        <h2 class="book-modal-title">{{ props.book_title }}</h2>
+        {% if props.book_author %}
+        <p class="book-modal-author">by {{ props.book_author }}</p>
+        {% endif %}
+      </div>
+      <button class="book-modal-close" aria-label="Close modal">
+        <span class="close-icon">&times;</span>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="book-modal-body">
+      <!-- Sidebar: Chapter Navigation -->
+      <aside class="book-modal-sidebar">
+        <div class="chapter-list">
+          <h3 class="chapter-list-title">Chapters</h3>
+          <ul class="chapter-items">
+            {% if props.chapters %}
+            {% for chapter in props.chapters %}
+            <li class="chapter-item">
+              <a href="#" class="chapter-link" data-chapter-index="{{ loop.index0 }}" data-chapter-url="{{ chapter.url }}">
+                <span class="chapter-number">{{ loop.index }}.</span>
+                <span class="chapter-name">{{ chapter.title }}</span>
+              </a>
+            </li>
+            {% endfor %}
+            {% else %}
+            <li class="chapter-item">
+              <p class="no-chapters">No chapters available</p>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="book-modal-content">
+        <div class="book-description">
+          {% if props.book_description %}
+          <p>{{ props.book_description }}</p>
+          {% endif %}
+          <p class="select-chapter-hint">Select a chapter from the sidebar to begin reading.</p>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>

@@ -4,10 +4,17 @@
 
 {% block extra_styles %}
 <style>
+    .book-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--spacing-8, 2rem);
+        width: 100%;
+    }
+    
     .book-container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: var(--spacing-8);
+        width: 100%;
+        max-width: none;
+        padding: 0;
     }
     
     .book-header {
@@ -134,36 +141,43 @@
 {% endblock %}
 
 {% block content %}
-<div class="book-container">
-    <header class="book-header">
-        <h1 class="book-title">{{ page.title }}</h1>
-        <div class="book-meta">
-            {% if page.author %}by {{ page.author }}{% endif %}
-        </div>
-    </header>
-    
-    <main>
-        <article class="book-content">
-            {% if toc and toc | length > 1 %}
-            <div class="toc">
-                <h3>Table of Contents</h3>
-                {{ toc | safe }}
+{{ component(name="page_tags", title="Books", page_url=page.url) | safe }}
+
+<div class="book-layout">
+    <div class="book-container">
+        <header class="book-header">
+            <h1 class="book-title">{{ page.title }}</h1>
+            <div class="book-meta">
+                {% if page.author %}by {{ page.author }}{% endif %}
             </div>
-            {% endif %}
-            
-            {{ content | safe }}
-        </article>
+        </header>
         
-        {% if page.previous_chapter or page.next_chapter %}
-        <nav class="book-navigation">
-            {% if page.previous_chapter %}
-            <a href="{{ page.previous_chapter.url }}">← {{ page.previous_chapter.title }}</a>
+        <main>
+            <article class="book-content">
+                {% if toc and toc | length > 1 %}
+                <div class="toc">
+                    <h3>Table of Contents</h3>
+                    {{ toc | safe }}
+                </div>
+                {% endif %}
+                
+                {{ content | safe }}
+            </article>
+            
+            {% if page.previous_chapter or page.next_chapter %}
+            <nav class="book-navigation">
+                {% if page.previous_chapter %}
+                <a href="{{ page.previous_chapter.url }}">← {{ page.previous_chapter.title }}</a>
+                {% endif %}
+                {% if page.next_chapter %}
+                <a href="{{ page.next_chapter.url }}">{{ page.next_chapter.title }} →</a>
+                {% endif %}
+            </nav>
             {% endif %}
-            {% if page.next_chapter %}
-            <a href="{{ page.next_chapter.url }}">{{ page.next_chapter.title }} →</a>
-            {% endif %}
-        </nav>
-        {% endif %}
-    </main>
+        </main>
+    </div>
 </div>
+
+<!-- Book Modal Component -->
+{{ component(name="book_modal", book_title=page.title) | safe }}
 {% endblock %}

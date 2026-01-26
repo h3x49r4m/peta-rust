@@ -77,6 +77,7 @@ impl Function for ComponentScriptsFunction {
                     "snippet_card_modal" => "composite",
                     "grid_cards" => "composite",
                     "article_modal" => "composite",
+                    "book_modal" => "composite",
                     _ => continue,
                 };
                 

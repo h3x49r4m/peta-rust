@@ -1,0 +1,43 @@
+name: book_modal
+version: 1.0.0
+category: Composite
+description: Modal component for displaying full book content with chapter navigation
+enabled: true
+dependencies: []
+props:
+  book_title:
+    type: string
+    required: true
+    description: Title of the book
+  book_author:
+    type: string
+    required: false
+    description: Author of the book
+  book_description:
+    type: string
+    required: false
+    description: Description of the book
+  chapters:
+    type: array
+    required: false
+    description: Array of chapter objects with title, content, and url
+  current_chapter:
+    type: object
+    required: false
+    description: Currently active chapter object
+  book_id:
+    type: string
+    required: false
+    description: Unique identifier for the book
+slots: []
+templates:
+  - book_modal.html
+styles:
+  - book_modal.css
+scripts:
+  - book_modal.js
+static_data: []
+config_schema: {}
+default_config: {}
+seo: null
+state: []
