@@ -528,6 +528,12 @@ impl SiteBuilder {
             if let Ok(book_toc) = self.generate_book_toc(&content) {
                 context.insert("book_toc", &book_toc);
             }
+            if let Ok(book_title) = self.get_book_title(&content) {
+                context.insert("book_title", &book_title);
+            }
+            if let Ok(book_author) = self.get_book_author(&content) {
+                context.insert("book_author", &book_author);
+            }
         }
         
         // Add all snippets data if this is a snippet page
@@ -610,6 +616,82 @@ impl SiteBuilder {
         let toc_html = generator.render_html(&chapters);
         
         Ok(toc_html)
+    }
+    
+    /// Get book title from the book's index.rst file
+    fn get_book_title(&self, content: &RstContent) -> Result<String> {
+        use std::fs;
+        
+        // Extract book directory from URL
+        let url_parts: Vec<&str> = content.metadata.url.split('/').collect();
+        if url_parts.len() < 2 || url_parts[0] != "books" {
+            return Ok(content.metadata.title.clone());
+        }
+        
+        let book_dir_name = url_parts[1];
+        let index_path = Path::new("_content/books").join(book_dir_name).join("index.rst");
+        
+        if !index_path.exists() {
+            return Ok(content.metadata.title.clone());
+        }
+        
+        let index_content = fs::read_to_string(&index_path)?;
+        
+        // Extract title from frontmatter
+        if let Some(frontmatter) = index_content.split("---").nth(1) {
+            for line in frontmatter.lines() {
+                if line.starts_with("title:") {
+                    let title = line.trim_start_matches("title:")
+                        .trim()
+                        .trim_start_matches('"')
+                        .trim_end_matches('"')
+                        .trim_start_matches('\'')
+                        .trim_end_matches('\'');
+                    return Ok(title.to_string());
+                }
+            }
+        }
+        
+        // Fallback to content title
+        Ok(content.metadata.title.clone())
+    }
+    
+    /// Get book author from the book's index.rst file
+    fn get_book_author(&self, content: &RstContent) -> Result<String> {
+        use std::fs;
+        
+        // Extract book directory from URL
+        let url_parts: Vec<&str> = content.metadata.url.split('/').collect();
+        if url_parts.len() < 2 || url_parts[0] != "books" {
+            return Ok(content.metadata.author.clone().unwrap_or_default());
+        }
+        
+        let book_dir_name = url_parts[1];
+        let index_path = Path::new("_content/books").join(book_dir_name).join("index.rst");
+        
+        if !index_path.exists() {
+            return Ok(content.metadata.author.clone().unwrap_or_default());
+        }
+        
+        let index_content = fs::read_to_string(&index_path)?;
+        
+        // Extract author from frontmatter
+        if let Some(frontmatter) = index_content.split("---").nth(1) {
+            for line in frontmatter.lines() {
+                if line.starts_with("author:") {
+                    let author = line.trim_start_matches("author:")
+                        .trim()
+                        .trim_start_matches('"')
+                        .trim_end_matches('"')
+                        .trim_start_matches('\'')
+                        .trim_end_matches('\'');
+                    return Ok(author.to_string());
+                }
+            }
+        }
+        
+        // Fallback to content author
+        Ok(content.metadata.author.clone().unwrap_or_default())
     }
     
     /// Generate contexts data files (site.json, search.json, tags.json)
