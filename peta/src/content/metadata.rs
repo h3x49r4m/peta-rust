@@ -16,10 +16,19 @@ impl MetadataExtractor {
     
     /// Extract metadata from frontmatter with optional file path for book chapters
     pub fn extract_with_path(frontmatter: &HashMap<String, serde_json::Value>, file_path: Option<&std::path::Path>) -> Result<ContentMetadata> {
-        let title = frontmatter.get("title")
-            .and_then(|v| v.as_str())
-            .unwrap_or("Untitled")
-            .to_string();
+        // For book chapters without frontmatter, use filename as title
+        let title = if frontmatter.get("title").is_none() && file_path.is_some() {
+            file_path
+                .and_then(|p| p.file_stem())
+                .and_then(|s| s.to_str())
+                .map(|s| s.replace('-', " ").replace('_', " ")) // Convert kebab-case to title case
+                .unwrap_or_else(|| "Untitled".to_string())
+        } else {
+            frontmatter.get("title")
+                .and_then(|v| v.as_str())
+                .unwrap_or("Untitled")
+                .to_string()
+        };
         
         let content_type = frontmatter.get("type")
             .and_then(|v| v.as_str())
@@ -75,19 +84,23 @@ impl MetadataExtractor {
     
     /// Generate URL from title, content type, and optional file path
     fn generate_url_with_path(title: &str, content_type: &ContentType, file_path: Option<&std::path::Path>) -> String {
-        let slug = Self::slugify(title);
-        
         // For books, check if this is a chapter file
         if *content_type == ContentType::Book {
             if let Some(path) = file_path {
                 if let Some(file_name) = path.file_name().and_then(|n| n.to_str()) {
                     if file_name != "index.rst" {
-                        // This is a chapter file
+                        // This is a chapter file - ALWAYS use filename stem for URL to ensure 1-to-1 mapping
+                        let fallback_slug = Self::slugify(title);
+                        let chapter_slug = path.file_stem()
+                            .and_then(|s| s.to_str())
+                            .unwrap_or(fallback_slug.as_str())
+                            .to_string();
+                        
                         if let Some(parent) = path.parent() {
                             if let Some(book_dir_name) = parent.file_name().and_then(|n| n.to_str()) {
                                 let book_slug = Self::slugify(book_dir_name);
                                 // Generate URL: books/{book-name}/{chapter-name}.html
-                                return format!("books/{}/{}.html", book_slug, slug);
+                                return format!("books/{}/{}.html", book_slug, chapter_slug);
                             }
                         }
                     }
@@ -95,7 +108,8 @@ impl MetadataExtractor {
             }
         }
         
-        // Default URL generation
+        // Default URL generation for index pages and other content types
+        let slug = Self::slugify(title);
         match content_type {
             ContentType::Article => format!("articles/{}.html", slug),
             ContentType::Book => format!("books/{}/index.html", slug),

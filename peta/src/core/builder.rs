@@ -86,12 +86,16 @@ impl SiteBuilder {
             return Ok(());
         }
         
+        use std::collections::HashSet;
+        let mut loaded_files = HashSet::new();
+        
         // First load index.rst files in subdirectories
         let pattern = dir.join("**/index.rst");
         
         if let Ok(paths) = glob(pattern.to_str().unwrap()) {
             for path in paths.flatten() {
                 if let Ok(content) = self.load_rst_file(&path, content_type.clone()).await {
+                    loaded_files.insert(path.clone());
                     self.rst_content.push(content);
                 }
             }
@@ -103,6 +107,7 @@ impl SiteBuilder {
         if let Ok(paths) = glob(pattern.to_str().unwrap()) {
             for path in paths.flatten() {
                 if let Ok(content) = self.load_rst_file(&path, content_type.clone()).await {
+                    loaded_files.insert(path.clone());
                     self.rst_content.push(content);
                 }
             }
@@ -114,9 +119,10 @@ impl SiteBuilder {
             
             if let Ok(paths) = glob(pattern.to_str().unwrap()) {
                 for path in paths.flatten() {
-                    // Skip index.rst files as they were already loaded
-                    if path.file_name().and_then(|n| n.to_str()) != Some("index.rst") {
+                    // Skip files that were already loaded
+                    if !loaded_files.contains(&path) {
                         if let Ok(content) = self.load_rst_file(&path, content_type.clone()).await {
+                            loaded_files.insert(path.clone());
                             self.rst_content.push(content);
                         }
                     }
@@ -352,7 +358,12 @@ impl SiteBuilder {
             match content.metadata.content_type {
                 ContentType::Article => articles.push(item),
                 ContentType::Snippet => snippets.push(item),
-                ContentType::Book => books.push(item),
+                ContentType::Book => {
+                    // Only include book index files, not chapters
+                    if content.metadata.url.ends_with("index.html") {
+                        books.push(item);
+                    }
+                },
                 ContentType::Project => projects.push(item),
             }
         }

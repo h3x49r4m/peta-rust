@@ -48,15 +48,41 @@ document.addEventListener('DOMContentLoaded', function() {
               if (link) {
                 // Clone the link and keep its href for navigation
                 const newLink = link.cloneNode(true);
+                const href = newLink.getAttribute('href');
                 
-                // Add click handler to close sidebar after navigation
-                newLink.addEventListener('click', function() {
-                  // Close sidebar on mobile
-                  if (window.innerWidth <= 768) {
-                    tocSidebar.classList.remove('active');
-                    toggleBtn.classList.remove('active');
-                  }
-                });
+                // Check if it's an external link or chapter link
+                if (href && !href.startsWith('#') && !href.startsWith('http')) {
+                  // It's a chapter link - make it work as normal navigation
+                  newLink.addEventListener('click', function(e) {
+                    // Let the browser handle the navigation normally
+                    // Just close sidebar on mobile
+                    if (window.innerWidth <= 768) {
+                      tocSidebar.classList.remove('active');
+                      toggleBtn.classList.remove('active');
+                    }
+                  });
+                } else if (href && href.startsWith('#')) {
+                  // It's an anchor link for scrolling
+                  newLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = href.substring(1);
+                    const targetElement = component.querySelector(`[id="${targetId}"]`);
+                    
+                    if (targetElement) {
+                      targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                      });
+                      history.pushState(null, null, href);
+                    }
+                    
+                    // Close sidebar on mobile
+                    if (window.innerWidth <= 768) {
+                      tocSidebar.classList.remove('active');
+                      toggleBtn.classList.remove('active');
+                    }
+                  });
+                }
                 
                 const listItem = document.createElement('li');
                 listItem.appendChild(newLink);
