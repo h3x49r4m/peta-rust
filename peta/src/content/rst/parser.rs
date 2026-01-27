@@ -1,8 +1,7 @@
-//! Main RST parser implementation following RST-first architecture
+//! RST parser implementation with improved architecture
 
 use crate::content::rst::{
-    toc_generator::TocGenerator, CodeHighlighter, DirectiveHandler, MathDetectionResult,
-    MathProcessor, MathRenderer,
+    toc_generator::TocGenerator, CodeHighlighter, DirectiveHandler, MathProcessor, MathRenderer,
 };
 use crate::content::{ContentMetadata, ContentType, RstContent, TocEntry};
 use crate::core::Error;
@@ -49,7 +48,7 @@ impl RstParser {
         })
     }
 
-    /// Parse RST content to HTML following RST-first architecture
+    /// Parse RST content to HTML
     pub fn parse(&mut self, content: &str) -> Result<RstContent> {
         self.parse_with_type(content, None)
     }
@@ -73,7 +72,7 @@ impl RstParser {
         // 1. Extract frontmatter
         let (frontmatter, rst_content) = self.extract_frontmatter(content)?;
 
-        // 2. Extract metadata from frontmatter with optional type override and file path
+        // 2. Extract metadata from frontmatter
         let metadata = self.extract_metadata_with_type_and_path(
             &frontmatter,
             content_type_override,
@@ -83,26 +82,19 @@ impl RstParser {
         // 3. Parse RST structure and process directives
         let processed_html = self.process_rst_content(&rst_content)?;
 
-        // 4. Generate table of contents based on content type
+        // 4. Generate table of contents
         let (toc, toc_html) = if metadata.content_type == ContentType::Book {
-            // For books, extract TOC from toctree directive
             self.extract_toc_from_toctree(&processed_html)?
         } else {
-            // For articles and other types, generate TOC from headings
             let toc_entries = self.toc_generator.generate(&processed_html)?;
             let toc_html = self.toc_generator.render_html(&toc_entries);
             (toc_entries, toc_html)
         };
 
         // 5. Detect math formulas and generate rendering script
-        let math_detection = self
-            .math_processor
-            .auto_detect_math_content(&processed_html)?;
+        let math_detection = self.math_processor.auto_detect_math_content(&processed_html)?;
         let math_script = if math_detection.has_formulas {
-            Some(
-                self.math_renderer
-                    .generate_on_demand_script(&math_detection),
-            )
+            Some(self.math_renderer.generate_on_demand_script(&math_detection))
         } else {
             None
         };
@@ -124,12 +116,11 @@ impl RstParser {
         &self,
         content: &str,
     ) -> Result<(HashMap<String, serde_json::Value>, String)> {
-        // Simple approach: split on the first occurrence of "---\n"
         if content.starts_with("---\n") {
-            let without_prefix = &content[4..]; // Remove "---\n"
+            let without_prefix = &content[4..];
             if let Some(pos) = without_prefix.find("\n---\n") {
                 let frontmatter_str = &without_prefix[..pos];
-                let rst_content = &without_prefix[pos + 5..]; // Skip "\n---\n"
+                let rst_content = &without_prefix[pos + 5..];
 
                 let frontmatter: HashMap<String, serde_json::Value> =
                     serde_yaml::from_str(frontmatter_str).map_err(|e| {
@@ -140,19 +131,10 @@ impl RstParser {
             }
         }
 
-        // No frontmatter found
         Ok((HashMap::new(), content.to_string()))
     }
 
     /// Extract metadata from frontmatter
-    #[allow(dead_code)]
-    fn extract_metadata(
-        &self,
-        frontmatter: &HashMap<String, serde_json::Value>,
-    ) -> Result<ContentMetadata> {
-        self.extract_metadata_with_type(frontmatter, None)
-    }
-
     fn extract_metadata_with_type(
         &self,
         frontmatter: &HashMap<String, serde_json::Value>,
@@ -167,7 +149,6 @@ impl RstParser {
         content_type_override: Option<ContentType>,
         file_path: Option<&std::path::Path>,
     ) -> Result<ContentMetadata> {
-        // If content_type_override is provided, add it to frontmatter
         let mut frontmatter_clone = frontmatter.clone();
         if let Some(ct) = content_type_override {
             frontmatter_clone.insert(
@@ -176,81 +157,10 @@ impl RstParser {
             );
         }
 
-        // Use MetadataExtractor to extract metadata
         crate::content::metadata::MetadataExtractor::extract_with_path(
             &frontmatter_clone,
             file_path,
         )
-    }
-
-    /// Generate URL from title and content type
-    fn generate_url(&self, title: &str, content_type: &ContentType) -> String {
-        let slug = self.slugify(title);
-        match content_type {
-            ContentType::Article => format!("articles/{}.html", slug),
-            ContentType::Book => format!("books/{}/index.html", slug),
-            ContentType::Snippet => format!("snippets/{}.html", slug),
-            ContentType::Project => format!("projects/{}.html", slug),
-        }
-    }
-
-    /// Generate ID from title
-    fn generate_id(&self, title: &str) -> String {
-        self.slugify(title)
-    }
-
-    /// Convert title to URL-friendly slug
-    fn slugify(&self, title: &str) -> String {
-        let mut result = title.to_lowercase();
-
-        // Handle common programming language notations first
-        result = result.replace("c++", "cpp");
-        result = result.replace("c#", "csharp");
-        result = result.replace("f#", "fsharp");
-        result = result.replace("c++/cli", "cpp-cli");
-        result = result.replace(".net", "dotnet");
-        result = result.replace("node.js", "nodejs");
-        result = result.replace("react.js", "reactjs");
-        result = result.replace("vue.js", "vuejs");
-        result = result.replace("angular.js", "angularjs");
-
-        // Replace common symbols with words
-        result = result.replace("++", "plus");
-        result = result.replace("--", "minus");
-        result = result.replace("==", "equals");
-        result = result.replace("!=", "not-equals");
-        result = result.replace("<=", "less-equal");
-        result = result.replace(">=", "greater-equal");
-        result = result.replace("->", "arrow");
-        result = result.replace("=>", "fat-arrow");
-        result = result.replace("&&", "and");
-        result = result.replace("||", "or");
-
-        // Replace spaces and punctuation with dashes
-        result = result.replace(
-            &[
-                ' ', '-', '_', '.', ',', ';', ':', '!', '?', '@', '#', '$', '%', '^', '&', '*',
-                '(', ')', '=', '[', ']', '{', '}', '\\', '|', '<', '>', '/', '"', '\'',
-            ][..],
-            "-",
-        );
-
-        // Remove quotes completely
-        result = result.replace(['"', '\''], "");
-
-        // Filter to only keep alphanumeric characters and dashes
-        result = result
-            .chars()
-            .filter(|c| c.is_alphanumeric() || *c == '-')
-            .collect::<String>();
-
-        // Collapse multiple dashes into single dashes
-        while result.contains("--") {
-            result = result.replace("--", "-");
-        }
-
-        // Trim leading/trailing dashes
-        result.trim_matches('-').to_string()
     }
 
     /// Process RST content and convert to HTML
@@ -263,27 +173,20 @@ impl RstParser {
         // Process math equations
         processed = self.math_renderer.render(&processed)?;
 
-        // Process code blocks (only actual code blocks, not entire content)
-        // This is handled in the directive processing, so we don't apply it to the entire document
-
-        // Convert RST markup to HTML (skip directive content)
+        // Convert RST markup to HTML
         processed = self.convert_rst_to_html(&processed)?;
 
         Ok(processed)
     }
 
     /// Process RST directives
-
     fn process_directives(&mut self, content: &str) -> Result<String> {
         let directive_start_regex = Regex::new(r"\.\. ([a-zA-Z0-9_-]+)::").map_err(|e| {
             crate::core::Error::rst_parse(format!("Failed to compile directive regex: {}", e))
         })?;
 
         let mut result = String::new();
-
         let mut last_pos = 0;
-
-        // Find all directive starts
 
         let mut directive_starts = Vec::new();
 
@@ -291,51 +194,29 @@ impl RstParser {
             directive_starts.push((mat.start(), mat.end(), mat.as_str()));
         }
 
-        // Process each directive
-
         for (i, &(start, end, directive_str)) in directive_starts.iter().enumerate() {
-            // Add content before this directive
-
             result.push_str(&content[last_pos..start]);
-
-            // Extract directive type
 
             let directive_type = directive_str
                 .trim_start_matches(".. ")
                 .trim_end_matches("::")
                 .trim();
 
-            // Find directive content end based on indentation
-
             let content_start = end;
-
             let lines_after_directive: Vec<&str> = content[content_start..].lines().collect();
-
             let mut content_end = content.len();
-
             let mut found_indented_content = false;
 
-            // Special handling for snippet-card directive - only take the first line
-
             if directive_type == "snippet-card" {
-                // Find the first non-empty line
-
                 for line in lines_after_directive.iter() {
                     if line.trim().is_empty() {
                         continue;
                     }
-
-                    // Only take the first non-empty line as the snippet name
-
                     let line_end = content_start + line.len();
-
                     content_end = line_end;
-
                     break;
                 }
             } else {
-                // Original logic for other directives
-
                 for (line_idx, line) in lines_after_directive.iter().enumerate() {
                     let line_start_pos = content_start
                         + if line_idx > 0 {
@@ -344,37 +225,26 @@ impl RstParser {
                             0
                         };
 
-                    // Skip empty lines at the beginning
-
                     if !found_indented_content && line.trim().is_empty() {
                         continue;
                     }
 
-                    // If we find an indented line, mark that we've found the content
-
                     if line.starts_with("    ") || line.starts_with("\t") {
                         found_indented_content = true;
-
                         continue;
                     }
-
-                    // If we found indented content and now hit a non-indented line, this is the end
 
                     if found_indented_content
                         && !line.starts_with("    ")
                         && !line.starts_with("\t")
                     {
                         content_end = line_start_pos;
-
                         break;
                     }
                 }
 
-                // If there's another directive, don't go past it
-
                 if i + 1 < directive_starts.len() {
                     let next_directive_start = directive_starts[i + 1].0;
-
                     if content_end > next_directive_start {
                         content_end = next_directive_start;
                     }
@@ -383,18 +253,13 @@ impl RstParser {
 
             let directive_content = &content[content_start..content_end];
 
-            // Process directive if we have a handler
-
             if let Some(handler) = self.directive_handlers.get_mut(directive_type) {
                 let processed = handler.handle(directive_content)?;
-
                 result.push_str(&processed);
             }
 
             last_pos = content_end;
         }
-
-        // Add remaining content after the last directive
 
         result.push_str(&content[last_pos..]);
 
@@ -405,19 +270,10 @@ impl RstParser {
     fn convert_rst_to_html(&self, content: &str) -> Result<String> {
         let mut html = content.to_string();
 
-        // Convert headers
         html = self.convert_headers(&html)?;
-
-        // Convert emphasis
         html = self.convert_emphasis(&html)?;
-
-        // Convert links
         html = self.convert_links(&html)?;
-
-        // Convert lists
         html = self.convert_lists(&html)?;
-
-        // Convert paragraphs
         html = self.convert_paragraphs(&html)?;
 
         Ok(html)
@@ -432,11 +288,9 @@ impl RstParser {
         while i < lines.len() {
             let line = lines[i];
 
-            // Check for RST-style underlined headers
             if i + 1 < lines.len() {
                 let next_line = lines[i + 1];
                 let current_line = line.trim();
-                // RST underline should be at least as long as the text
                 if (next_line.chars().all(|c| c == '=') || next_line.chars().all(|c| c == '-'))
                     && next_line.len() >= current_line.len()
                     && !current_line.is_empty()
@@ -451,12 +305,11 @@ impl RstParser {
                         "<h{} id=\"{}\">{}</h{}>",
                         level, anchor, current_line, level
                     ));
-                    i += 2; // Skip both the title and underline
+                    i += 2;
                     continue;
                 }
             }
 
-            // Check for markdown-style headers as fallback
             let header_regex = Regex::new(r"^(#{1,6})\s+(.+)$").map_err(|e| {
                 crate::core::Error::rst_parse(format!("Failed to compile header regex: {}", e))
             })?;
@@ -474,17 +327,19 @@ impl RstParser {
                 && !line.contains('[')
                 && !line.contains('`')
             {
-                // Check if this line could be a standalone header (not empty, not indented, no markup)
                 let trimmed = line.trim();
-                // Skip lines that are just RST underline characters or too long (likely sentences)
-                if trimmed.len() > 0 &&
+                // Skip lines that look like list items
+                if trimmed.starts_with("- ") || trimmed.starts_with("* ") ||
+                   (trimmed.chars().next().map(|c| c.is_numeric()).unwrap_or(false) && trimmed.contains('.')) {
+                    result.push(line.to_string());
+                    i += 1;
+                } else if trimmed.len() > 0 &&
                    !trimmed.chars().all(|c| c == '=' || c == '-' || c == '~' || c == '^' || c == '*' || c == '+' || c == '"' || c == '#' || c == '`') &&
-                   trimmed.len() <= 50 && // Shorter than 50 characters
-                   !trimmed.contains('.') && // No periods (not a sentence)
-                   !trimmed.contains(',') && // No commas
+                   trimmed.len() <= 50 &&
+                   !trimmed.contains('.') &&
+                   !trimmed.contains(',') &&
                    trimmed.chars().all(|c| c.is_alphanumeric() || c == ' ' || c == '-' || c == '_')
                 {
-                    // Treat as a level 3 header
                     let anchor = self.slugify(trimmed);
                     result.push(format!("<h3 id=\"{}\">{}</h3>", anchor, trimmed));
                     i += 1;
@@ -506,31 +361,23 @@ impl RstParser {
         let mut result = String::new();
         let mut pos = 0;
 
-        // Regex to match HTML tags
         let html_tag_regex = Regex::new(r"<[^>]*>").map_err(|e| {
             crate::core::Error::rst_parse(format!("Failed to compile HTML tag regex: {}", e))
         })?;
 
-        // Find all HTML tags
         let mut html_tags = Vec::new();
         for mat in html_tag_regex.find_iter(content) {
             html_tags.push((mat.start(), mat.end()));
         }
 
-        // Process content, skipping HTML tags
         for &(start, end) in &html_tags {
-            // Process text content before this HTML tag
             let before_tag = &content[pos..start];
             let processed_before = self.process_emphasis_text(before_tag)?;
             result.push_str(&processed_before);
-
-            // Add the HTML tag as-is (without processing emphasis)
             result.push_str(&content[start..end]);
-
             pos = end;
         }
 
-        // Process remaining content after the last HTML tag
         if pos < content.len() {
             let remaining = &content[pos..];
             let processed_remaining = self.process_emphasis_text(remaining)?;
@@ -540,11 +387,10 @@ impl RstParser {
         Ok(result)
     }
 
-    /// Process emphasis conversion for regular text (not inside HTML tags)
+    /// Process emphasis conversion for regular text
     fn process_emphasis_text(&self, content: &str) -> Result<String> {
         let mut html = content.to_string();
 
-        // Bold text
         html = regex::Regex::new(r"\*\*([^*]+)\*\*")
             .map_err(|e| {
                 crate::core::Error::rst_parse(format!("Failed to compile bold regex: {}", e))
@@ -552,7 +398,6 @@ impl RstParser {
             .replace_all(&html, "<strong>$1</strong>")
             .to_string();
 
-        // Italic text
         html = regex::Regex::new(r"\*([^*]+)\*")
             .map_err(|e| {
                 crate::core::Error::rst_parse(format!("Failed to compile italic regex: {}", e))
@@ -560,7 +405,6 @@ impl RstParser {
             .replace_all(&html, "<em>$1</em>")
             .to_string();
 
-        // Inline code
         html = regex::Regex::new(r"``([^`]+)``")
             .map_err(|e| {
                 crate::core::Error::rst_parse(format!("Failed to compile code regex: {}", e))
@@ -584,19 +428,17 @@ impl RstParser {
         Ok(html)
     }
 
-    /// Convert RST lists to HTML with proper nesting support
+    /// Convert RST lists to HTML
     fn convert_lists(&self, content: &str) -> Result<String> {
         let lines: Vec<&str> = content.lines().collect();
         let mut result = Vec::new();
-        let mut list_stack = Vec::new(); // Stack to track nested lists
+        let mut list_stack = Vec::new();
         let mut last_indent = 0;
 
         for line in lines {
             let trimmed = line.trim();
 
-            // Skip empty lines and lines that don't look like list items
             if trimmed.is_empty() || !self.is_list_item(line) {
-                // Close all open lists when we encounter a non-list line
                 while !list_stack.is_empty() {
                     let (list_type, _) = list_stack.pop().unwrap();
                     result.push(format!("</{}>", list_type));
@@ -606,17 +448,13 @@ impl RstParser {
                 continue;
             }
 
-            // Calculate current indentation (in spaces)
             let current_indent = self.calculate_indent(line);
             let (list_type, item_content) = self.parse_list_item(line)?;
 
-            // If we're at a different indentation level, adjust the list stack
             if current_indent > last_indent {
-                // We're going deeper - open a new list
                 result.push(format!("<{}>", list_type));
                 list_stack.push((list_type, current_indent));
             } else if current_indent < last_indent {
-                // We're going up - close lists until we're at the right level
                 while let Some((stack_type, stack_indent)) = list_stack.last() {
                     if *stack_indent > current_indent {
                         result.push(format!("</{}>", stack_type));
@@ -626,7 +464,6 @@ impl RstParser {
                     }
                 }
 
-                // If the top list type is different, close it and open the new one
                 if let Some((stack_type, _)) = list_stack.last() {
                     if *stack_type != list_type {
                         result.push(format!("</{}>", stack_type));
@@ -636,7 +473,6 @@ impl RstParser {
                     }
                 }
             } else {
-                // Same indentation level
                 if let Some((stack_type, _)) = list_stack.last() {
                     if *stack_type != list_type {
                         result.push(format!("</{}>", stack_type));
@@ -645,7 +481,6 @@ impl RstParser {
                         list_stack.push((list_type, current_indent));
                     }
                 } else {
-                    // No open list, start a new one
                     result.push(format!("<{}>", list_type));
                     list_stack.push((list_type, current_indent));
                 }
@@ -655,7 +490,6 @@ impl RstParser {
             last_indent = current_indent;
         }
 
-        // Close any remaining open lists
         while !list_stack.is_empty() {
             let (list_type, _) = list_stack.pop().unwrap();
             result.push(format!("</{}>", list_type));
@@ -667,16 +501,13 @@ impl RstParser {
     /// Check if a line is a list item
     fn is_list_item(&self, line: &str) -> bool {
         let trimmed = line.trim();
-        // Check for unordered list items
         if trimmed.starts_with("- ") || trimmed.starts_with("* ") {
             return true;
         }
 
-        // Check for ordered list items
         if let Some(first_char) = trimmed.chars().next() {
             if first_char.is_numeric() {
                 if let Some(dot_pos) = trimmed.find('.') {
-                    // Check if everything before the dot is numeric
                     let before_dot = &trimmed[..dot_pos];
                     if before_dot.chars().all(|c| c.is_numeric()) {
                         return true;
@@ -693,17 +524,15 @@ impl RstParser {
         line.len() - line.trim_start().len()
     }
 
-    /// Parse a list item and return (list_type, content)
+    /// Parse a list item
     fn parse_list_item(&self, line: &str) -> Result<(String, String)> {
         let trimmed = line.trim();
 
-        // Check for unordered list items
         if trimmed.starts_with("- ") || trimmed.starts_with("* ") {
             let content = trimmed.trim_start_matches("- ").trim_start_matches("* ");
             return Ok(("ul".to_string(), content.to_string()));
         }
 
-        // Check for ordered list items
         if let Some(first_char) = trimmed.chars().next() {
             if first_char.is_numeric() {
                 if let Some(dot_pos) = trimmed.find('.') {
@@ -727,12 +556,11 @@ impl RstParser {
         let mut result = Vec::new();
         let mut paragraph = Vec::new();
         let mut in_html_block = false;
-        let mut html_block_depth = 0; // Track nested HTML blocks
+        let mut html_block_depth = 0;
 
         for line in lines {
             let trimmed = line.trim();
 
-            // Track HTML block depth
             if trimmed.starts_with("<div") {
                 if html_block_depth == 0 && !paragraph.is_empty() {
                     result.push(format!("<p>{}</p>", paragraph.join(" ")));
@@ -748,10 +576,8 @@ impl RstParser {
                     in_html_block = false;
                 }
             } else if in_html_block {
-                // Inside an HTML block, preserve the line as-is
                 result.push(line.to_string());
             } else if self.is_html_tag(trimmed) {
-                // Single-line HTML tag
                 if !paragraph.is_empty() {
                     result.push(format!("<p>{}</p>", paragraph.join(" ")));
                     paragraph.clear();
@@ -763,10 +589,8 @@ impl RstParser {
                     paragraph.clear();
                 }
             } else if !trimmed.starts_with("    ") && !trimmed.starts_with("\t") {
-                // Regular text line
                 paragraph.push(trimmed);
             } else {
-                // Indented content (should be preserved as-is)
                 if !paragraph.is_empty() {
                     result.push(format!("<p>{}</p>", paragraph.join(" ")));
                     paragraph.clear();
@@ -797,36 +621,8 @@ impl RstParser {
             || line.starts_with("</button")
     }
 
-    /// Parse RST content with math detection
-    pub fn parse_with_math_detection(
-        &mut self,
-        content: &str,
-    ) -> Result<(RstContent, MathDetectionResult)> {
-        // Process content with math detection
-        let (processed_content, math_detection) =
-            self.math_processor.process_with_detection(content)?;
-
-        // Parse the processed content
-        let mut rst_content = self.parse(&processed_content)?;
-
-        // Add math detection metadata
-        rst_content.metadata.extra.insert(
-            "has_math_formulas".to_string(),
-            math_detection.has_formulas.to_string(),
-        );
-        rst_content.metadata.extra.insert(
-            "math_formula_count".to_string(),
-            math_detection.formula_count.to_string(),
-        );
-
-        Ok((rst_content, math_detection))
-    }
-
     /// Extract TOC from toctree directive output in HTML
     fn extract_toc_from_toctree(&self, html: &str) -> Result<(Vec<TocEntry>, String)> {
-        use regex::Regex;
-
-        // Try to find toctree-generated HTML
         let toc_tree_pattern = r#"<div class="toc-tree">(.+?)</div>"#;
         let toc_caption_pattern = r#"<div class="toc-caption">(.+?)</div>"#;
         let toc_tree_regex = Regex::new(toc_tree_pattern)?;
@@ -835,7 +631,6 @@ impl RstParser {
         let mut toc_html = String::new();
         let mut entries = Vec::new();
 
-        // Extract caption if present
         if let Some(caps) = toc_caption_regex.captures(html) {
             if let Some(caption) = caps.get(1) {
                 toc_html.push_str(&format!(
@@ -845,15 +640,13 @@ impl RstParser {
             }
         }
 
-        // Extract toc-tree content
         if let Some(caps) = toc_tree_regex.captures(html) {
             let toc_content = caps.get(1).map(|m| m.as_str()).unwrap_or("");
-
-            // Parse individual toc-item elements
             let item_pattern = r#"<div class="toc-item"><a href="([^"]+)">([^<]+)</a></div>"#;
             let item_regex = Regex::new(item_pattern)?;
+
             for item_caps in item_regex.captures_iter(toc_content) {
-                if let (Some(url), Some(title)) = (item_caps.get(1), item_caps.get(2)) {
+                if let (Some(_url), Some(title)) = (item_caps.get(1), item_caps.get(2)) {
                     let title_text = title.as_str().trim().to_string();
                     let anchor = title_text.to_lowercase().replace(' ', "-");
 
@@ -873,10 +666,371 @@ impl RstParser {
 
         Ok((entries, toc_html))
     }
+
+    /// Convert title to URL-friendly slug
+    fn slugify(&self, title: &str) -> String {
+        let mut result = title.to_lowercase();
+
+        result = result.replace("c++", "cpp");
+        result = result.replace("c#", "csharp");
+        result = result.replace("f#", "fsharp");
+        result = result.replace("c++/cli", "cpp-cli");
+        result = result.replace(".net", "dotnet");
+        result = result.replace("node.js", "nodejs");
+        result = result.replace("react.js", "reactjs");
+        result = result.replace("vue.js", "vuejs");
+        result = result.replace("angular.js", "angularjs");
+
+        result = result.replace("++", "plus");
+        result = result.replace("--", "minus");
+        result = result.replace("==", "equals");
+        result = result.replace("!=", "not-equals");
+        result = result.replace("<=", "less-equal");
+        result = result.replace(">=", "greater-equal");
+        result = result.replace("->", "arrow");
+        result = result.replace("=>", "fat-arrow");
+        result = result.replace("&&", "and");
+        result = result.replace("||", "or");
+
+        result = result.replace(&[' ', '-', '_', '.', ',', ';', ':', '!', '?', '@', '#', '$', '%', '^', '&', '*', '(', ')', '=', '[', ']', '{', '}', '\\', '|', '<', '>', '/', '"', '\''][..], "-");
+
+        result = result.replace(['"', '\''], "");
+
+        result = result.chars().filter(|c| c.is_alphanumeric() || *c == '-').collect::<String>();
+
+        while result.contains("--") {
+            result = result.replace("--", "-");
+        }
+
+        result.trim_matches('-').to_string()
+    }
 }
 
 impl Default for RstParser {
     fn default() -> Self {
         Self::new().expect("Failed to create RstParser")
+    }
+}
+
+// ============================================================================
+// Tests
+// ============================================================================
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    mod fixtures {
+        pub fn frontmatter_valid() -> &'static str {
+            r#"---
+title: "Test Title"
+date: 2023-01-01
+tags: ["test", "example"]
+author: "Test Author"
+---
+
+"#
+        }
+
+        pub fn frontmatter_all_fields() -> &'static str {
+            r#"---
+title: "Complete Test"
+date: 2023-01-01
+tags: ["tag1", "tag2"]
+author: "Author Name"
+type: "article"
+---
+
+"#
+        }
+
+        pub fn simple_header() -> &'static str {
+            "Test Header\n===========\n"
+        }
+
+        pub fn markdown_header() -> &'static str {
+            "## Test Header\n"
+        }
+
+        pub fn unordered_list() -> &'static str {
+            "- Item 1\n- Item 2\n- Item 3\n"
+        }
+
+        pub fn ordered_list() -> &'static str {
+            "1. First item\n2. Second item\n3. Third item\n"
+        }
+
+        pub fn code_block_python() -> &'static str {
+            r#".. code-block:: python
+
+    def hello():
+        print("Hello, World!")
+"#
+        }
+
+        pub fn snippet_card_directive() -> &'static str {
+            r#".. snippet-card:: test_snippet
+"#
+        }
+
+        pub fn toctree_directive() -> &'static str {
+            r#".. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   chapter1
+   chapter2
+   chapter3
+"#
+        }
+
+        pub fn inline_math() -> &'static str {
+            "The formula is $E = mc^2$.\n"
+        }
+
+        pub fn display_math() -> &'static str {
+            "Here is the formula:\n$$\\int_0^1 f(x) dx$$\n"
+        }
+
+        pub fn complete_document() -> &'static str {
+            r#"---
+title: "Complete Test Document"
+date: 2023-01-01
+tags: ["test"]
+author: "Test Author"
+---
+
+Introduction
+============
+
+This is a test document.
+
+First Section
+-------------
+
+Here is some **bold** text and *italic* text.
+
+List Example
+------------
+
+- First item
+- Second item
+- Third item
+
+Code Example
+------------
+
+.. code-block:: python
+
+    def example():
+        return 42
+
+Math Example
+------------
+
+Inline math: $x^2 + y^2 = z^2$
+
+Display math:
+$$\\int_0\\infty e^{-x} dx = 1$$
+
+Conclusion
+----------
+
+This concludes the test.
+"#
+        }
+    }
+
+    mod assertions {
+        pub fn assert_html_contains(html: &str, expected: &str) {
+            assert!(
+                html.contains(expected),
+                "Expected HTML to contain: {}\nActual: {}",
+                expected,
+                html
+            );
+        }
+    }
+
+    // Frontmatter Tests
+    #[test]
+    fn test_extract_frontmatter_valid() {
+        let content = fixtures::frontmatter_valid();
+        let mut parser = RstParser::new().unwrap();
+        let result = parser.parse(content).unwrap();
+
+        assert_eq!(result.metadata.title, "Test Title");
+        assert_eq!(result.metadata.author.unwrap(), "Test Author");
+        assert_eq!(result.metadata.tags, vec!["test", "example"]);
+    }
+
+    #[test]
+    fn test_extract_frontmatter_with_all_fields() {
+        let content = fixtures::frontmatter_all_fields();
+        let mut parser = RstParser::new().unwrap();
+        let result = parser.parse(content).unwrap();
+
+        assert_eq!(result.metadata.title, "Complete Test");
+        assert_eq!(result.metadata.tags, vec!["tag1", "tag2"]);
+    }
+
+    // Header Tests
+    #[test]
+    fn test_convert_underlined_headers() {
+        let content = format!("{}{}", fixtures::frontmatter_valid(), fixtures::simple_header());
+        let mut parser = RstParser::new().unwrap();
+        let result = parser.parse(&content).unwrap();
+
+        assertions::assert_html_contains(&result.html, "<h2");
+        assertions::assert_html_contains(&result.html, "Test Header");
+    }
+
+    #[test]
+    fn test_convert_markdown_headers() {
+        let content = format!("{}{}", fixtures::frontmatter_valid(), fixtures::markdown_header());
+        let mut parser = RstParser::new().unwrap();
+        let result = parser.parse(&content).unwrap();
+
+        assertions::assert_html_contains(&result.html, "<h2");
+        assertions::assert_html_contains(&result.html, "Test Header");
+    }
+
+    // List Tests
+    #[test]
+    fn test_convert_unordered_lists() {
+        let content = format!("{}{}", fixtures::frontmatter_valid(), fixtures::unordered_list());
+        let mut parser = RstParser::new().unwrap();
+        let result = parser.parse(&content).unwrap();
+
+        assertions::assert_html_contains(&result.html, "<ul>");
+        assertions::assert_html_contains(&result.html, "<li>Item 1</li>");
+    }
+
+    #[test]
+    fn test_convert_ordered_lists() {
+        let content = format!("{}{}", fixtures::frontmatter_valid(), fixtures::ordered_list());
+        let mut parser = RstParser::new().unwrap();
+        let result = parser.parse(&content).unwrap();
+
+        assertions::assert_html_contains(&result.html, "<ol>");
+        assertions::assert_html_contains(&result.html, "<li>First item</li>");
+    }
+
+    // Directive Tests
+    #[test]
+    fn test_process_code_block_directive() {
+        let content = format!("{}{}", fixtures::frontmatter_valid(), fixtures::code_block_python());
+        let mut parser = RstParser::new().unwrap();
+        let result = parser.parse(&content).unwrap();
+
+        assertions::assert_html_contains(&result.html, "code-block");
+        assertions::assert_html_contains(&result.html, "python");
+    }
+
+    #[test]
+    fn test_process_snippet_card_directive() {
+        let content = format!("{}{}", fixtures::frontmatter_valid(), fixtures::snippet_card_directive());
+        let mut parser = RstParser::new().unwrap();
+        let result = parser.parse(&content).unwrap();
+
+        assertions::assert_html_contains(&result.html, "snippet-card");
+        assertions::assert_html_contains(&result.html, "test_snippet");
+    }
+
+    #[test]
+    fn test_process_toctree_directive() {
+        let content = format!("{}{}", fixtures::frontmatter_valid(), fixtures::toctree_directive());
+        let mut parser = RstParser::new().unwrap();
+        let result = parser.parse(&content).unwrap();
+
+        assertions::assert_html_contains(&result.html, "toc-tree");
+        assertions::assert_html_contains(&result.html, "toc-caption");
+    }
+
+    // Math Tests
+    #[test]
+    fn test_render_inline_math() {
+        let content = format!("{}{}", fixtures::frontmatter_valid(), fixtures::inline_math());
+        let mut parser = RstParser::new().unwrap();
+        let result = parser.parse(&content).unwrap();
+
+        assertions::assert_html_contains(&result.html, "math-inline");
+        assert!(result.has_math_formulas);
+    }
+
+    #[test]
+    fn test_render_display_math() {
+        let content = format!("{}{}", fixtures::frontmatter_valid(), fixtures::display_math());
+        let mut parser = RstParser::new().unwrap();
+        let result = parser.parse(&content).unwrap();
+
+        assertions::assert_html_contains(&result.html, "math-display");
+        assert!(result.has_math_formulas);
+    }
+
+    // Integration Tests
+    #[test]
+    fn test_parse_complete_document() {
+        let content = fixtures::complete_document();
+        let mut parser = RstParser::new().unwrap();
+        let result = parser.parse(content).unwrap();
+
+        assert_eq!(result.metadata.title, "Complete Test Document");
+        assertions::assert_html_contains(&result.html, "<h2");
+        assertions::assert_html_contains(&result.html, "<ul>");
+        assertions::assert_html_contains(&result.html, "code-block");
+        assertions::assert_html_contains(&result.html, "math-display");
+        assert!(result.has_math_formulas);
+    }
+
+    #[test]
+    fn test_parser_creates_valid_html() {
+        let content = fixtures::complete_document();
+        let mut parser = RstParser::new().unwrap();
+        let result = parser.parse(content).unwrap();
+
+        assert!(result.html.contains("<h2") || result.html.contains("<h3"));
+        assert!(result.html.contains("<p>") || result.html.contains("<ul"));
+        assert!(!result.html.is_empty());
+    }
+
+    #[test]
+    fn test_metadata_extraction() {
+        let content = fixtures::complete_document();
+        let mut parser = RstParser::new().unwrap();
+        let result = parser.parse(content).unwrap();
+
+        assert_eq!(result.metadata.title, "Complete Test Document");
+        assert_eq!(result.metadata.author.unwrap(), "Test Author");
+        assert_eq!(result.metadata.tags, vec!["test"]);
+    }
+
+    #[test]
+    fn test_toc_generation() {
+        let content = fixtures::complete_document();
+        let mut parser = RstParser::new().unwrap();
+        let result = parser.parse(content).unwrap();
+
+        assert!(!result.toc.is_empty());
+    }
+
+    // Edge Case Tests
+    #[test]
+    fn test_parse_empty_document() {
+        let content = "---\ntitle: \"Empty\"\n---\n";
+        let mut parser = RstParser::new().unwrap();
+        let result = parser.parse(content).unwrap();
+
+        assert_eq!(result.metadata.title, "Empty");
+        assert!(!result.has_math_formulas);
+    }
+
+    #[test]
+    fn test_parse_document_with_only_frontmatter() {
+        let content = "---\ntitle: \"Frontmatter Only\"\n---\n";
+        let mut parser = RstParser::new().unwrap();
+        let result = parser.parse(content).unwrap();
+
+        assert_eq!(result.metadata.title, "Frontmatter Only");
     }
 }

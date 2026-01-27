@@ -547,6 +547,7 @@ mod tests {
                 author: None,
                 excerpt: None,
                 url: url.to_string(),
+                extra: std::collections::HashMap::new(),
             },
             format!("<p>{}</p>", content),
             Vec::new(),
