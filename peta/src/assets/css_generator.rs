@@ -157,6 +157,9 @@ impl CssGenerator {
   border: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
   transition: all 0.3s ease;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
 }}
 
 .code-block::before {{

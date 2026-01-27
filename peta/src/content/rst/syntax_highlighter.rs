@@ -52,7 +52,7 @@ impl SyntaxHighlighter {
     /// Create a syntax highlighter with custom configuration
     pub fn with_config(config: HighlighterConfig) -> Result<Self> {
         // Load syntax definitions
-        let mut syntax_set = SyntaxSet::load_defaults_newlines();
+        let syntax_set = SyntaxSet::load_defaults_newlines();
 
         // Load themes
         let theme_set = ThemeSet::load_defaults();
@@ -309,6 +309,7 @@ impl SyntaxHighlighter {
     }
 
     /// Escape HTML entities
+    #[allow(dead_code)]
     fn escape_html(&self, text: &str) -> String {
         text.replace('&', "&amp;")
             .replace('<', "&lt;")

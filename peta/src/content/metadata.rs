@@ -81,6 +81,7 @@ impl MetadataExtractor {
     }
     
     /// Generate URL from title and content type
+    #[allow(dead_code)]
     fn generate_url(title: &str, content_type: &ContentType) -> String {
         Self::generate_url_with_path(title, content_type, None)
     }

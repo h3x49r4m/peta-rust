@@ -185,11 +185,14 @@ pub struct TemplateEngine {
     tera: Tera,
     theme_dir: PathBuf,
     component_registry: Option<ComponentRegistry>,
+    #[allow(dead_code)]
     component_manager: Arc<RwLock<ComponentManager>>,
     component_renderer: Option<crate::components::renderer::ComponentRendererWrapper>,
     theme_manager: Option<crate::components::ThemeManager>,
     current_theme: Option<String>,
+    #[allow(dead_code)]
     tag_collector: TagCollector,
+    #[allow(dead_code)]
     template_cache: TemplateCache,
 }
 
@@ -423,6 +426,7 @@ impl TemplateEngine {
         }
     }
 
+    #[allow(dead_code)]
     fn load_component_templates(tera: &mut Tera) -> Result<()> {
         let component_categories = ["atomic", "composite"];
         for category in &component_categories {
@@ -933,6 +937,7 @@ impl TemplateEngine {
     }
 
     /// Helper function to render nested components
+    #[allow(dead_code)]
     fn render_nested_component_helper(
         component_name: &str,
         template_content: &str,

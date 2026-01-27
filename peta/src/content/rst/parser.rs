@@ -135,6 +135,7 @@ impl RstParser {
     }
 
     /// Extract metadata from frontmatter
+    #[allow(dead_code)]
     fn extract_metadata_with_type(
         &self,
         frontmatter: &HashMap<String, serde_json::Value>,

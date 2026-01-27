@@ -168,7 +168,6 @@ impl ComponentLoader {
         // we might use a mapping or component metadata
         match name {
             "navbar" => "atomic",
-            "navbar" => "atomic",
             "contacts" => "atomic",
             "tag_cloud" => "atomic",
             "grid_card" => "atomic",
