@@ -225,19 +225,20 @@ impl RstParser {
                             0
                         };
 
+                    // Check if line is indented (has leading whitespace)
+                    let is_indented = line.starts_with(' ') || line.starts_with('\t');
+
                     if !found_indented_content && line.trim().is_empty() {
                         continue;
                     }
 
-                    if line.starts_with("    ") || line.starts_with("\t") {
+                    if is_indented {
                         found_indented_content = true;
                         continue;
                     }
 
-                    if found_indented_content
-                        && !line.starts_with("    ")
-                        && !line.starts_with("\t")
-                    {
+                    // If we found indented content and now hit a non-indented line, stop
+                    if found_indented_content && !is_indented {
                         content_end = line_start_pos;
                         break;
                     }
@@ -291,14 +292,15 @@ impl RstParser {
             if i + 1 < lines.len() {
                 let next_line = lines[i + 1];
                 let current_line = line.trim();
-                if (next_line.chars().all(|c| c == '=') || next_line.chars().all(|c| c == '-'))
+                // Support all RST underline characters: = - ~ ^ " ' ` : # * + _ < > |
+                let is_underline = next_line.chars().all(|c| matches!(c, '=' | '-' | '~' | '^' | '"' | '\'' | '`' | ':' | '#' | '*' | '+' | '_' | '<' | '>' | '|'));
+                if is_underline
                     && next_line.len() >= current_line.len()
                     && !current_line.is_empty()
                 {
-                    let level = if next_line.chars().all(|c| c == '=') {
-                        "2"
-                    } else {
-                        "3"
+                    let level = match next_line.chars().next() {
+                        Some('=') => "2",
+                        _ => "3",
                     };
                     let anchor = self.slugify(current_line);
                     result.push(format!(
@@ -588,6 +590,12 @@ impl RstParser {
                     result.push(format!("<p>{}</p>", paragraph.join(" ")));
                     paragraph.clear();
                 }
+            } else if self.is_rst_underline(trimmed) {
+                // Skip RST underline characters (already processed as headers)
+                if !paragraph.is_empty() {
+                    result.push(format!("<p>{}</p>", paragraph.join(" ")));
+                    paragraph.clear();
+                }
             } else if !trimmed.starts_with("    ") && !trimmed.starts_with("\t") {
                 paragraph.push(trimmed);
             } else {
@@ -619,6 +627,16 @@ impl RstParser {
             || line.starts_with("</span")
             || line.starts_with("<button")
             || line.starts_with("</button")
+    }
+
+    /// Check if a line consists only of RST underline characters
+    fn is_rst_underline(&self, line: &str) -> bool {
+        let trimmed = line.trim();
+        if trimmed.is_empty() {
+            return false;
+        }
+        // Check if line consists only of RST underline characters
+        trimmed.chars().all(|c| matches!(c, '=' | '-' | '~' | '^' | '"' | '\'' | '`' | ':' | '#' | '*' | '+' | '_' | '<' | '>' | '|'))
     }
 
     /// Extract TOC from toctree directive output in HTML
