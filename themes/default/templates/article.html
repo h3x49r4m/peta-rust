@@ -10,9 +10,3 @@
 
 {{ component(name="article_modal", title=page.title, content=content, toc=toc, meta=page) | safe }}
 {% endblock %}
-
-{% block scripts %}
-{% if has_math_formulas %}
-{{ math_render_script | safe }}
-{% endif %}
-{% endblock %}

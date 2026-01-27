@@ -1,132 +1,28 @@
-//! Math rendering using KaTeX and MathJax
+//! Math rendering using KaTeX
 
 use crate::core::Result;
 
-
 /// Math renderer for LaTeX equations
 pub struct MathRenderer {
-    #[allow(dead_code)]
-    katex_delimiters: Vec<String>,
-    #[allow(dead_code)]
-    fallback_mathjax: bool,
     cache: std::collections::HashMap<String, String>,
 }
-
-use super::MathDetectionResult;
 
 impl MathRenderer {
     /// Create a new math renderer
     pub fn new() -> Self {
         Self {
-            katex_delimiters: vec![
-                "$$".to_string(),
-                "$".to_string(),
-                "\\[".to_string(),
-                "\\]".to_string(),
-            ],
-            fallback_mathjax: true,
             cache: std::collections::HashMap::new(),
         }
     }
-    
-    /// Create an on-demand math renderer
-    pub fn new_on_demand() -> Self {
-        Self {
-            katex_delimiters: vec![
-                "$$".to_string(),
-                "$".to_string(),
-                "\\[".to_string(),
-                "\\]".to_string(),
-            ],
-            fallback_mathjax: true,
-            cache: std::collections::HashMap::new(),
-        }
-    }
-    
+
     /// Check if content needs math rendering
     pub fn should_render(&self, content: &str) -> bool {
-        content.contains("$") || 
-        content.contains("\\[") || 
+        content.contains("$") ||
+        content.contains("\\[") ||
         content.contains("\\(") ||
         content.contains("data-latex")
     }
-    
-    /// Generate on-demand rendering JavaScript
-    pub fn generate_on_demand_script(&self, detection: &MathDetectionResult) -> String {
-        if !detection.has_formulas {
-            return String::new();
-        }
-        
-        format!(r#"
-<script>
-// Auto-generated math renderer for {} formulas
-(function() {{
-    if (typeof window.mathRendererLoaded === 'undefined') {{
-        window.mathRendererLoaded = false;
-        window.pendingMathRender = false;
-        
-        // Load KaTeX on demand
-        function loadKaTeX() {{
-            if (window.mathRendererLoaded) return;
-            
-            // Load CSS
-            const css = document.createElement('link');
-            css.rel = 'stylesheet';
-            css.href = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css';
-            document.head.appendChild(css);
-            
-            // Load JS
-            const katex = document.createElement('script');
-            katex.src = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js';
-            katex.onload = function() {{
-                const autoRender = document.createElement('script');
-                autoRender.src = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js';
-                autoRender.onload = function() {{
-                    window.mathRendererLoaded = true;
-                    renderMathFormulas();
-                }};
-                document.body.appendChild(autoRender);
-            }};
-            document.body.appendChild(katex);
-        }}
-        
-        // Render math formulas
-        function renderMathFormulas() {{
-            if (!window.mathRendererLoaded) {{
-                window.pendingMathRender = true;
-                loadKaTeX();
-                return;
-            }}
-            
-            const elements = document.querySelectorAll('[data-latex]');
-            elements.forEach(el => {{
-                const latex = el.getAttribute('data-latex');
-                if (latex && window.katex) {{
-                    try {{
-                        el.innerHTML = '';
-                        window.katex.render(latex, el, {{
-                            displayMode: el.classList.contains('math-display'),
-                            throwOnError: false
-                        }});
-                    }} catch (e) {{
-                        console.error('Math rendering error:', e);
-                    }}
-                }}
-            }});
-        }}
-        
-        // Auto-render when DOM is ready
-        if (document.readyState === 'loading') {{
-            document.addEventListener('DOMContentLoaded', renderMathFormulas);
-        }} else {{
-            renderMathFormulas();
-        }}
-    }}
-}})();
-</script>
-"#, detection.formula_count)
-    }
-    
+
     /// Render math equations in HTML content
     pub fn render(&mut self, content: &str) -> Result<String> {
         let mut result = content.to_string();

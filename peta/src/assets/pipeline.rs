@@ -3,6 +3,7 @@
 use crate::core::{Error, Result};
 use crate::components::ComponentRegistry;
 use crate::assets::{CssGenerator, CssConfig, JsGenerator, JsConfig};
+use crate::content::rst::{MathCssGenerator, MathJsGenerator};
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -109,6 +110,9 @@ impl AssetPipeline {
         // Generate code block assets (from Rust)
         self.generate_code_block_assets()?;
 
+        // Generate math formula assets (from Rust)
+        self.generate_math_assets()?;
+
         // Process component assets
         self.process_component_assets()?;
 
@@ -151,6 +155,31 @@ impl AssetPipeline {
             .map_err(|e| Error::asset(format!("Failed to create JS directory: {}", e)))?;
         fs::write(&js_output_path, js_content)
             .map_err(|e| Error::asset(format!("Failed to write code-blocks.js: {}", e)))?;
+
+        Ok(())
+    }
+
+    /// Generate math formula CSS and JS from Rust generators
+    fn generate_math_assets(&mut self) -> Result<()> {
+        // Generate math formula CSS
+        let math_css_generator = MathCssGenerator::new()?;
+        let math_css_content = math_css_generator.generate()?;
+
+        let math_css_output_path = self.output_dir.join("css").join("math-formulas.css");
+        fs::create_dir_all(math_css_output_path.parent().unwrap())
+            .map_err(|e| Error::asset(format!("Failed to create math CSS directory: {}", e)))?;
+        fs::write(&math_css_output_path, math_css_content)
+            .map_err(|e| Error::asset(format!("Failed to write math-formulas.css: {}", e)))?;
+
+        // Generate math formula JS
+        let math_js_generator = MathJsGenerator::new()?;
+        let math_js_content = math_js_generator.generate()?;
+
+        let math_js_output_path = self.output_dir.join("js").join("math-formulas.js");
+        fs::create_dir_all(math_js_output_path.parent().unwrap())
+            .map_err(|e| Error::asset(format!("Failed to create math JS directory: {}", e)))?;
+        fs::write(&math_js_output_path, math_js_content)
+            .map_err(|e| Error::asset(format!("Failed to write math-formulas.js: {}", e)))?;
 
         Ok(())
     }

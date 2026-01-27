@@ -28,6 +28,8 @@ pub struct MathProcessor {
     inline_math_regex: Regex,
     /// Cached rendered formulas
     render_cache: HashMap<String, String>,
+    /// Cached detection results
+    detection_cache: HashMap<String, MathDetectionResult>,
     /// Configuration
     config: MathConfig,
 }
@@ -92,6 +94,7 @@ impl MathProcessor {
             display_math_regex,
             inline_math_regex,
             render_cache: HashMap::new(),
+            detection_cache: HashMap::new(),
             config,
         })
     }
@@ -284,6 +287,7 @@ impl MathProcessor {
     /// Clear render cache
     pub fn clear_cache(&mut self) {
         self.render_cache.clear();
+        self.detection_cache.clear();
     }
     
     /// Get cache statistics
@@ -292,7 +296,24 @@ impl MathProcessor {
     }
     
     /// Automatically detect if content contains math formulas
-    pub fn auto_detect_math_content(&self, content: &str) -> Result<MathDetectionResult> {
+    pub fn auto_detect_math_content(&mut self, content: &str) -> Result<MathDetectionResult> {
+        // Check cache first
+        let content_hash = self.hash_content(content);
+        if let Some(cached) = self.detection_cache.get(&content_hash) {
+            return Ok(cached.clone());
+        }
+
+        // Perform detection
+        let result = self.perform_detection(content)?;
+
+        // Cache the result
+        self.detection_cache.insert(content_hash, result.clone());
+
+        Ok(result)
+    }
+
+    /// Perform actual detection (internal method)
+    fn perform_detection(&self, content: &str) -> Result<MathDetectionResult> {
         // First try to extract from original LaTeX syntax
         let math_blocks = self.extract_math_blocks(content)?;
         if !math_blocks.is_empty() {
@@ -302,19 +323,34 @@ impl MathProcessor {
                 math_blocks,
             });
         }
-        
+
         // If no LaTeX found, check for data-latex attributes (already processed content)
         let data_latex_regex = Regex::new(r#"data-latex="([^"]*)""#)
             .map_err(|e| Error::content(format!("Invalid data-latex regex: {}", e)))?;
-        
+
         let math_count = data_latex_regex.find_iter(content).count();
         let has_formulas = math_count > 0;
-        
+
         Ok(MathDetectionResult {
             has_formulas,
             formula_count: math_count,
             math_blocks: Vec::new(), // Not needed for already processed content
         })
+    }
+
+    /// Hash content for caching
+    fn hash_content(&self, content: &str) -> String {
+        use std::collections::hash_map::DefaultHasher;
+        use std::hash::{Hash, Hasher};
+
+        let mut hasher = DefaultHasher::new();
+        content.hash(&mut hasher);
+        format!("{:x}", hasher.finish())
+    }
+
+    /// Clear detection cache
+    pub fn clear_detection_cache(&mut self) {
+        self.detection_cache.clear();
     }
     
     /// Process RST content and return both processed content and detection result

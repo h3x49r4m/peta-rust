@@ -10,9 +10,12 @@
     
     <!-- External CSS -->
     <link rel="stylesheet" href="/css/main.css">
-    
+
     <!-- Code Block Styles (generated from Rust) -->
     <link rel="stylesheet" href="/assets/css/code-blocks.css">
+
+    <!-- Math Formula Styles (generated from Rust) -->
+    <link rel="stylesheet" href="/assets/css/math-formulas.css">
     
     <!-- Component Styles -->
     <style>
@@ -37,9 +40,12 @@
     
     <!-- External JavaScript -->
     <script src="/js/main.js"></script>
-    
+
     <!-- Code Block Scripts (generated from Rust) -->
     <script src="/assets/js/code-blocks.js"></script>
+
+    <!-- Math Formula Scripts (generated from Rust) -->
+    <script src="/assets/js/math-formulas.js"></script>
     
     <!-- Component Scripts -->
     <script>
@@ -163,92 +169,27 @@
                 
                 if (hasMathFormulas) {
                     console.log('Content has math formulas, ensuring KaTeX is loaded...');
-                    
-                    // Use the same KaTeX system as main pages
-                    if (typeof window.mathRendererLoaded === 'undefined') {
-                        window.mathRendererLoaded = false;
-                        window.pendingMathRender = false;
-                    }
-                    
-                    function loadKaTeX() {
-                        if (window.mathRendererLoaded) {
-                            // Render math elements with data-latex attributes
-                            const elements = body.querySelectorAll('[data-latex]');
-                            elements.forEach(el => {
-                                const latex = el.getAttribute('data-latex');
-                                if (latex && window.katex) {
-                                    try {
-                                        el.innerHTML = '';
-                                        window.katex.render(latex, el, {
-                                            displayMode: el.classList.contains('math-display'),
-                                            throwOnError: false
-                                        });
-                                    } catch (e) {
-                                        console.error('Math rendering error:', e);
-                                    }
-                                }
-                            });
-                            return;
-                        }
-                        
-                        // Load KaTeX CSS if not already loaded
-                        if (!document.querySelector('link[href*="katex.min.css"]')) {
-                            const css = document.createElement('link');
-                            css.rel = 'stylesheet';
-                            css.href = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css';
-                            document.head.appendChild(css);
-                        }
-                        
-                        // Load KaTeX JS if not already loaded
-                        if (typeof window.katex === 'undefined') {
-                            const katex = document.createElement('script');
-                            katex.src = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js';
-                            katex.onload = function() {
-                                const autoRender = document.createElement('script');
-                                autoRender.src = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js';
-                                autoRender.onload = function() {
-                                    window.mathRendererLoaded = true;
-                                    // Render math elements with data-latex attributes
-                                    const elements = body.querySelectorAll('[data-latex]');
-                                    elements.forEach(el => {
-                                        const latex = el.getAttribute('data-latex');
-                                        if (latex && window.katex) {
-                                            try {
-                                                el.innerHTML = '';
-                                                window.katex.render(latex, el, {
-                                                    displayMode: el.classList.contains('math-display'),
-                                                    throwOnError: false
-                                                });
-                                            } catch (e) {
-                                                console.error('Math rendering error:', e);
-                                            }
-                                        }
+
+                    // KaTeX is already loaded by math-formulas.js
+                    // Just trigger render if needed
+                    if (window.petaMathLoaded) {
+                        const elements = body.querySelectorAll('[data-latex]');
+                        elements.forEach(el => {
+                            const latex = el.getAttribute('data-latex');
+                            if (latex && window.katex) {
+                                try {
+                                    el.innerHTML = '';
+                                    window.katex.render(latex, el, {
+                                        displayMode: el.classList.contains('math-display'),
+                                        throwOnError: false,
+                                        trust: true
                                     });
-                                };
-                                document.body.appendChild(autoRender);
-                            };
-                            document.body.appendChild(katex);
-                        } else {
-                            // KaTeX already loaded, render directly
-                            const elements = body.querySelectorAll('[data-latex]');
-                            elements.forEach(el => {
-                                const latex = el.getAttribute('data-latex');
-                                if (latex && window.katex) {
-                                    try {
-                                        el.innerHTML = '';
-                                        window.katex.render(latex, el, {
-                                            displayMode: el.classList.contains('math-display'),
-                                            throwOnError: false
-                                        });
-                                    } catch (e) {
-                                        console.error('Math rendering error:', e);
-                                    }
+                                } catch (e) {
+                                    console.error('Math rendering error:', e);
                                 }
-                            });
-                        }
+                            }
+                        });
                     }
-                    
-                    loadKaTeX();
                 }
             }
             

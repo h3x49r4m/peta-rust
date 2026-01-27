@@ -34,6 +34,49 @@ katex_delimiters = ["$$", "$", "\\[", "\\]"]
 fallback_mathjax = true
 cache_rendered = true
 
+[math_rendering]
+# Math rendering engine (katex only supported for now)
+engine = "katex"
+
+# Enable automatic math detection
+auto_detect = true
+
+# Enable on-demand loading (only load KaTeX when math is detected)
+on_demand_loading = true
+
+[math_rendering.katex]
+# KaTeX version to use
+version = "0.16.9"
+
+# CDN base URL
+cdn_base = "https://cdn.jsdelivr.net/npm/katex"
+
+[math_rendering.css]
+# Theme for math styling
+theme = "default"
+
+# Font scaling factor
+font_scale = 1.0
+
+# Line height
+line_height = 1.5
+
+# Display math margin
+display_margin = "1.5em 0"
+
+# Inline math padding
+inline_padding = "0.2em 0.3em"
+
+[math_rendering.js]
+# Auto-render on page load
+auto_render = true
+
+# Enable debug mode
+debug_mode = false
+
+# Render in modals
+modal_support = true
+
 [rst.code]
 line_numbers = true
 copy_button = true

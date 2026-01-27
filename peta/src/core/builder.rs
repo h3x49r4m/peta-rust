@@ -523,9 +523,6 @@ impl SiteBuilder {
         context.insert("toc", &content.toc);
         context.insert("has_math_formulas", &content.has_math_formulas);
         context.insert("math_formula_count", &content.math_formula_count);
-        if let Some(ref script) = content.math_render_script {
-            context.insert("math_render_script", script);
-        }
         
         // Generate book TOC for book pages
         if content.metadata.content_type == ContentType::Book {

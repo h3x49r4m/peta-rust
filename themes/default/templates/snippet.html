@@ -304,10 +304,6 @@
 {% endblock %}
 
 {% block scripts %}
-{% if has_math_formulas %}
-{{ math_render_script | safe }}
-{% endif %}
-
 <script>
 // Always redirect to snippets page with modal for consistent UX
 document.addEventListener('DOMContentLoaded', function() {

@@ -91,13 +91,8 @@ impl RstParser {
             (toc_entries, toc_html)
         };
 
-        // 5. Detect math formulas and generate rendering script
+        // 5. Detect math formulas (keep for optimization, but don't generate script)
         let math_detection = self.math_processor.auto_detect_math_content(&processed_html)?;
-        let math_script = if math_detection.has_formulas {
-            Some(self.math_renderer.generate_on_demand_script(&math_detection))
-        } else {
-            None
-        };
 
         Ok(RstContent {
             metadata,
@@ -107,7 +102,6 @@ impl RstParser {
             frontmatter,
             has_math_formulas: math_detection.has_formulas,
             math_formula_count: math_detection.formula_count,
-            math_render_script: math_script,
         })
     }
 

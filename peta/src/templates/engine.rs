@@ -930,9 +930,6 @@ impl TemplateEngine {
         if let Some(toc) = &article.toc {
             context.insert("toc", toc);
         }
-        if let Some(math_script) = &article.math_render_script {
-            context.insert("math_render_script", math_script);
-        }
         self.render("article.html", &context)
     }
 

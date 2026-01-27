@@ -15,7 +15,6 @@ pub struct ProcessedArticle {
     pub metadata: ContentMetadata,
     pub has_math_formulas: bool,
     pub math_formula_count: usize,
-    pub math_render_script: Option<String>,
     pub toc: Option<String>,
 }
 
@@ -85,7 +84,6 @@ pub struct RstContent {
     pub frontmatter: HashMap<String, serde_json::Value>,
     pub has_math_formulas: bool,
     pub math_formula_count: usize,
-    pub math_render_script: Option<String>,
 }
 
 impl RstContent {
@@ -104,10 +102,9 @@ impl RstContent {
             frontmatter,
             has_math_formulas: false,
             math_formula_count: 0,
-            math_render_script: None,
         }
     }
-    
+
     /// Create new RST content with math detection
     pub fn new_with_math(
         metadata: ContentMetadata,
@@ -116,7 +113,6 @@ impl RstContent {
         frontmatter: HashMap<String, serde_json::Value>,
         has_math_formulas: bool,
         math_formula_count: usize,
-        math_render_script: Option<String>,
     ) -> Self {
         Self {
             metadata,
@@ -126,7 +122,6 @@ impl RstContent {
             frontmatter,
             has_math_formulas,
             math_formula_count,
-            math_render_script,
         }
     }
     
