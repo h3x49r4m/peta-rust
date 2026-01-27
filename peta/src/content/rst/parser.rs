@@ -1,7 +1,7 @@
 //! RST parser implementation with improved architecture
 
 use crate::content::rst::{
-    toc_generator::TocGenerator, CodeHighlighter, DirectiveHandler, MathProcessor, MathRenderer,
+    toc_generator::TocGenerator, CodeHighlighter, directives::DirectiveHandler, MathProcessor, MathRenderer,
 };
 use crate::content::{ContentMetadata, ContentType, RstContent, TocEntry};
 use crate::core::Error;
