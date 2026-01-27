@@ -59,9 +59,22 @@
   background: linear-gradient(90deg, transparent, var(--border_color, #e2e8f0), transparent);
 }
 
+/* Project metadata container - displays date, author, tags in a row */
+.project-metadata {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: var(--spacing_sm, 0.5rem);
+  margin-bottom: var(--spacing_md, 1rem);
+  padding: var(--spacing_sm, 0.5rem);
+  width: 100%;
+}
+
 .project-date,
-.project-author {
-  display: flex;
+.project-author,
+.project-status {
+  display: inline-flex;
   align-items: center;
   gap: var(--spacing_sm, 0.5rem);
   padding: var(--spacing_xs, 0.25rem) var(--spacing_sm, 0.5rem);
@@ -72,16 +85,19 @@
   border-radius: var(--radius_sm, 0.25rem);
   transition: all 0.2s ease;
   position: relative;
+  flex-shrink: 0;
 }
 
 .project-date:hover,
-.project-author:hover {
+.project-author:hover,
+.project-status:hover {
   color: var(--primary_color, #3b82f6);
   background: var(--background_secondary, #f8fafc);
 }
 
 .project-date svg,
-.project-author svg {
+.project-author svg,
+.project-status svg {
   opacity: 0.6;
   width: 14px;
   height: 14px;
@@ -89,7 +105,8 @@
 }
 
 .project-date:hover svg,
-.project-author:hover svg {
+.project-author:hover svg,
+.project-status:hover svg {
   opacity: 1;
   color: var(--primary_color, #3b82f6);
 }
@@ -202,24 +219,24 @@
   opacity: 1;
 }
 
-/* Tags section (if separate) */
+/* Tags section - displays inline with date and author */
 .project-tags {
-  display: flex;
+  display: inline-flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: var(--spacing_sm, 0.5rem);
-  margin-top: var(--spacing_lg, 1.5rem);
+  gap: var(--spacing_xs, 0.25rem);
+  margin: 0;
 }
 
 .tag {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing_xs, 0.25rem);
-  padding: var(--spacing_xs, 0.25rem) var(--spacing_md, 1rem);
+  padding: var(--spacing_xs, 0.25rem) var(--spacing_sm, 0.5rem);
   background: var(--background_secondary, #f8fafc);
   color: var(--text_secondary, #64748b);
   border-radius: var(--radius_full, 9999px);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   border: 1px solid var(--border_color, #e2e8f0);
   text-decoration: none;
@@ -585,18 +602,33 @@
     justify-content: center;
   }
 
+  .project-metadata {
+    flex-wrap: nowrap;
+    flex-direction: row;
+  }
+
   .project-date,
   .project-author,
-  .reading-time {
+  .project-status {
     padding: var(--spacing_xs, 0.25rem) var(--spacing_sm, 0.5rem);
     font-size: 0.75rem;
   }
 
   .project-date svg,
   .project-author svg,
-  .reading-time svg {
+  .project-status svg {
     width: 12px;
     height: 12px;
+  }
+
+  .project-tags {
+    display: inline-flex;
+    gap: var(--spacing_xs, 0.25rem);
+  }
+
+  .tag {
+    font-size: 0.75rem;
+    padding: var(--spacing_xs, 0.25rem) var(--spacing_sm, 0.5rem);
   }
 
   .project-navigation {
