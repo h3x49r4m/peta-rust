@@ -37,6 +37,8 @@
   padding: var(--spacing-8, 2rem);
   max-width: 100%;
   margin: 0 auto;
+  word-wrap: break-word;
+  word-break: break-word;
 }
 
 /* Loading and error states */
@@ -138,33 +140,7 @@
   line-height: 1.7;
 }
 
-.book-content-wrapper code {
-  background: rgba(59, 130, 246, 0.1);
-  color: var(--primary-color, #2563eb);
-  padding: 0.125rem 0.375rem;
-  border-radius: var(--radius-sm, 0.25rem);
-  font-family: var(--font-family-mono, 'JetBrains Mono', 'Fira Code', Consolas, monospace);
-  font-size: 0.9em;
-  font-weight: 500;
-}
 
-.book-content-wrapper pre {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  color: #e2e8f0;
-  padding: var(--spacing-6, 1.5rem);
-  border-radius: var(--radius-lg, 0.75rem);
-  overflow-x: auto;
-  margin: var(--spacing-4, 1rem) 0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.book-content-wrapper pre code {
-  background: none;
-  color: inherit;
-  padding: 0;
-  border-radius: 0;
-}
 
 .book-content-wrapper blockquote {
   margin: var(--spacing-4, 1rem) 0;

@@ -19,7 +19,7 @@
   box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  overflow: visible;
+  overflow: hidden;
   margin: 0 auto;
   position: relative;
   border: 1px solid var(--border-light, #f1f5f9);
@@ -103,7 +103,7 @@
   flex: 1;
   display: flex;
   flex-direction: row;
-  overflow: visible;
+  overflow: hidden;
   position: relative;
 }
 
@@ -126,11 +126,14 @@
   flex: 1;
   width: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .book-modal-body .book-content-wrapper {
   width: 100%;
   padding: var(--spacing-8, 2rem);
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Responsive Design */
