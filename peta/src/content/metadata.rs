@@ -56,7 +56,10 @@ impl MetadataExtractor {
         
         let excerpt = frontmatter.get("excerpt")
             .and_then(|v| v.as_str())
-            .map(|s| s.to_string());
+            .map(|s| s.to_string())
+            .or_else(|| frontmatter.get("description")
+                .and_then(|v| v.as_str())
+                .map(|s| s.to_string()));
         
         // Generate URL from title, considering file path for book chapters
         let url = Self::generate_url_with_path(&title, &content_type, file_path);

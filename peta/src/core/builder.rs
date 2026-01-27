@@ -334,12 +334,16 @@ impl SiteBuilder {
         let mut projects = Vec::new();
         
         for content in &self.rst_content {
+            let excerpt = content.metadata.excerpt.as_deref()
+                .map(|s| s.to_string())
+                .unwrap_or_else(|| content.get_excerpt(200));
+            
             let mut item = serde_json::json!({
                 "title": content.metadata.title,
                 "url": content.metadata.url,
                 "date": content.metadata.date,
                 "tags": content.metadata.tags,
-                "excerpt": content.metadata.excerpt.as_deref().unwrap_or("No excerpt available"),
+                "excerpt": excerpt,
                 "author": content.metadata.author,
                 "content_type": format!("{:?}", content.metadata.content_type)
             });
