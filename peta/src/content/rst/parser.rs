@@ -197,17 +197,28 @@ impl RstParser {
         for (i, &(start, end, directive_str)) in directive_starts.iter().enumerate() {
             result.push_str(&content[last_pos..start]);
 
-            let directive_type = directive_str
-                .trim_start_matches(".. ")
-                .trim_end_matches("::")
-                .trim();
+            // Extract directive name and optional language
+            // The directive_str is like ".. code-block::"
+            // After trimming ".. ", we get "code-block::"
+            let directive_full = directive_str.trim_start_matches(".. ");
+            
+            // Split on "::" to get the directive name
+            let directive_name = directive_full.split("::").next().unwrap_or("").trim();
+            
+            // Extract language from the original content (the part after "::")
+            // The content starts at 'end', which is after the "::"
+            // So we need to look at the characters between the end of the directive and the start of the indented content
+            let content_after_directive = &content[end..];
+            let first_newline = content_after_directive.find('\n').unwrap_or(content_after_directive.len());
+            let language = content_after_directive[..first_newline].trim();
 
-            let content_start = end;
+            // The actual code content starts after the language line
+            let content_start = end + first_newline + 1; // +1 to skip the newline
             let lines_after_directive: Vec<&str> = content[content_start..].lines().collect();
             let mut content_end = content.len();
             let mut found_indented_content = false;
 
-            if directive_type == "snippet-card" {
+            if directive_name == "snippet-card" {
                 for line in lines_after_directive.iter() {
                     if line.trim().is_empty() {
                         continue;
@@ -244,6 +255,13 @@ impl RstParser {
                     }
                 }
 
+                // If we found indented content but never hit a non-indented line,
+                // set content_end to the end of the content
+                if found_indented_content && content_end == content.len() {
+                    // Keep content_end as is (end of file)
+                }
+                
+                // If we have more directives, make sure we don't go past them
                 if i + 1 < directive_starts.len() {
                     let next_directive_start = directive_starts[i + 1].0;
                     if content_end > next_directive_start {
@@ -254,8 +272,8 @@ impl RstParser {
 
             let directive_content = &content[content_start..content_end];
 
-            if let Some(handler) = self.directive_handlers.get_mut(directive_type) {
-                let processed = handler.handle(directive_content)?;
+            if let Some(handler) = self.directive_handlers.get_mut(directive_name) {
+                let processed = handler.handle(language, directive_content)?;
                 result.push_str(&processed);
             }
 

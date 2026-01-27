@@ -276,6 +276,11 @@ impl TemplateEngine {
                 let component_path = theme_dir.join("components").join(&category).join(component_name);
                 let template_path = component_path.join(format!("{}.html", component_name));
 
+                // Skip code_block as it's handled by Rust rendering
+                if component_name == "code_block" {
+                    return Ok(Value::String(String::new()));
+                }
+
                 if !template_path.exists() {
                     return Ok(Value::String(format!("Component not found: {}", component_name)));
                 }
@@ -332,6 +337,10 @@ impl TemplateEngine {
                 let mut styles = String::new();
                 for component in component_names {
                     if let Some(name) = component.as_str() {
+                        // Skip code_block as it's handled by Rust generators
+                        if name == "code_block" {
+                            continue;
+                        }
                         styles.push_str(&format!("/* Styles for component: {} */\n", name));
                         let css_paths = [
                             format!("themes/default/components/composite/{}/{}.css", name, name),
@@ -365,6 +374,10 @@ impl TemplateEngine {
                 let mut scripts = String::new();
                 for component in component_names {
                     if let Some(name) = component.as_str() {
+                        // Skip code_block as it's handled by Rust generators
+                        if name == "code_block" {
+                            continue;
+                        }
                         let category = if let Ok(manager) = component_manager_clone3.read() {
                             manager.get_component_category(name).unwrap_or_else(|| "atomic".to_string())
                         } else {

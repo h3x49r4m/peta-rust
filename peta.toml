@@ -11,7 +11,7 @@ email = "h3x49r4m@outlook.com"
 
 [components]
 enabled = true
-enabled_components = ["code_block", "footer", "contacts", "navbar", "header"]
+enabled_components = ["footer", "contacts", "navbar", "header"]
 component_configs = {}
 layout = "default"
 theme = "default"
@@ -38,6 +38,55 @@ cache_rendered = true
 line_numbers = true
 copy_button = true
 theme = "one-dark"
+
+[code_blocks]
+default_theme = "one-dark"
+enable_line_numbers = true
+enable_copy_button = true
+enable_keyboard_shortcuts = true
+enable_line_hover = true
+
+[code_blocks.languages]
+python = { aliases = ["py", "python3"] }
+javascript = { aliases = ["js", "node"] }
+typescript = { aliases = ["ts", "tsx"] }
+rust = { aliases = ["rs"] }
+go = { aliases = [] }
+bash = { aliases = ["sh", "shell", "zsh"] }
+ruby = { aliases = ["rb"] }
+php = { aliases = [] }
+java = { aliases = [] }
+kotlin = { aliases = ["kt"] }
+scala = { aliases = [] }
+csharp = { aliases = ["cs"] }
+cpp = { aliases = ["c++", "cxx", "cc", "hpp"] }
+c = { aliases = ["h"] }
+sql = { aliases = [] }
+html = { aliases = ["htm"] }
+xml = { aliases = [] }
+css = { aliases = ["scss", "sass", "less"] }
+json = { aliases = [] }
+yaml = { aliases = ["yml"] }
+toml = { aliases = [] }
+dockerfile = { aliases = [] }
+makefile = { aliases = [] }
+cmake = { aliases = [] }
+diff = { aliases = ["patch"] }
+log = { aliases = [] }
+
+[code_blocks.themes]
+one-dark = { name = "One Dark", description = "Dark theme based on Atom's One Dark" }
+solarized = { name = "Solarized", description = "Precision colors for solarized theme" }
+
+[code_blocks.styles]
+font_family = "SF Mono, Monaco, 'Inconsolata', 'Roboto Mono', 'Source Code Pro', monospace"
+font_size = "0.9rem"
+line_height = "1.6"
+border_radius = "1rem"
+background_gradient_start = "#1e293b"
+background_gradient_end = "#0f172a"
+header_background = "rgba(15, 23, 42, 0.6)"
+copy_success_duration = 2000
 
 [server]
 port = 3566

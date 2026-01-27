@@ -133,6 +133,11 @@ impl ComponentManager {
 
     /// Get component category
     pub fn get_component_category(&self, name: &str) -> Option<String> {
+        // Handle code_block specially as it's rendered by Rust
+        if name == "code_block" {
+            return Some("atomic".to_string());
+        }
+        
         if let Some(mut discovery) = self.discovery.write().ok() {
             if let Ok(Some(component)) = discovery.get_component(name) {
                 return Some(component.category);
@@ -244,7 +249,6 @@ Ok(Component {
     /// Get component category directory
     fn get_component_category_dir(&self, name: &str) -> &str {
         match name {
-            "code_block" => "atomic",
             "footer" => "composite",
             "grid_cards" => "composite",
             _ => "content",

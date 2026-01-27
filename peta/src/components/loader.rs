@@ -167,7 +167,7 @@ impl ComponentLoader {
         // This is a simple heuristic - in a real implementation,
         // we might use a mapping or component metadata
         match name {
-            "code_block" => "atomic",
+            "navbar" => "atomic",
             "navbar" => "atomic",
             "contacts" => "atomic",
             "tag_cloud" => "atomic",

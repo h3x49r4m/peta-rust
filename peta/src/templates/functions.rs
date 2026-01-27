@@ -63,7 +63,6 @@ impl Function for ComponentScriptsFunction {
         for component_name_value in component_names {
             if let Some(component_name) = component_name_value.as_str() {
                 let category = match component_name {
-                    "code_block" => "atomic",
                     "navbar" => "atomic",
                     "contacts" => "atomic",
                     "tag_cloud" => "atomic",

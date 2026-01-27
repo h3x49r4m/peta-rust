@@ -11,9 +11,12 @@
     <!-- External CSS -->
     <link rel="stylesheet" href="/css/main.css">
     
+    <!-- Code Block Styles (generated from Rust) -->
+    <link rel="stylesheet" href="/assets/css/code-blocks.css">
+    
     <!-- Component Styles -->
     <style>
-    {{ component_styles(component_names=["header", "navbar", "contacts", "grid_card", "code_block", "tag_cloud", "footer", "page_tags", "snippet_card_modal", "content_div", "grid_cards", "article_toc", "article_content", "article_modal", "book_toc", "book_content", "book_modal"]) | safe }}
+    {{ component_styles(component_names=["header", "navbar", "contacts", "grid_card", "tag_cloud", "footer", "page_tags", "snippet_card_modal", "content_div", "grid_cards", "article_toc", "article_content", "article_modal", "book_toc", "book_content", "book_modal"]) | safe }}
     </style>
     
     {% block extra_styles %}{% endblock extra_styles %}
@@ -35,9 +38,12 @@
     <!-- External JavaScript -->
     <script src="/js/main.js"></script>
     
+    <!-- Code Block Scripts (generated from Rust) -->
+    <script src="/assets/js/code-blocks.js"></script>
+    
     <!-- Component Scripts -->
     <script>
-    {{ component_scripts(component_names=["header", "navbar", "contacts", "grid_card", "code_block", "tag_cloud", "footer", "page_tags", "content_div", "grid_cards", "article_toc", "article_content", "article_modal", "book_toc", "book_content", "book_modal"]) | safe }}
+    {{ component_scripts(component_names=["header", "navbar", "contacts", "grid_card", "tag_cloud", "footer", "page_tags", "content_div", "grid_cards", "article_toc", "article_content", "article_modal", "book_toc", "book_content", "book_modal"]) | safe }}
     </script>
     
     <!-- Snippet Modal Script -->

@@ -6,73 +6,47 @@ use crate::core::Result;
 /// Trait for RST directive handlers
 pub trait DirectiveHandler {
     /// Handle the directive and return HTML
-    fn handle(&mut self, content: &str) -> Result<String>;
+    fn handle(&mut self, directive_type: &str, content: &str) -> Result<String>;
 }
 
 /// Code block directive handler
-pub struct CodeBlockHandler;
+pub struct CodeBlockHandler {
+    renderer: crate::content::rst::CodeBlockRenderer,
+}
 
 impl CodeBlockHandler {
     pub fn new() -> Self {
-        Self
+        Self {
+            renderer: crate::content::rst::CodeBlockRenderer::new()
+                .expect("Failed to create CodeBlockRenderer"),
+        }
     }
 }
 
 impl Default for CodeBlockHandler {
     fn default() -> Self {
-        Self
+        Self::new()
     }
 }
 
 impl DirectiveHandler for CodeBlockHandler {
-    fn handle(&mut self, content: &str) -> Result<String> {
-        // Extract language from first line
-        let lines: Vec<&str> = content.lines().collect();
-        let language = if let Some(first_line) = lines.first() {
-            first_line.trim()
-        } else {
+    fn handle(&mut self, language: &str, content: &str) -> Result<String> {
+        // Language is passed directly from the directive (e.g., "python", "rust", "typescript")
+        // If no language specified, default to "text"
+        let language = if language.is_empty() {
             "text"
+        } else {
+            language
         };
-        
-        // Collect code lines (skip first line which is language)
-        let code_lines: Vec<&str> = lines.iter().skip(1).copied().collect();
-        let mut code = code_lines.join("\n");
-        
+
+        // Clean up the code content
+        let mut code = content.to_string();
+
         // Remove paragraph tags that might have been added by the paragraph converter
         code = code.replace("<p>", "").replace("</p>", "\n");
-        
-        // We're now using Prism.js for syntax highlighting, no need for custom highlighting
-        
-        // Generate proper component HTML that matches the code_block component with line numbers
-        let code_lines: Vec<&str> = code.lines().collect();
-        let numbered_code = code_lines.iter().enumerate().map(|(i, line)| {
-            let line_num = i + 1;
-            format!(r#"<span class="line-number" data-line="{}">{}</span>{}"#, line_num, line_num, line)
-        }).collect::<Vec<_>>().join("\n");
-        
-        Ok(format!(
-            r#"<div class="code-block" data-language="{}" data-line-numbers="true">
-    <!-- Code Header -->
-    <div class="code-header">
-        <div class="code-info">
-            <span class="code-language">{}</span>
-        </div>
-        <button class="code-copy-button" onclick="copyCode(this)" aria-label="Copy code">
-            <svg class="code-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-            </svg>
-            <span class="copy-text">Copy</span>
-        </button>
-    </div>
-    
-    <!-- Code Content -->
-    <div class="code-content with-line-numbers">
-        <pre><code class="language-{}">{}</code></pre>
-    </div>
-</div>"#,
-            language, language.to_uppercase(), language, numbered_code
-        ))
+
+        // Use the new CodeBlockRenderer
+        self.renderer.render(&code, language, None)
     }
 }
 
@@ -80,7 +54,7 @@ impl DirectiveHandler for CodeBlockHandler {
 pub struct SnippetCardHandler;
 
 impl DirectiveHandler for SnippetCardHandler {
-    fn handle(&mut self, content: &str) -> Result<String> {
+    fn handle(&mut self, _directive_type: &str, content: &str) -> Result<String> {
         let snippet_name = content.trim();
         let snippet_link = format!("/snippets/{}.html", snippet_name.replace('_', "-").to_lowercase());
         
@@ -102,7 +76,7 @@ impl DirectiveHandler for SnippetCardHandler {
 pub struct TocTreeHandler;
 
 impl DirectiveHandler for TocTreeHandler {
-    fn handle(&mut self, content: &str) -> Result<String> {
+    fn handle(&mut self, _directive_type: &str, content: &str) -> Result<String> {
         let lines: Vec<&str> = content.lines().collect();
         let mut _maxdepth = 2;
         let mut caption = String::new();

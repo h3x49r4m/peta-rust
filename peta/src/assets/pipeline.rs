@@ -2,6 +2,7 @@
 
 use crate::core::{Error, Result};
 use crate::components::ComponentRegistry;
+use crate::assets::{CssGenerator, CssConfig, JsGenerator, JsConfig};
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -104,21 +105,47 @@ impl AssetPipeline {
     pub fn process_assets(&mut self) -> Result<()> {
         // Create output directories
         self.create_output_directories()?;
-        
+
+        // Generate code block assets (from Rust)
+        self.generate_code_block_assets()?;
+
         // Process component assets
         self.process_component_assets()?;
-        
+
         // Process theme assets
         self.process_theme_assets()?;
-        
+
         // Generate asset bundles
         if self.config.bundle_assets {
             self.generate_asset_bundles()?;
         }
-        
+
         // Generate asset manifest
         self.generate_asset_manifest()?;
-        
+
+        Ok(())
+    }
+
+    /// Generate code block CSS and JS from Rust generators
+    fn generate_code_block_assets(&mut self) -> Result<()> {
+        // Generate code block CSS
+        let css_config = CssConfig::default();
+        let css_generator = CssGenerator::with_config(css_config);
+        let css_content = css_generator.generate()?;
+
+        let css_output_path = self.output_dir.join("assets").join("css").join("code-blocks.css");
+        fs::write(&css_output_path, css_content)
+            .map_err(|e| Error::asset(format!("Failed to write code-blocks.css: {}", e)))?;
+
+        // Generate code block JS
+        let js_config = JsConfig::default();
+        let js_generator = JsGenerator::with_config(js_config);
+        let js_content = js_generator.generate()?;
+
+        let js_output_path = self.output_dir.join("assets").join("js").join("code-blocks.js");
+        fs::write(&js_output_path, js_content)
+            .map_err(|e| Error::asset(format!("Failed to write code-blocks.js: {}", e)))?;
+
         Ok(())
     }
     
