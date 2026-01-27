@@ -40,7 +40,7 @@ Build From Source
     git clone https://github.com/h3x49r4m/peta-rust.git
     cd peta-rust
 
-    # Build the project
+    # Build the project (faster for development)
     cargo build --bin peta
 
     # Build the site
@@ -48,6 +48,27 @@ Build From Source
 
     # Start development server
     cargo run --bin peta -- serve --port 3566
+
+Performance Tips
+----------------
+
+For faster development workflow:
+
+.. code-block:: bash
+
+    # Compile once in release mode for optimal performance
+    cargo build --release
+
+    # Use the compiled binary directly (much faster than cargo run)
+    ./target/release/peta build
+    ./target/release/peta serve
+
+    # Or install globally for system-wide access
+    cargo install --path .
+
+    # Then use directly
+    peta build
+    peta serve
 
 Build Commands
 ==============
@@ -188,6 +209,19 @@ Peta is optimized for performance:
 * **Asset Optimization**: CSS/JS minification and image processing
 * **Fast Development Server**: Live reload with minimal rebuild times
 * **Component Caching**: Reusable component rendering
+
+Optimization Tips
+-----------------
+
+For optimal performance during development:
+
+1. **Use Release Build**: Compile once with ``cargo build --release`` and use the binary directly
+2. **Avoid Repeated Compilation**: Use ``./target/release/peta serve`` instead of ``cargo run -- serve``
+3. **Incremental Builds**: Cargo caches compiled modules, only recompiles changed files
+4. **Parallel Processing**: Multi-core compilation for faster builds
+5. **Asset Caching**: Static assets are cached between builds
+
+The development server is fast but initial compilation may take time. For the best experience, compile once and use the binary directly.
 
 License
 =======
