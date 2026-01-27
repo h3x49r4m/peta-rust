@@ -2,7 +2,7 @@
 .article-modal {
   width: 100%;
   max-width: none;
-  margin: 0;
+  margin: var(--spacing-8, 2rem) 0;
   padding: 0;
 }
 
