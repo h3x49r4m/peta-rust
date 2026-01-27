@@ -1,0 +1,7 @@
+name: project_modal
+category: composite
+version: 1.0.0
+description: Project modal component
+dependencies:
+  - project_toc
+  - project_content

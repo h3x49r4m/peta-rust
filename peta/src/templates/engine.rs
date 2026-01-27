@@ -557,6 +557,9 @@ impl TemplateEngine {
             "article_modal" => {
                 result = Self::render_article_modal_nested(&result, props, template_cache, theme_dir)?;
             }
+            "project_modal" => {
+                result = Self::render_project_modal_nested(&result, props, template_cache, theme_dir)?;
+            }
             _ => {}
         }
 
@@ -719,6 +722,84 @@ impl TemplateEngine {
 
         Ok(result)
     }
+
+    fn render_project_modal_nested(
+            rendered: &str,
+            props: &Value,
+            template_cache: &Arc<RwLock<TemplateCache>>,
+            theme_dir: &Path,
+        ) -> Result<String> {
+            let mut result = rendered.to_string();
+    
+            // Render project_toc
+            let toc_template_path = theme_dir.join("components/atomic/project_toc/project_toc.html");
+            if toc_template_path.exists() {
+                let template_content = if let Ok(cache) = template_cache.read() {
+                    cache.load(toc_template_path.to_str().unwrap())?
+                } else {
+                    std::fs::read_to_string(&toc_template_path)?
+                };
+    
+                let mut toc_props = serde_json::Map::new();
+                if let Some(props_obj) = props.as_object() {
+                    if let Some(toc) = props_obj.get("toc") {
+                        toc_props.insert("toc".to_string(), toc.clone());
+                    }
+                }
+    
+                let mut tera = tera::Tera::default();
+                tera.autoescape_on(vec![]);
+                Self::load_component_templates_for_tera(&mut tera, theme_dir)?;
+                tera.add_raw_template("project_toc", &template_content)?;            
+                let mut context = Context::new();
+                context.insert("props", &Value::Object(toc_props.clone()));
+
+                let nested_rendered = tera.render("project_toc", &context)
+                    .map_err(|e| Error::template(format!("Failed to render project_toc: {}", e)))?;
+
+                result = result.replace("<div id=\"project-toc-placeholder\"></div>", &nested_rendered);
+            }
+
+            // Render project_content
+            let content_template_path = theme_dir.join("components/atomic/project_content/project_content.html");
+            if content_template_path.exists() {
+                let template_content = if let Ok(cache) = template_cache.read() {
+                    cache.load(content_template_path.to_str().unwrap())?
+                } else {
+                    std::fs::read_to_string(&content_template_path)?
+                };
+        
+                let mut content_props = serde_json::Map::new();
+                if let Some(props_obj) = props.as_object() {
+                    if let Some(title) = props_obj.get("title") {
+                        content_props.insert("title".to_string(), title.clone());
+                    }
+                    if let Some(content) = props_obj.get("content") {
+                        content_props.insert("content".to_string(), content.clone());
+                    }
+                    if let Some(page) = props_obj.get("page") {
+                        content_props.insert("page".to_string(), page.clone());
+                    }
+                }
+        
+                let mut tera = tera::Tera::default();
+                tera.autoescape_on(vec![]);
+                Self::load_component_templates_for_tera(&mut tera, theme_dir)?;
+                tera.add_raw_template("project_content", &template_content)?;            
+                let mut context = Context::new();
+                context.insert("props", &Value::Object(content_props.clone()));
+                if let Some(page) = props.as_object().and_then(|p| p.get("page")) {
+                    context.insert("page", page);
+                }
+
+                let nested_rendered = tera.render("project_content", &context)
+                    .map_err(|e| Error::template(format!("Failed to render project_content: {}", e)))?;
+
+                result = result.replace("<div id=\"project-content-placeholder\"></div>", &nested_rendered);
+            }
+
+            Ok(result)
+        }
 
     fn build_nested_context(_component_name: &str, props: &Value) -> Context {
         let mut context = Context::new();

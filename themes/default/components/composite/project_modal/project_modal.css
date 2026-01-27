@@ -1,0 +1,202 @@
+/* Project Modal Component Styles */
+.project-modal {
+  width: 100%;
+  max-width: none;
+  margin: var(--spacing-8, 2rem) 0;
+  padding: 0;
+}
+
+.project-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: var(--spacing-8, 2rem);
+  align-items: start;
+  width: 100%;
+}
+
+.project-sidebar {
+  position: sticky;
+  top: var(--spacing-8, 2rem);
+  height: fit-content;
+  max-height: calc(100vh - var(--spacing-16, 4rem));
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.5) rgba(226, 232, 240, 0.3);
+  padding-right: var(--spacing-2, 0.5rem);
+}
+
+.project-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.project-sidebar::-webkit-scrollbar-track {
+  background: rgba(226, 232, 240, 0.3);
+  border-radius: 3px;
+}
+
+.project-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.5);
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+.project-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.7);
+}
+
+.project-main {
+  min-width: 0; /* Prevent grid item from overflowing */
+}
+
+.project-body {
+  line-height: 1.8;
+  color: var(--text-color, #1e293b);
+}
+
+.project-body p {
+  margin-bottom: var(--spacing-4, 1rem);
+}
+
+.project-body h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-color, #1e293b);
+  margin: 2rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--border-color, #e2e8f0);
+  position: relative;
+}
+
+.project-body h2::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 50px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary-color, #3b82f6), var(--secondary-color, #8b5cf6));
+}
+
+.project-body h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-color, #1e293b);
+  margin: 1.75rem 0 0.875rem;
+}
+
+.project-body h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-color, #1e293b);
+  margin: 1.5rem 0 0.75rem;
+}
+
+.project-body ul,
+.project-body ol {
+  margin: 1.5rem 0;
+  padding-left: 2rem;
+}
+
+.project-body li {
+  margin-bottom: 0.5rem;
+}
+
+.project-body blockquote {
+  margin: 1.5rem 0;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, var(--background-secondary, #f8fafc) 0%, var(--background-tertiary, #f1f5f9) 100%);
+  border-left: 4px solid var(--primary-color, #3b82f6);
+  border-radius: 0.5rem;
+  font-style: italic;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+
+
+
+
+.project-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  margin: 1.5rem 0;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.project-body img:hover {
+  transform: scale(1.02);
+}
+
+.project-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  background: var(--background-color, #ffffff);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.project-body th,
+.project-body td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+}
+
+.project-body th {
+  background: linear-gradient(135deg, var(--background-secondary, #f8fafc) 0%, var(--background-tertiary, #f1f5f9) 100%);
+  font-weight: 700;
+  color: var(--text-color, #1e293b);
+}
+
+.project-body tr:last-child td {
+  border-bottom: none;
+}
+
+.project-body tr:hover td {
+  background: rgba(59, 130, 246, 0.02);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .project-layout {
+    grid-template-columns: 280px 1fr;
+    gap: var(--spacing-6, 1.5rem);
+  }
+}
+
+@media (max-width: 768px) {
+  .project-layout {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-6, 1.5rem);
+  }
+
+  .project-sidebar {
+    position: static;
+    max-height: none;
+    order: 2;
+    padding-right: 0;
+  }
+
+  .project-main {
+    order: 1;
+  }
+
+  .project-content {
+    padding: var(--spacing-6, 1.5rem);
+  }
+
+  .project-title {
+    font-size: 1.875rem;
+  }
+
+  .project-body h2 {
+    font-size: 1.5rem;
+  }
+
+  .project-body h3 {
+    font-size: 1.25rem;
+  }
+}

@@ -1,0 +1,18 @@
+name: project_content
+category: atomic
+version: 1.0.0
+description: Project content component
+props:
+  content:
+    type: string
+    description: Project content HTML
+    required: false
+  title:
+    type: string
+    description: Project title
+    default: ""
+    required: false
+  page:
+    type: object
+    description: Page metadata
+    required: false

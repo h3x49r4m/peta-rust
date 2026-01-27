@@ -1,0 +1,14 @@
+name: project_toc
+category: atomic
+version: 1.0.0
+description: Project table of contents component
+props:
+  toc:
+    type: object
+    description: Table of contents data
+    required: false
+  title:
+    type: string
+    description: TOC title
+    default: "Project Contents"
+    required: false
