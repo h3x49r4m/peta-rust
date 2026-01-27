@@ -4,6 +4,7 @@
 //! static sites with reusable UI components following the V4 architecture.
 
 pub mod config;
+pub mod discovery;
 pub mod loader;
 pub mod manager;
 pub mod registry;
@@ -12,6 +13,7 @@ pub mod theme;
 pub mod version;
 
 pub use config::{ComponentConfig, PropConfig, SlotConfig, StateConfig, ComponentCategory, SeoConfig};
+pub use discovery::{ComponentDiscovery, DiscoveredComponent};
 pub use loader::ComponentLoader;
 pub use manager::ComponentManager;
 pub use registry::{ComponentRegistry, DependencyGraph};

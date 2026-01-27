@@ -1,14 +1,16 @@
 //! Component manager for managing components lifecycle
 
-use crate::components::{Component, ComponentLoader, ComponentRegistry, ComponentVersion};
+use crate::components::{Component, ComponentLoader, ComponentRegistry, ComponentVersion, ComponentDiscovery};
 use crate::components::config::ComponentCategory;
 use crate::core::{Error, Result};
 use std::path::PathBuf;
+use std::sync::{Arc, RwLock};
 
-/// Component manager for installing, updating, and removing components
+/// Component manager for managing components lifecycle
 pub struct ComponentManager {
     registry: ComponentRegistry,
     loader: ComponentLoader,
+    discovery: Arc<RwLock<ComponentDiscovery>>,
     theme_dir: PathBuf,
 }
 
@@ -17,21 +19,30 @@ impl ComponentManager {
     pub fn new(theme_dir: &PathBuf) -> Self {
         let registry = ComponentRegistry::new();
         let loader = ComponentLoader::new(theme_dir);
+        let discovery = Arc::new(RwLock::new(ComponentDiscovery::new(theme_dir)));
         
         Self {
             registry,
             loader,
+            discovery,
             theme_dir: theme_dir.clone(),
         }
     }
     
     /// Initialize the component manager with default components
     pub fn initialize(&mut self) -> Result<()> {
-        // Load all components from theme
-        let components = self.loader.load_all_components()?;
+        // Discover all components from theme using discovery system
+        let discovered = if let Ok(mut discovery) = self.discovery.write() {
+            discovery.discover_all()?
+        } else {
+            vec![]
+        };
         
-        for component in components {
-            self.registry.register_component(component)?;
+        // Convert discovered components to Component structs
+        for discovered_component in discovered {
+            if let Ok(component) = discovered_component.to_component() {
+                let _ = self.registry.register_component(component);
+            }
         }
         
         Ok(())
@@ -118,6 +129,21 @@ impl ComponentManager {
     /// Get component information
     pub fn get_component_info(&self, name: &str) -> Option<&Component> {
         self.registry.get_component(name)
+    }
+
+    /// Get component category
+    pub fn get_component_category(&self, name: &str) -> Option<String> {
+        if let Some(mut discovery) = self.discovery.write().ok() {
+            if let Ok(Some(component)) = discovery.get_component(name) {
+                return Some(component.category);
+            }
+        }
+        None
+    }
+
+    /// Get all components
+    pub fn get_all(&self) -> Vec<Component> {
+        self.registry.get_all_components().values().cloned().collect()
     }
     
     /// List all components

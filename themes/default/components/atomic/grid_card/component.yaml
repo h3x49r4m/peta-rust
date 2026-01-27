@@ -1,48 +1,5 @@
 name: grid_card
-version: 1.0.0
 category: Atomic
-description: Grid card component for displaying content items
-enabled: true
+version: 1.0.0
+description: Grid card component for displaying content
 dependencies: []
-props:
-  title:
-    type: string
-    required: true
-    description: Title of the content item
-  url:
-    type: string
-    required: true
-    description: URL link for the content item
-  excerpt:
-    type: string
-    required: false
-    description: Excerpt or description of the content
-  content_type:
-    type: string
-    required: true
-    description: Type of content (article, book, snippet, project)
-  meta:
-    type: object
-    required: false
-    description: Additional metadata (author, date, tags, etc.)
-  tags:
-    type: array
-    required: false
-    description: Array of tags associated with the content
-  featured:
-    type: boolean
-    required: false
-    default: false
-    description: Whether this card is featured
-slots: []
-templates:
-  - grid_card.html
-styles:
-  - grid_card.css
-scripts:
-  - grid_card.js
-static_data: []
-config_schema: {}
-default_config: {}
-seo: null
-state: []

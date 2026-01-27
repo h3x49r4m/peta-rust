@@ -1,43 +1,5 @@
 name: contacts
-version: 1.0.0
 category: Atomic
-description: Contact information component with social links
-enabled: true
+version: 1.0.0
+description: Contact information component
 dependencies: []
-props:
-  email:
-    type: string
-    required: false
-    description: Contact email address
-  phone:
-    type: string
-    required: false
-    description: Contact phone number
-  social_links:
-    type: array
-    required: false
-    description: Array of social media links
-    items:
-      type: object
-      properties:
-        name:
-          type: string
-        url:
-          type: string
-        icon:
-          type: string
-slots:
-  - name: children
-    required: false
-    description: Additional content to display
-templates:
-  - contacts.html
-styles:
-  - contacts.css
-scripts:
-  - contacts.js
-static_data: []
-config_schema: {}
-default_config: {}
-seo: null
-state: []

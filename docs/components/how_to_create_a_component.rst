@@ -26,40 +26,18 @@ The ``component.yaml`` file defines the component's metadata, properties, and de
 
     name: my_component
     version: 1.0.0
-    category: Atomic  # or Composite
+    category: atomic  # or composite (lowercase)
     description: A brief description of what this component does
-    enabled: true
     dependencies: []
-    props:
-      title:
-        type: string
-        required: true
-        description: The title to display
-      show_icon:
-        type: boolean
-        required: false
-        default: true
-        description: Whether to show an icon
-    slots: []
-    templates:
-      - my_component.html
-    styles:
-      - my_component.css
-    scripts:
-      - my_component.js
-    static_data: []
-    config_schema: {}
-    default_config: {}
-    seo: null
-    state: []
 
 Key fields:
 - ``name``: Component identifier (must match directory name)
-- ``category``: Either "Atomic" or "Composite"
-- ``props``: Component properties that can be passed when using the component
-- ``templates``: List of HTML template files
-- ``styles``: List of CSS files
-- ``scripts``: List of JavaScript files (optional)
+- ``category``: Either "atomic" or "composite" (lowercase)
+- ``version``: Component version (defaults to "1.0.0")
+- ``description``: Brief description of the component (optional)
+- ``dependencies``: List of component dependencies (optional)
+
+**Note**: All other fields (props, slots, templates, styles, scripts, etc.) are optional and have default values. For most simple components, you only need to specify ``name``, ``category``, ``version``, and ``description``.
 
 HTML Template
 -------------
@@ -126,19 +104,17 @@ JavaScript files add interactivity to components. Use the ``data-component`` att
         });
     });
 
-Registering Components
-----------------------
+Automatic Component Discovery
+------------------------------
 
-After creating a component, you need to register it in the component loader. Edit ``peta/src/components/loader.rs`` and add your component to the ``get_category_dir`` function::
+**Important**: As of Peta V4, components are automatically discovered from the filesystem. You do NOT need to manually register components in the code.
 
-    fn get_category_dir(&self, name: &str) -> &'static str {
-        match name {
-            // ... existing components ...
-            "my_component" => "atomic",
-            // ... other components ...
-            _ => "content",
-        }
-    }
+When you create a component directory with a ``component.yaml`` file in ``themes/default/components/``, it will be automatically discovered and available for use. The system scans the following directories:
+
+- ``themes/default/components/atomic/`` - For atomic components
+- ``themes/default/components/composite/`` - For composite components
+
+For more details on how component discovery works, see :doc:`component_pipeline`.
 
 Using Components in Templates
 -----------------------------
@@ -182,31 +158,11 @@ Example: Creating a Simple Button Component
 
     name: my_button
     version: 1.0.0
-    category: Atomic
+    category: atomic
     description: A simple button component
-    enabled: true
     dependencies: []
-    props:
-      text:
-        type: string
-        required: true
-        description: Button text
-      variant:
-        type: string
-        required: false
-        default: "primary"
-        description: Button style variant (primary, secondary, danger)
-    slots: []
-    templates:
-      - my_button.html
-    styles:
-      - my_button.css
-    scripts: []
-    static_data: []
-    config_schema: {}
-    default_config: {}
-    seo: null
-    state: []
+
+**Note**: Use lowercase "atomic" or "composite" for the category.
 
 3. Create ``my_button.html``::
 
@@ -240,19 +196,10 @@ Example: Creating a Simple Button Component
         color: white;
     }
 
-5. Register the component in ``peta/src/components/loader.rs``::
-
-    fn get_category_dir(&self, name: &str) -> &'static str {
-        match name {
-            // ... existing components ...
-            "my_button" => "atomic",
-            // ... other components ...
-            _ => "content",
-        }
-    }
-
-6. Use the component in templates::
+5. Use the component in templates::
 
     {{ component(name="my_button", text="Click me", variant="primary") | safe }}
+
+**Note**: No manual registration required! The component will be automatically discovered and available for use.
 
 This completes the component creation process. You can now reuse your component across different pages and templates in your Peta site.

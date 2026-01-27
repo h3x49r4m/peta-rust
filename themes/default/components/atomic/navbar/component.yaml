@@ -1,35 +1,6 @@
 name: navbar
+category: atomic
 version: 1.0.0
-category: Atomic
-description: Navigation bar component with menu items
+description: Site navigation bar component
 enabled: true
 dependencies: []
-props:
-  nav_items:
-    type: array
-    required: false
-    description: Array of navigation items
-    items:
-      type: object
-      properties:
-        name:
-          type: string
-        url:
-          type: string
-        active:
-          type: boolean
-slots:
-  - name: children
-    required: false
-    description: Additional content to display
-templates:
-  - navbar.html
-styles:
-  - navbar.css
-scripts:
-  - navbar.js
-static_data: []
-config_schema: {}
-default_config: {}
-seo: null
-state: []

@@ -1,44 +1,6 @@
 name: header
+category: composite
 version: 1.0.0
-category: Composite
-description: Header component with site name and navigation bar
-enabled: true
-dependencies: [navbar]
-props:
-  site_name:
-    type: string
-    required: true
-    description: Site name to display
-  site_url:
-    type: string
-    required: false
-    description: Site URL for the logo link
-    default: "/"
-  nav_items:
-    type: array
-    required: false
-    description: Array of navigation items
-    items:
-      type: object
-      properties:
-        name:
-          type: string
-        url:
-          type: string
-        active:
-          type: boolean
-slots:
-  - name: children
-    required: false
-    description: Additional content to display
-templates:
-  - header.html
-styles:
-  - header.css
-scripts:
-  - header.js
-static_data: []
-config_schema: {}
-default_config: {}
-seo: null
-state: []
+description: Site header component with navbar
+dependencies:
+  - navbar

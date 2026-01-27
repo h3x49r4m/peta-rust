@@ -1,46 +1,6 @@
 name: grid_cards
+category: composite
 version: 1.0.0
-category: Composite
-description: Composite component for displaying multiple grid cards in a responsive layout
-enabled: true
+description: Grid cards container component
 dependencies:
   - grid_card
-props:
-  title:
-    type: string
-    required: false
-    description: Title for the grid cards section
-  items:
-    type: array
-    required: true
-    description: Array of content items to display as grid cards
-  columns:
-    type: number
-    required: false
-    default: 3
-    description: Number of columns in the grid (auto-responsive)
-  show_empty:
-    type: boolean
-    required: false
-    default: true
-    description: Whether to show empty state message when no items
-  empty_message:
-    type: string
-    required: false
-    default: "No items found."
-    description: Message to display when no items are available
-slots:
-  - name: empty_state
-    description: Custom empty state content
-    required: false
-templates:
-  - grid_cards.html
-styles:
-  - grid_cards.css
-scripts:
-  - grid_cards.js
-static_data: []
-config_schema: {}
-default_config: {}
-seo: null
-state: []

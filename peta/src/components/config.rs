@@ -3,13 +3,39 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+fn default_description() -> String {
+    String::new()
+}
+
+fn default_enabled() -> bool {
+    true
+}
+
+fn default_value() -> serde_json::Value {
+    serde_json::Value::Object(serde_json::Map::new())
+}
+
 /// Component category
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Serialize, PartialEq, Eq, Hash)]
 pub enum ComponentCategory {
     /// Basic building blocks
     Atomic,
     /// Complex UI components
     Composite,
+}
+
+impl<'de> Deserialize<'de> for ComponentCategory {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        match s.to_lowercase().as_str() {
+            "atomic" => Ok(ComponentCategory::Atomic),
+            "composite" => Ok(ComponentCategory::Composite),
+            _ => Err(serde::de::Error::custom(format!("unknown category: {}", s))),
+        }
+    }
 }
 
 /// Prop configuration for component properties
@@ -80,28 +106,40 @@ pub struct ComponentConfig {
     /// Component category
     pub category: ComponentCategory,
     /// Component description
+    #[serde(default = "default_description")]
     pub description: String,
     /// Whether component is enabled
+    #[serde(default = "default_enabled")]
     pub enabled: bool,
     /// Required dependencies
+    #[serde(default)]
     pub dependencies: Vec<String>,
     /// Component props
+    #[serde(default)]
     pub props: HashMap<String, PropConfig>,
     /// Component slots
+    #[serde(default)]
     pub slots: Vec<SlotConfig>,
     /// Component state
+    #[serde(default)]
     pub state: Vec<StateConfig>,
     /// Template files
+    #[serde(default)]
     pub templates: Vec<String>,
     /// CSS files
+    #[serde(default)]
     pub styles: Vec<String>,
     /// JavaScript files
+    #[serde(default)]
     pub scripts: Vec<String>,
     /// Static data files
+    #[serde(default)]
     pub static_data: Vec<String>,
     /// Configuration schema
+    #[serde(default = "default_value")]
     pub config_schema: serde_json::Value,
     /// Default configuration
+    #[serde(default = "default_value")]
     pub default_config: serde_json::Value,
     /// SEO configuration
     pub seo: Option<SeoConfig>,

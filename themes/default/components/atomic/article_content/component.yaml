@@ -1,34 +1,5 @@
 name: article_content
-version: 1.0.0
 category: Atomic
-description: Atomic component for displaying article content
-enabled: true
+version: 1.0.0
+description: Article content component
 dependencies: []
-props:
-  title:
-    type: string
-    required: false
-    description: Article title
-  content:
-    type: string
-    required: false
-    description: Article content HTML
-  page:
-    type: object
-    required: false
-    description: Page metadata object (date, author, tags, etc.)
-slots:
-  - name: children
-    required: false
-    description: Additional content to display
-templates:
-  - article_content.html
-styles:
-  - article_content.css
-scripts:
-  - article_content.js
-static_data: []
-config_schema: {}
-default_config: {}
-seo: null
-state: []
