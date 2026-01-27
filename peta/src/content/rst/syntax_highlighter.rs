@@ -52,7 +52,7 @@ impl SyntaxHighlighter {
     /// Create a syntax highlighter with custom configuration
     pub fn with_config(config: HighlighterConfig) -> Result<Self> {
         // Load syntax definitions
-        let syntax_set = SyntaxSet::load_defaults_newlines();
+        let mut syntax_set = SyntaxSet::load_defaults_newlines();
 
         // Load themes
         let theme_set = ThemeSet::load_defaults();
@@ -155,7 +155,74 @@ impl SyntaxHighlighter {
                 })?;
         }
 
-        Ok(html_generator.finalize())
+        let html = html_generator.finalize();
+
+        // Convert syntect classes to our token classes
+        let converted_html = self.convert_classes(&html);
+
+        Ok(converted_html)
+    }
+    
+    /// Convert syntect class names to our token classes
+    /// Convert syntect class names to our token classes
+    fn convert_classes(&self, html: &str) -> String {
+        use regex::Regex;
+        
+        let mut result = html.to_string();
+        
+        // Keywords - must be after more specific patterns
+        result = Regex::new(r#"class="keyword storage type function(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-keyword""#).to_string();
+        result = Regex::new(r#"class="keyword storage type(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-type""#).to_string();
+        result = Regex::new(r#"class="keyword storage modifier(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-keyword""#).to_string();
+        result = Regex::new(r#"class="keyword control(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-keyword""#).to_string();
+        result = Regex::new(r#"class="keyword operator(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-operator""#).to_string();
+        result = Regex::new(r#"class="keyword(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-keyword""#).to_string();
+        
+        // Storage types
+        result = Regex::new(r#"class="storage type(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-type""#).to_string();
+        result = Regex::new(r#"class="storage modifier(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-keyword""#).to_string();
+        
+        // Entity names
+        result = Regex::new(r#"class="entity name function(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-function""#).to_string();
+        result = Regex::new(r#"class="entity name type(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-type""#).to_string();
+        result = Regex::new(r#"class="entity name struct(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-type""#).to_string();
+        result = Regex::new(r#"class="entity name class(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-type""#).to_string();
+        result = Regex::new(r#"class="entity name variable(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-variable""#).to_string();
+        result = Regex::new(r#"class="entity name constant(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-variable""#).to_string();
+        result = Regex::new(r#"class="entity name label(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-variable""#).to_string();
+        result = Regex::new(r#"class="entity name(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-variable""#).to_string();
+        
+        // Support
+        result = Regex::new(r#"class="support function(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-function""#).to_string();
+        result = Regex::new(r#"class="support type(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-type""#).to_string();
+        result = Regex::new(r#"class="support class(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-type""#).to_string();
+        result = Regex::new(r#"class="support constant(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-variable""#).to_string();
+        
+        // Variables
+        result = Regex::new(r#"class="variable function(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-function""#).to_string();
+        result = Regex::new(r#"class="variable parameter(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-variable""#).to_string();
+        result = Regex::new(r#"class="variable other(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-variable""#).to_string();
+        result = Regex::new(r#"class="variable(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-variable""#).to_string();
+        
+        // Constants
+        result = Regex::new(r#"class="constant numeric(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-number""#).to_string();
+        result = Regex::new(r#"class="constant other(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-variable""#).to_string();
+        result = Regex::new(r#"class="constant(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-variable""#).to_string();
+        
+        // Strings
+        result = Regex::new(r#"class="string(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-string""#).to_string();
+        
+        // Comments
+        result = Regex::new(r#"class="comment(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-comment""#).to_string();
+        
+        // Punctuation
+        result = Regex::new(r#"class="punctuation(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-punctuation""#).to_string();
+        
+        // Plain text
+        result = Regex::new(r#"class="source(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-plain""#).to_string();
+        result = Regex::new(r#"class="text(\s+[^"]*)?""#).unwrap().replace_all(&result, r#"class="token-plain""#).to_string();
+        
+        result
     }
 
     /// Highlight code with line numbers
@@ -194,10 +261,17 @@ impl SyntaxHighlighter {
 
     /// Resolve language alias
     fn resolve_language(&self, language: &str) -> String {
-        self.language_aliases
+        let resolved = self.language_aliases
             .get(language)
             .cloned()
-            .unwrap_or_else(|| language.to_string())
+            .unwrap_or_else(|| language.to_string());
+
+        // TypeScript isn't in syntect's default set, use JavaScript as fallback
+        if resolved == "typescript" || resolved == "ts" {
+            "javascript".to_string()
+        } else {
+            resolved
+        }
     }
 
     /// Get available themes

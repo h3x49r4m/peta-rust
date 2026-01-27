@@ -57,47 +57,7 @@ components:
     scripts: []
     config: {}
     variants: {}
-    components:
-      code_block:
-        name: "code_block"
-        type: "atomic"
-        description: "Enhanced code block with syntax highlighting, line numbers, and copy functionality"
-        version: "1.0.0"
-        enabled: true
-        category: "Atomic"
-        dependencies: []
-        props:
-          code:
-            type: "string"
-            required: true
-            description: "The code content to display"
-          language:
-            type: "string"
-            required: false
-            default: "text"
-            description: "Programming language for syntax highlighting"
-          show_line_numbers:
-            type: "boolean"
-            required: false
-            default: true
-            description: "Show line numbers"
-          copy_button:
-            type: "boolean"
-            required: false
-            default: true
-            description: "Show copy button"
-        slots: []
-        state: []
-        templates:
-          - "code_block.html"
-        styles:
-          - "code_block.css"
-        scripts:
-          - "code_block.js"
-        static_data: []
-        config_schema: {}
-        default_config: {}
-        seo: null
+    components: {}
   
   composite:
     name: "Composite Components"
@@ -167,12 +127,6 @@ features:
   # Search functionality
   search: true
   search_type: "client_side"
-  
-  # Code highlighting
-  code_highlighting: true
-  code_theme: "github-dark"
-  line_numbers: true
-  copy_button: true
   
   # Math rendering
   math_rendering: true

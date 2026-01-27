@@ -111,32 +111,9 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.article-body code {
-  background: rgba(59, 130, 246, 0.1);
-  color: #1e40af;
-  padding: 0.2rem 0.4rem;
-  border-radius: 0.25rem;
-  font-family: var(--font-family-mono, 'SF Mono', Monaco, 'Inconsolata', 'Roboto Mono', 'Source Code Pro', monospace);
-  font-size: 0.9em;
-  font-weight: 500;
-}
 
-.article-body pre {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  color: #e2e8f0;
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  overflow-x: auto;
-  margin: 1.5rem 0;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
 
-.article-body pre code {
-  background: none;
-  color: inherit;
-  padding: 0;
-}
+
 
 .article-body img {
   max-width: 100%;

@@ -133,7 +133,10 @@ impl AssetPipeline {
         let css_generator = CssGenerator::with_config(css_config);
         let css_content = css_generator.generate()?;
 
-        let css_output_path = self.output_dir.join("assets").join("css").join("code-blocks.css");
+        // Write directly to output_dir/css/ (not output_dir/assets/css/)
+        let css_output_path = self.output_dir.join("css").join("code-blocks.css");
+        fs::create_dir_all(css_output_path.parent().unwrap())
+            .map_err(|e| Error::asset(format!("Failed to create CSS directory: {}", e)))?;
         fs::write(&css_output_path, css_content)
             .map_err(|e| Error::asset(format!("Failed to write code-blocks.css: {}", e)))?;
 
@@ -142,7 +145,10 @@ impl AssetPipeline {
         let js_generator = JsGenerator::with_config(js_config);
         let js_content = js_generator.generate()?;
 
-        let js_output_path = self.output_dir.join("assets").join("js").join("code-blocks.js");
+        // Write directly to output_dir/js/ (not output_dir/assets/js/)
+        let js_output_path = self.output_dir.join("js").join("code-blocks.js");
+        fs::create_dir_all(js_output_path.parent().unwrap())
+            .map_err(|e| Error::asset(format!("Failed to create JS directory: {}", e)))?;
         fs::write(&js_output_path, js_content)
             .map_err(|e| Error::asset(format!("Failed to write code-blocks.js: {}", e)))?;
 

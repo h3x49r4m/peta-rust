@@ -430,6 +430,13 @@ impl CssGenerator {
   border-radius: 2px;
   padding: 0 2px;
 }
+
+/* Syntect wrapper classes - inherit styling from child elements */
+.meta,
+.source,
+.text {
+  color: inherit;
+}
 "#);
 
         css
