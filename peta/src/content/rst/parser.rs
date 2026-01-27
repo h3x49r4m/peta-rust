@@ -307,6 +307,13 @@ impl RstParser {
 
         while i < lines.len() {
             let line = lines[i];
+            let trimmed = line.trim();
+
+            // Skip RST underline characters at the start of processing
+            if self.is_rst_underline(trimmed) {
+                i += 1;
+                continue;
+            }
 
             if i + 1 < lines.len() {
                 let next_line = lines[i + 1];
@@ -319,7 +326,11 @@ impl RstParser {
                 {
                     let level = match next_line.chars().next() {
                         Some('=') => "2",
-                        _ => "3",
+                        Some('-') => "3",
+                        Some('~') => "4",
+                        Some('^') => "5",
+                        Some('"') => "6",
+                        _ => "3", // Default to level 3 for other underline characters
                     };
                     let anchor = self.slugify(current_line);
                     result.push(format!(
@@ -355,7 +366,7 @@ impl RstParser {
                     result.push(line.to_string());
                     i += 1;
                 } else if trimmed.len() > 0 &&
-                   !trimmed.chars().all(|c| c == '=' || c == '-' || c == '~' || c == '^' || c == '*' || c == '+' || c == '"' || c == '#' || c == '`') &&
+                   !self.is_rst_underline(trimmed) &&
                    trimmed.len() <= 50 &&
                    !trimmed.contains('.') &&
                    !trimmed.contains(',') &&
