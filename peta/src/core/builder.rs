@@ -8,6 +8,7 @@ use crate::templates::TemplateEngine;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 use glob::glob;
+use chrono::NaiveDate;
 
 /// Main site builder that orchestrates the RST-to-HTML pipeline
 pub struct SiteBuilder {
@@ -390,6 +391,12 @@ impl SiteBuilder {
                 ContentType::Project => projects.push(item),
             }
         }
+        
+        // Sort by date (newest first)
+        self.sort_content_by_date(&mut articles);
+        self.sort_content_by_date(&mut snippets);
+        self.sort_content_by_date(&mut books);
+        self.sort_content_by_date(&mut projects);
         
         // Generate articles listing
         let mut articles_context = self.create_base_context();
@@ -1157,5 +1164,29 @@ window.PETA_HOOKS.useTheme = useTheme;
         } else {
             "general".to_string()
         }
+    }
+    
+    /// Sort content items by date (newest first)
+    fn sort_content_by_date(&self, items: &mut Vec<serde_json::Value>) {
+        items.sort_by(|a, b| {
+            let date_a = a.get("date").and_then(|d| d.as_str());
+            let date_b = b.get("date").and_then(|d| d.as_str());
+            
+            match (date_a, date_b) {
+                (Some(da), Some(db)) => {
+                    // Parse dates and sort in descending order (newest first)
+                    let parsed_a = NaiveDate::parse_from_str(da, "%Y-%m-%d");
+                    let parsed_b = NaiveDate::parse_from_str(db, "%Y-%m-%d");
+                    
+                    match (parsed_a, parsed_b) {
+                        (Ok(pa), Ok(pb)) => pb.cmp(&pa), // Reverse order for newest first
+                        _ => da.cmp(&db).reverse(), // Fallback to string comparison
+                    }
+                }
+                (Some(_), None) => std::cmp::Ordering::Less,
+                (None, Some(_)) => std::cmp::Ordering::Greater,
+                (None, None) => std::cmp::Ordering::Equal,
+            }
+        });
     }
 }
