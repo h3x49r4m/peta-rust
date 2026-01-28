@@ -1,0 +1,5 @@
+name: search
+category: Atomic
+version: 1.0.0
+description: Search component for finding content
+dependencies: []

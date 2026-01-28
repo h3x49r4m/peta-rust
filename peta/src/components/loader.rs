@@ -139,7 +139,7 @@ impl ComponentLoader {
     }
     
     /// Discover files of a specific type in a directory
-    fn discover_files(&self, dir: &PathBuf, _extension: &str) -> Result<Vec<String>> {
+    fn discover_files(&self, dir: &PathBuf, extension: &str) -> Result<Vec<String>> {
         let mut files = Vec::new();
         
         for entry in std::fs::read_dir(dir)? {
@@ -147,8 +147,8 @@ impl ComponentLoader {
             let path = entry.path();
             
             if path.is_file() {
-                if let Some(extension) = path.extension() {
-                    if extension == extension {
+                if let Some(file_extension) = path.extension() {
+                    if file_extension == extension {
                         if let Some(name) = path.file_name() {
                             if let Some(name_str) = name.to_str() {
                                 files.push(name_str.to_string());
@@ -178,6 +178,8 @@ impl ComponentLoader {
             "book_content" => "atomic",
             "project_toc" => "atomic",
             "project_content" => "atomic",
+            "site_stats" => "atomic",
+            "search" => "atomic",
             "header" => "composite",
             "footer" => "composite",
             "page_tags" => "composite",

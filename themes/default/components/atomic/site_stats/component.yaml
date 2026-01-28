@@ -1,0 +1,5 @@
+name: site_stats
+category: Atomic
+version: 1.0.0
+description: Site statistics component displaying content metrics
+dependencies: []
