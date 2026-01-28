@@ -5,12 +5,13 @@
   padding: var(--spacing-6, 1.5rem);
   border: 1px solid rgba(226, 232, 240, 0.8);
   position: sticky;
-  top: var(--spacing-8, 2rem);
+  top: 6rem;
   height: fit-content;
-  max-height: calc(100vh - var(--spacing-16, 4rem));
+  max-height: calc(100vh - 8rem);
   overflow-y: auto;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
+  z-index: 100;
 }
 
 .article-toc:hover {
@@ -21,6 +22,10 @@
   margin-bottom: var(--spacing-4, 1rem);
   border-bottom: 2px solid var(--border_color, #e2e8f0);
   padding-bottom: var(--spacing-3, 0.75rem);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-2, 0.5rem);
 }
 
 .toc-title {
@@ -33,6 +38,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-2, 0.5rem);
+  flex: 1;
 }
 
 .toc-title::before {
@@ -41,6 +47,72 @@
   height: 1.5rem;
   background: linear-gradient(180deg, var(--primary_color, #3b82f6), var(--secondary_color, #8b5cf6));
   border-radius: 2px;
+}
+
+.toc-toggle-btn {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 0.5rem;
+  color: var(--primary_color, #3b82f6);
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+}
+
+.toc-toggle-btn:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.3);
+  transform: scale(1.05);
+}
+
+.toc-toggle-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.toc-toggle-icon {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.3s ease;
+}
+
+/* Collapsed state */
+.article-toc.collapsed {
+  padding: var(--spacing-4, 1rem);
+  min-width: 3rem;
+  max-width: 3rem;
+  overflow: visible;
+}
+
+.article-toc.collapsed .toc-title {
+  display: none;
+}
+
+.article-toc.collapsed .toc-content {
+  display: none;
+}
+
+.article-toc.collapsed .toc-header {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+  justify-content: center;
+}
+
+.article-toc.collapsed .toc-toggle-btn {
+  background: rgba(59, 130, 246, 0.15);
+  position: relative;
+  z-index: 101;
+}
+
+.article-toc.collapsed .toc-toggle-icon {
+  transform: rotate(180deg);
 }
 
 .toc-content {
