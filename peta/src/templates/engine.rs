@@ -797,6 +797,9 @@ impl TemplateEngine {
                     if let Some(toc) = props.get("toc") {
                         toc_props.insert("toc".to_string(), toc.clone());
                     }
+                    if let Some(title) = props.get("title") {
+                        toc_props.insert("title".to_string(), title.clone());
+                    }
                 }
     
                 let mut tera = tera::Tera::default();
