@@ -294,7 +294,7 @@ impl SiteBuilder {
         
         // Add content type counts
         let books_count = self.rst_content.iter()
-            .filter(|c| c.metadata.content_type == ContentType::Book)
+            .filter(|c| c.metadata.content_type == ContentType::Book && c.metadata.url.ends_with("index.html"))
             .count();
         let articles_count = self.rst_content.iter()
             .filter(|c| c.metadata.content_type == ContentType::Article)
