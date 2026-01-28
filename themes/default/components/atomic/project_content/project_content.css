@@ -9,19 +9,7 @@
   padding: var(--spacing_xl, 2rem);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   border: 1px solid var(--border_color, #e2e8f0);
-}
 
-/* Reading Progress Indicator */
-.reading-progress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--primary_color, #3b82f6), var(--secondary_color, #8b5cf6));
-  width: 0%;
-  z-index: 1000;
-  transition: width 0.3s ease;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
 /* Project Header */
