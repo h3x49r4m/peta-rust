@@ -195,6 +195,19 @@ impl SiteBuilder {
             content.html = result;
         }
 
+        // Regenerate TOC for articles and projects to include embedded snippet cards
+        let toc_generator = crate::content::rst::toc_generator::TocGenerator::new();
+        for content in self.rst_content.iter_mut() {
+            if content.metadata.content_type == crate::content::ContentType::Article || 
+               content.metadata.content_type == crate::content::ContentType::Project {
+                // Use enhanced TOC generator that includes embedded snippet cards
+                let toc_entries = toc_generator.generate_with_snippets(&content.html)?;
+                let toc_html = toc_generator.render_html(&toc_entries);
+                content.toc = toc_entries;
+                content.toc_html = toc_html;
+            }
+        }
+
         // Resolve internal links
         // Process toctree directives
         Ok(())

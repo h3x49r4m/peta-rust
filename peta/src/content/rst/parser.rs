@@ -85,6 +85,11 @@ impl RstParser {
         // 4. Generate table of contents
         let (toc, toc_html) = if metadata.content_type == ContentType::Book {
             self.extract_toc_from_toctree(&processed_html)?
+        } else if metadata.content_type == ContentType::Article || metadata.content_type == ContentType::Project {
+            // Use enhanced TOC generator that includes embedded snippet cards
+            let toc_entries = self.toc_generator.generate_with_snippets(&processed_html)?;
+            let toc_html = self.toc_generator.render_html(&toc_entries);
+            (toc_entries, toc_html)
         } else {
             let toc_entries = self.toc_generator.generate(&processed_html)?;
             let toc_html = self.toc_generator.render_html(&toc_entries);

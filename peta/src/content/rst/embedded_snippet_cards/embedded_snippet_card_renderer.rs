@@ -26,9 +26,12 @@ impl EmbeddedSnippetCardRenderer {
     /// Render an embedded snippet card
     pub fn render(&self, snippet: &RstContent) -> Result<String> {
         let mut html = String::new();
+        
+        // Generate a unique ID for this snippet card based on snippet ID
+        let snippet_id = Self::generate_snippet_id(&snippet.metadata.title);
 
-        // Start card container
-        html.push_str(r#"<div class="embedded-snippet-card">"#);
+        // Start card container with ID for TOC linking
+        html.push_str(&format!(r#"<div class="embedded-snippet-card" id="{}">"#, snippet_id));
         html.push('\n');
 
         // Card header with metadata
@@ -56,8 +59,8 @@ impl EmbeddedSnippetCardRenderer {
         // Card content with full snippet HTML
         html.push_str("  <div class=\"embedded-snippet-content\">\n");
         
-        // Adjust heading hierarchy to avoid conflicts with parent page
-        let adjusted_content = self.adjust_heading_hierarchy(&snippet.html);
+        // Adjust heading hierarchy and scope IDs to avoid conflicts with parent page
+        let adjusted_content = self.adjust_heading_hierarchy(&snippet.html, &snippet_id);
         html.push_str(&adjusted_content);
         
         html.push_str("  </div>\n");
@@ -81,8 +84,15 @@ impl EmbeddedSnippetCardRenderer {
 
     /// Adjust heading hierarchy to avoid conflicts with parent page
     /// h1 → h3, h2 → h4, h3 → h5, h4 → h6, h5 → h6, h6 → h6
-    fn adjust_heading_hierarchy(&self, html: &str) -> String {
+    /// Also scope all IDs to prevent conflicts with parent page IDs
+    fn adjust_heading_hierarchy(&self, html: &str, snippet_id: &str) -> String {
         let mut adjusted = html.to_string();
+
+        // Scope all IDs to prevent conflicts
+        // Find all id="..." attributes and prefix them with snippet_id
+        use regex::Regex;
+        let id_regex = Regex::new(r#"id="([^"]+)""#).unwrap();
+        adjusted = id_regex.replace_all(&adjusted, format!(r#"id="{}-$1""#, snippet_id)).to_string();
 
         // Replace h1 with h3
         adjusted = adjusted.replace("<h1", "<h3").replace("</h1>", "</h3>");
@@ -102,6 +112,16 @@ impl EmbeddedSnippetCardRenderer {
         // h6 stays as h6
 
         adjusted
+    }
+    
+    /// Generate a snippet ID from title (for ID scoping)
+    pub fn generate_snippet_id(title: &str) -> String {
+        title.to_lowercase()
+            .replace(&[' ', '-', '_', '.', ',', ';', ':', '!', '?', '@', '#', '$', '%', '^', '&', '*', '(', ')', '=', '[', ']', '{', '}', '\\', '|', '<', '>', '/', '"', '\''][..], "-")
+            .split(|c: char| !c.is_alphanumeric() && c != '-')
+            .filter(|s| !s.is_empty())
+            .collect::<Vec<_>>()
+            .join("-")
     }
 
     /// Render error card for missing snippets
