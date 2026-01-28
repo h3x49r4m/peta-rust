@@ -1,0 +1,6 @@
+name: reading_progress
+category: atomic
+version: 1.0.0
+description: Reading progress indicator component that shows scroll progress at the top of the page
+enabled: true
+dependencies: []

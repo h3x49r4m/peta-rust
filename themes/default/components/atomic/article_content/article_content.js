@@ -11,9 +11,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function initializeArticleContent(component) {
-  // Initialize reading progress
-  initializeReadingProgress(component);
-
   // Initialize table of contents
   initializeTableOfContents(component);
 
@@ -28,37 +25,6 @@ function initializeArticleContent(component) {
 
   // Initialize smooth scrolling
   initializeSmoothScrolling(component);
-}
-
-// Reading Progress Indicator
-function initializeReadingProgress(component) {
-  const progressBar = component.querySelector(".reading-progress");
-  if (!progressBar) return;
-
-  const articleBody = component.querySelector(".article-body");
-  if (!articleBody) return;
-
-  function updateProgress() {
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const scrollHeight = articleBody.offsetHeight;
-    const clientHeight = document.documentElement.clientHeight;
-    const articleTop = articleBody.offsetTop;
-
-    let progress = 0;
-    if (scrollTop > articleTop) {
-      const articleScrollTop = scrollTop - articleTop;
-      const articleHeight = scrollHeight - clientHeight;
-      progress = Math.min(
-        100,
-        Math.max(0, (articleScrollTop / articleHeight) * 100)
-      );
-    }
-
-    progressBar.style.width = progress + "%";
-  }
-
-  window.addEventListener("scroll", updateProgress);
-  updateProgress();
 }
 
 // Table of Contents Generation
@@ -96,28 +62,6 @@ function initializeTableOfContents(component) {
   });
 
   tocNav.innerHTML = tocHTML;
-
-  // Add active state tracking
-  const tocLinks = tocNav.querySelectorAll(".toc-link");
-  const observerOptions = {
-    root: null,
-    rootMargin: "-20% 0px -70% 0px",
-    threshold: 0,
-  };
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        tocLinks.forEach((link) => link.classList.remove("active"));
-        const activeLink = tocNav.querySelector(`[href="#${entry.target.id}"]`);
-        if (activeLink) {
-          activeLink.classList.add("active");
-        }
-      }
-    });
-  }, observerOptions);
-
-  headings.forEach((heading) => observer.observe(heading));
 }
 
 // Enhanced Image Lightbox
