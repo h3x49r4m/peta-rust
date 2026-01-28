@@ -3,7 +3,7 @@
     <div class="tag-cloud-container">
         {% if props.tags %}
             {% for tag in props.tags %}
-            <a href="#" class="tag-cloud-tag" style="font-size: {{ 1.0 + (tag.count * 0.1) }}rem;">
+            <a href="#" class="tag-cloud-tag" style="font-size: {{ 0.75 + (tag.count * 0.1) }}rem;">
                 {{ tag.name }}
                 {% if tag.count %}
                 <span class="tag-count">({{ tag.count }})</span>
@@ -12,7 +12,7 @@
             {% endfor %}
         {% elif site.all_tags %}
             {% for tag in site.all_tags %}
-            <a href="#" class="tag-cloud-tag" style="font-size: {{ 1.0 + (tag.count * 0.1) }}rem;">
+            <a href="#" class="tag-cloud-tag" style="font-size: {{ 0.75 + (tag.count * 0.1) }}rem;">
                 {{ tag.name }}
                 {% if tag.count %}
                 <span class="tag-count">({{ tag.count }})</span>
