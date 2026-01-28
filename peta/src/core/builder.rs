@@ -212,13 +212,6 @@ impl SiteBuilder {
         // Process toctree directives
         Ok(())
     }
-
-    /// Get directive handler (placeholder for implementation)
-    fn get_directive_handler(&mut self) -> Option<&mut crate::content::rst::directives::SnippetCardHandler> {
-        // This would need to return the actual directive handler from the parser
-        // For now, return None
-        None
-    }
     
     /// Build search index for client-side search
     async fn build_search_index(&mut self) -> Result<()> {

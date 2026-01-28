@@ -210,7 +210,7 @@ impl RstParser {
             // So we need to look at the characters between the end of the directive and the start of the indented content
             let content_after_directive = &content[end..];
             let first_newline = content_after_directive.find('\n').unwrap_or(content_after_directive.len());
-            let mut language = content_after_directive[..first_newline].trim();
+            let language = content_after_directive[..first_newline].trim();
 
             // The actual code content starts after the language line
             let content_start = end + first_newline + 1; // +1 to skip the newline

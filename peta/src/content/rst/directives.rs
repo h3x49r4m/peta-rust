@@ -52,23 +52,18 @@ impl DirectiveHandler for CodeBlockHandler {
 
 /// Snippet card directive handler
 pub struct SnippetCardHandler {
-    renderer: crate::content::rst::EmbeddedSnippetCardRenderer,
     snippet_index: std::collections::HashMap<String, usize>,
 }
 
 impl SnippetCardHandler {
     pub fn new() -> Self {
         Self {
-            renderer: crate::content::rst::EmbeddedSnippetCardRenderer::new()
-                .expect("Failed to create EmbeddedSnippetCardRenderer"),
             snippet_index: std::collections::HashMap::new(),
         }
     }
 
     pub fn with_snippet_index(snippet_index: std::collections::HashMap<String, usize>) -> Self {
         Self {
-            renderer: crate::content::rst::EmbeddedSnippetCardRenderer::new()
-                .expect("Failed to create EmbeddedSnippetCardRenderer"),
             snippet_index,
         }
     }

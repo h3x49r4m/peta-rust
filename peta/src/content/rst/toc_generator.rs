@@ -7,7 +7,6 @@ use crate::core::Result;
 pub struct TocGenerator {
     #[allow(dead_code)]
     max_depth: usize,
-    current_section_level: usize,
 }
 
 impl TocGenerator {
@@ -15,7 +14,6 @@ impl TocGenerator {
     pub fn new() -> Self {
         Self {
             max_depth: 3,
-            current_section_level: 0,
         }
     }
     
@@ -249,7 +247,7 @@ impl TocGenerator {
     }
     
     /// Render children TOC entries recursively
-    fn render_children_html(&self, children: &[TocEntry], parent_level: usize) -> String {
+    fn render_children_html(&self, children: &[TocEntry], _parent_level: usize) -> String {
         let mut html = String::from("<ul class=\"toc-sublist\">\n");
         
         for entry in children {

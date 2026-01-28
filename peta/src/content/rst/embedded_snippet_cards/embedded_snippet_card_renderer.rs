@@ -3,7 +3,6 @@
 use super::config::EmbeddedSnippetCardConfig;
 use crate::content::RstContent;
 use crate::core::Result;
-use regex::Regex;
 
 /// Embedded snippet card renderer
 pub struct EmbeddedSnippetCardRenderer {
