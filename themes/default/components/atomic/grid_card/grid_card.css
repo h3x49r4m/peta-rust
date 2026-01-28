@@ -190,23 +190,23 @@
 
 /* Content Type Variations */
 .grid-card[data-content-type="article"] .content-type-badge {
-  background: var(--color-blue-100, #dbeafe);
-  color: var(--color-blue-700, #1d4ed8);
+  background: var(--color-primary-100, #dbeafe);
+  color: var(--color-primary-700, #1d4ed8);
 }
 
 .grid-card[data-content-type="book"] .content-type-badge {
-  background: var(--color-green-100, #dcfce7);
-  color: var(--color-green-700, #15803d);
+  background: var(--color-primary-100, #dbeafe);
+  color: var(--color-primary-700, #1d4ed8);
 }
 
 .grid-card[data-content-type="snippet"] .content-type-badge {
-  background: var(--color-purple-100, #f3e8ff);
-  color: var(--color-purple-700, #6b21a8);
+  background: var(--color-primary-100, #dbeafe);
+  color: var(--color-primary-700, #1d4ed8);
 }
 
 .grid-card[data-content-type="project"] .content-type-badge {
-  background: var(--color-orange-100, #fed7aa);
-  color: var(--color-orange-700, #c2410c);
+  background: var(--color-primary-100, #dbeafe);
+  color: var(--color-primary-700, #1d4ed8);
 }
 
 /* Responsive Design */
