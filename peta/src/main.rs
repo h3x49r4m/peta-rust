@@ -13,6 +13,9 @@ async fn main() -> Result<()> {
         Commands::New { name, theme } => {
             commands::init_site(&name, &theme, &mut output)?;
         }
+        Commands::Init { r#type, title } => {
+            commands::init_content(&r#type, &title, &mut output)?;
+        }
         Commands::Build { output: output_dir, theme, draft } => {
             commands::build_site(output_dir, theme, draft, &mut output).await?;
         }

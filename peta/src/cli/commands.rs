@@ -5,6 +5,43 @@ use crate::core::SiteConfig;
 use std::path::Path;
 use anyhow::Result;
 
+/// Initialize new content (article/book/snippet/project)
+pub fn init_content(content_type: &str, title: &str, output: &mut OutputFormatter) -> Result<()> {
+    // Map content type to target directory
+    let target_dir = match content_type {
+        "article" => "_content/articles",
+        "book" => "_content/books",
+        "snippet" => "_content/snippets",
+        "project" => "_content/projects",
+        _ => return Err(anyhow::anyhow!("Invalid content type: {}", content_type)),
+    };
+    
+    // Generate filename (convert title to kebab-case)
+    let filename = title_to_filename(title);
+    let file_path = Path::new(target_dir).join(format!("{}.rst", filename));
+    
+    // Check if file already exists
+    if file_path.exists() {
+        return Err(anyhow::anyhow!("File '{}' already exists", file_path.display()));
+    }
+    
+    // Generate template content
+    let content = generate_template(content_type, title)?;
+    
+    // Ensure directory exists
+    if let Some(parent) = file_path.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+    
+    // Write file
+    std::fs::write(&file_path, content)?;
+    
+    output.success(&format!("{} '{}' created successfully!", capitalize(content_type), title));
+    output.info(&format!("Location: {}", file_path.display()));
+    
+    Ok(())
+}
+
 /// Initialize a new site
 pub fn init_site(name: &str, theme: &str, output: &mut OutputFormatter) -> Result<()> {
     output.info(&format!("Creating new site: {}", name));
@@ -544,5 +581,165 @@ console.log('Theme "{}" loaded');"#;
         output.info(&format!("Please manually clone the theme to themes/{}", theme_name));
         
         Ok(())
+    }
+}
+
+/// Generate template content based on content type
+fn generate_template(content_type: &str, title: &str) -> Result<String> {
+    let date = chrono::Utc::now().format("%Y-%m-%d").to_string();
+    
+    match content_type {
+        "article" => Ok(format!(
+r#"---
+title: "{}"
+date: {}
+tags: ["tag1", "tag2"]
+author: "Your Name"
+---
+
+
+{}
+=====
+
+
+Introduction
+------------
+
+Start writing your article here.
+
+
+Section
+-------
+
+Add more sections as needed.
+"#, title, date, title)),
+
+        "book" => Ok(format!(
+r#"---
+title: "{}"
+date: {}
+tags: ["tag1", "tag2"]
+author: "Your Name"
+description: "A brief description of the book"
+---
+
+{}
+=====
+
+This book provides comprehensive coverage of the topic.
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   chapter1
+   chapter2
+   chapter3
+
+What This Book Covers
+---------------------
+
+- Topic 1
+- Topic 2
+- Topic 3
+
+Target Audience
+---------------
+
+Describe who this book is for.
+
+Prerequisites
+-------------
+
+List any prerequisites.
+"#, title, date, title)),
+
+        "snippet" => Ok(format!(
+r#"---
+title: {}
+date: {}
+tags: [language, topic]
+---
+
+{}
+=============================
+
+This snippet demonstrates code examples.
+
+.. code-block:: python
+
+    # Your code here
+    def example():
+        print("Hello, world!")
+        return True
+
+Explanation
+-----------
+
+Add explanations here.
+"#, title, date, title)),
+
+        "project" => Ok(format!(
+r#"---
+title: "{}"
+date: {}
+tags: ["tag1", "tag2"]
+author: "Your Name"
+github_url: "https://github.com/username/project"
+demo_url: "https://project.example.com"
+---
+
+{}
+========================
+
+A brief description of your project.
+
+Features
+--------
+
+- **Feature 1**: Description
+- **Feature 2**: Description
+- **Feature 3**: Description
+
+Technical Details
+-----------------
+
+Describe the technical stack and implementation details.
+
+Usage
+-----
+
+1. Step one
+2. Step two
+3. Step three
+
+Contributions
+-------------
+
+Information about contributing.
+"#, title, date, title)),
+
+        _ => Err(anyhow::anyhow!("Invalid content type: {}", content_type)),
+    }
+}
+
+/// Convert title to filename (kebab-case)
+fn title_to_filename(title: &str) -> String {
+    title.to_lowercase()
+        .chars()
+        .map(|c| if c.is_alphanumeric() { c } else { '-' })
+        .collect::<String>()
+        .split('-')
+        .filter(|s| !s.is_empty())
+        .collect::<Vec<_>>()
+        .join("-")
+}
+
+/// Capitalize first letter
+fn capitalize(s: &str) -> String {
+    let mut chars = s.chars();
+    match chars.next() {
+        None => String::new(),
+        Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
     }
 }

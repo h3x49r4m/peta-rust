@@ -72,6 +72,16 @@ pub enum Commands {
         all: bool,
     },
     
+    /// Initialize new content (article/book/snippet/project)
+    Init {
+        /// Content type: article, book, snippet, or project
+        #[arg(value_parser = ["article", "book", "snippet", "project"])]
+        r#type: String,
+        
+        /// Title of the content
+        title: String,
+    },
+    
     /// Theme management
     Theme {
         #[command(subcommand)]
