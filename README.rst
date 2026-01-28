@@ -20,6 +20,7 @@ Features
 
 * **Component-Based Themes**: V4 architecture with atomic, composite, and content components
 * **RST-First Architecture**: Direct RST→HTML conversion with advanced parsing capabilities
+* **Content CLI**: Initialize articles, books, snippets, and projects with template generation
 * **Math Rendering**: KaTeX integration for LaTeX equations with fallback support
 * **Code Highlighting**: Syntect-based syntax highlighting with comprehensive language support
 * **Development Server**: Live reload with file watching and WebSocket support on port 3566
@@ -43,6 +44,11 @@ Build From Source
     # Build the project (faster for development)
     cargo build --bin peta
 
+    # Initialize new content
+    cargo run --bin peta -- init article "Getting Started"
+    cargo run --bin peta -- init snippet "Code Example"
+    cargo run --bin peta -- init project "My Portfolio"
+
     # Build the site
     cargo run --bin peta -- build
 
@@ -60,6 +66,7 @@ For faster development workflow:
     cargo build --release
 
     # Use the compiled binary directly (much faster than cargo run)
+    ./target/release/peta init article "My Article"
     ./target/release/peta build
     ./target/release/peta serve
 
@@ -67,6 +74,7 @@ For faster development workflow:
     cargo install --path .
 
     # Then use directly
+    peta init article "My Article"
     peta build
     peta serve
 
@@ -74,6 +82,12 @@ Build Commands
 ==============
 
 .. code-block:: bash
+
+    # Initialize new content (article/book/snippet/project)
+    cargo run --bin peta -- init article "My Article Title"
+    cargo run --bin peta -- init book "My Book Title"
+    cargo run --bin peta -- init snippet "My Snippet Title"
+    cargo run --bin peta -- init project "My Project Title"
 
     # Build the site
     cargo run --bin peta -- build
