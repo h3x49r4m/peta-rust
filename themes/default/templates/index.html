@@ -2,7 +2,7 @@
 
 {% block content %}
 <!-- Stats Section -->
-{{ component(name="site_stats") | safe }}
+{{ component(name="site_stats", books_count=books_count, articles_count=articles_count, snippets_count=snippets_count, projects_count=projects_count) | safe }}
 
 <!-- Tags Section -->
 <section style="margin-top: 1.5rem;">

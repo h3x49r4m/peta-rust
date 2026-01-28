@@ -292,6 +292,25 @@ impl SiteBuilder {
         let tags = self.generate_tags_data();
         context.insert("tags", &tags);
         
+        // Add content type counts
+        let books_count = self.rst_content.iter()
+            .filter(|c| c.metadata.content_type == ContentType::Book)
+            .count();
+        let articles_count = self.rst_content.iter()
+            .filter(|c| c.metadata.content_type == ContentType::Article)
+            .count();
+        let snippets_count = self.rst_content.iter()
+            .filter(|c| c.metadata.content_type == ContentType::Snippet)
+            .count();
+        let projects_count = self.rst_content.iter()
+            .filter(|c| c.metadata.content_type == ContentType::Project)
+            .count();
+        
+        context.insert("books_count", &books_count);
+        context.insert("articles_count", &articles_count);
+        context.insert("snippets_count", &snippets_count);
+        context.insert("projects_count", &projects_count);
+        
         let html = template_engine.render("index.html", &context)?;
         std::fs::write(output_dir.join("index.html"), html)?;
         
