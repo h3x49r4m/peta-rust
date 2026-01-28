@@ -48,17 +48,32 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         const tagName = tagLink.textContent.trim().replace(/\s*\(\d+\)\s*$/, '');
 
-        // Update active tag state
-        document.querySelectorAll('.tag-cloud-tag').forEach(tag => {
-          tag.classList.remove('active');
-        });
-        tagLink.classList.add('active');
+        // Check if there's a grid_cards container to filter
+        const gridCardsContainer = document.querySelector('[data-component="grid_cards"]');
+        
+        if (gridCardsContainer) {
+          // Filter grid cards on current page
+          // Update active tag state
+          document.querySelectorAll('.tag-cloud-tag').forEach(tag => {
+            tag.classList.remove('active');
+          });
+          tagLink.classList.add('active');
 
-        // Filter grid cards
-        filterGridCardsByTag(tagName);
+          // Filter grid cards
+          filterGridCardsByTag(tagName);
 
-        // Update URL hash
-        history.replaceState(null, '', '#' + encodeURIComponent(tagName));
+          // Update URL hash
+          history.replaceState(null, '', '#' + encodeURIComponent(tagName));
+        } else {
+          // No grid_cards container, redirect to list page with tag
+          const pageTitleLink = component.querySelector('.page-title-link');
+          if (pageTitleLink) {
+            const listPageUrl = pageTitleLink.getAttribute('href');
+            if (listPageUrl && listPageUrl !== '#') {
+              window.location.href = listPageUrl + '#' + encodeURIComponent(tagName);
+            }
+          }
+        }
       }
     });
 
