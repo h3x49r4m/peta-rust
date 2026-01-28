@@ -51,23 +51,56 @@ impl DirectiveHandler for CodeBlockHandler {
 }
 
 /// Snippet card directive handler
-pub struct SnippetCardHandler;
+pub struct SnippetCardHandler {
+    renderer: crate::content::rst::EmbeddedSnippetCardRenderer,
+    snippet_index: std::collections::HashMap<String, usize>,
+}
+
+impl SnippetCardHandler {
+    pub fn new() -> Self {
+        Self {
+            renderer: crate::content::rst::EmbeddedSnippetCardRenderer::new()
+                .expect("Failed to create EmbeddedSnippetCardRenderer"),
+            snippet_index: std::collections::HashMap::new(),
+        }
+    }
+
+    pub fn with_snippet_index(snippet_index: std::collections::HashMap<String, usize>) -> Self {
+        Self {
+            renderer: crate::content::rst::EmbeddedSnippetCardRenderer::new()
+                .expect("Failed to create EmbeddedSnippetCardRenderer"),
+            snippet_index,
+        }
+    }
+
+    pub fn set_snippet_index(&mut self, snippet_index: std::collections::HashMap<String, usize>) {
+        self.snippet_index = snippet_index;
+    }
+}
+
+impl Default for SnippetCardHandler {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl DirectiveHandler for SnippetCardHandler {
-    fn handle(&mut self, _directive_type: &str, content: &str) -> Result<String> {
-        let snippet_name = content.trim();
-        let snippet_link = format!("/snippets/{}.html", snippet_name.replace('_', "-").to_lowercase());
-        
+    fn handle(&mut self, directive_type: &str, content: &str) -> Result<String> {
+        // For snippet-card, directive_type is actually the snippet ID (language parameter)
+        // content is empty for snippet-card
+        let snippet_id = if content.trim().is_empty() {
+            // Use directive_type as the snippet ID
+            directive_type.trim()
+        } else {
+            // Fallback to content
+            content.trim()
+        };
+
+        // Generate a simple placeholder that will be replaced later
+        // The placeholder includes the snippet ID as a data attribute
         Ok(format!(
-            r#"<div class="snippet-card" data-snippet="{}">
-    <div class="snippet-header">
-        <h4>Referenced Snippet: {}</h4>
-    </div>
-    <div class="snippet-content">
-        <p>See <a href="{}">{}</a> for the complete snippet.</p>
-    </div>
-</div>"#,
-            snippet_name, snippet_name, snippet_link, snippet_name
+            r#"<div class="embedded-snippet-card" data-snippet="{}"></div>"#,
+            snippet_id
         ))
     }
 }

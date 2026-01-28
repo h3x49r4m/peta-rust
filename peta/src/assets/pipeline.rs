@@ -113,6 +113,9 @@ impl AssetPipeline {
         // Generate math formula assets (from Rust)
         self.generate_math_assets()?;
 
+        // Generate embedded snippet card assets (from Rust)
+        self.generate_embedded_snippet_card_assets()?;
+
         // Process component assets
         self.process_component_assets()?;
 
@@ -180,6 +183,31 @@ impl AssetPipeline {
             .map_err(|e| Error::asset(format!("Failed to create math JS directory: {}", e)))?;
         fs::write(&math_js_output_path, math_js_content)
             .map_err(|e| Error::asset(format!("Failed to write math-formulas.js: {}", e)))?;
+
+        Ok(())
+    }
+
+    /// Generate embedded snippet card CSS and JS from Rust generators
+    fn generate_embedded_snippet_card_assets(&mut self) -> Result<()> {
+        // Generate embedded snippet card CSS
+        let css_generator = crate::assets::css_generator::EmbeddedSnippetCardCssGenerator::new()?;
+        let css_content = css_generator.generate()?;
+
+        let css_output_path = self.output_dir.join("css").join("embedded-snippet-cards.css");
+        fs::create_dir_all(css_output_path.parent().unwrap())
+            .map_err(|e| Error::asset(format!("Failed to create embedded snippet card CSS directory: {}", e)))?;
+        fs::write(&css_output_path, css_content)
+            .map_err(|e| Error::asset(format!("Failed to write embedded-snippet-cards.css: {}", e)))?;
+
+        // Generate embedded snippet card JS
+        let js_generator = crate::assets::js_generator::EmbeddedSnippetCardJsGenerator::new()?;
+        let js_content = js_generator.generate()?;
+
+        let js_output_path = self.output_dir.join("js").join("embedded-snippet-cards.js");
+        fs::create_dir_all(js_output_path.parent().unwrap())
+            .map_err(|e| Error::asset(format!("Failed to create embedded snippet card JS directory: {}", e)))?;
+        fs::write(&js_output_path, js_content)
+            .map_err(|e| Error::asset(format!("Failed to write embedded-snippet-cards.js: {}", e)))?;
 
         Ok(())
     }

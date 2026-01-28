@@ -337,3 +337,194 @@ mod tests {
         assert!(!js.contains("initializeKeyboardShortcuts"));
     }
 }
+
+/// JavaScript generator for embedded snippet card functionality
+pub struct EmbeddedSnippetCardJsGenerator {
+    /// Configuration
+    config: EmbeddedSnippetCardConfig,
+}
+
+/// Configuration for embedded snippet card JS generation
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct EmbeddedSnippetCardConfig {
+    /// Enable collapse/expand functionality
+    pub enable_collapse: bool,
+    /// Max height before collapse (in pixels)
+    pub collapse_threshold: String,
+    /// Show "View in modal" button
+    pub show_modal_button: bool,
+}
+
+impl Default for EmbeddedSnippetCardConfig {
+    fn default() -> Self {
+        Self {
+            enable_collapse: true,
+            collapse_threshold: "400px".to_string(),
+            show_modal_button: true,
+        }
+    }
+}
+
+impl EmbeddedSnippetCardJsGenerator {
+    /// Create a new embedded snippet card JS generator
+    pub fn new() -> Result<Self> {
+        Ok(Self {
+            config: EmbeddedSnippetCardConfig::default(),
+        })
+    }
+
+    /// Create a JS generator with custom configuration
+    pub fn with_config(config: EmbeddedSnippetCardConfig) -> Result<Self> {
+        Ok(Self { config })
+    }
+
+    /// Generate complete JavaScript for embedded snippet cards
+    pub fn generate(&self) -> Result<String> {
+        let mut js = String::new();
+
+        js.push_str("(function() {\n");
+        js.push_str("  'use strict';\n\n");
+        
+        // Collapse/expand functionality
+        if self.config.enable_collapse {
+            js.push_str(&self.generate_collapse_functionality());
+        }
+
+        // Modal button functionality
+        if self.config.show_modal_button {
+            js.push_str(&self.generate_modal_button_functionality());
+        }
+
+        // Initialization function
+        js.push_str("  function initEmbeddedSnippetCards() {\n");
+        if self.config.enable_collapse {
+            js.push_str("    initCollapse();\n");
+        }
+        if self.config.show_modal_button {
+            js.push_str("    addModalButtons();\n");
+        }
+        js.push_str("  }\n");
+
+        js.push_str("  // Initialize on DOM content loaded\n");
+        js.push_str("  if (document.readyState === 'loading') {\n");
+        js.push_str("    document.addEventListener('DOMContentLoaded', initEmbeddedSnippetCards);\n");
+        js.push_str("  } else {\n");
+        js.push_str("    initEmbeddedSnippetCards();\n");
+        js.push_str("  }\n");
+
+        js.push_str("})();\n");
+
+        Ok(js)
+    }
+
+    /// Generate collapse/expand functionality
+    fn generate_collapse_functionality(&self) -> String {
+        format!(
+            r#"  // Initialize collapse functionality
+  function initCollapse() {{
+    const cards = document.querySelectorAll('.embedded-snippet-card');
+    
+    cards.forEach(card => {{
+      const content = card.querySelector('.embedded-snippet-content');
+      if (!content) return;
+      
+      // Check if content exceeds threshold
+      if (content.scrollHeight > parseInt('{}')) {{
+        addCollapseButton(card, content);
+      }}
+    }});
+  }}
+  
+  // Add collapse button to card
+  function addCollapseButton(card, content) {{
+    const button = document.createElement('button');
+    button.className = 'embedded-snippet-toggle';
+    button.innerHTML = 'Show More';
+    button.setAttribute('aria-expanded', 'false');
+    
+    button.addEventListener('click', function() {{
+      const isExpanded = content.style.maxHeight !== '{}';
+      if (isExpanded) {{
+        content.style.maxHeight = '{}';
+        content.style.overflow = 'hidden';
+        button.innerHTML = 'Show More';
+        button.setAttribute('aria-expanded', 'false');
+      }} else {{
+        content.style.maxHeight = 'none';
+        content.style.overflow = 'visible';
+        button.innerHTML = 'Show Less';
+        button.setAttribute('aria-expanded', 'true');
+      }}
+    }});
+    
+    const header = card.querySelector('.embedded-snippet-header');
+    if (header) {{
+      header.appendChild(button);
+    }} else {{
+      card.insertBefore(button, content);
+    }}
+  }}
+  
+"#,
+            self.config.collapse_threshold,
+            self.config.collapse_threshold,
+            self.config.collapse_threshold
+        )
+    }
+
+    /// Generate modal button functionality
+    fn generate_modal_button_functionality(&self) -> String {
+        r#"  // Add "View in modal" buttons
+  function addModalButtons() {
+    const cards = document.querySelectorAll('.embedded-snippet-card[data-snippet-id]');
+    
+    cards.forEach(card => {
+      const snippetId = card.getAttribute('data-snippet-id');
+      if (!snippetId) return;
+      
+      const footer = card.querySelector('.embedded-snippet-footer');
+      if (!footer) return;
+      
+      const existingButton = footer.querySelector('.embedded-snippet-modal-btn');
+      if (existingButton) return;
+      
+      const button = document.createElement('button');
+      button.className = 'embedded-snippet-modal-btn';
+      button.innerHTML = '📖 Open in Modal';
+      
+      button.addEventListener('click', function() {
+        if (typeof window.openSnippetModal === 'function') {
+          // Fetch snippet data
+          fetch(`/snippets/${snippetId}.json`)
+            .then(response => response.json())
+            .then(data => {
+              window.openSnippetModal({
+                title: data.title,
+                language: data.language,
+                content: data.content,
+                date: data.date,
+                tags: data.tags
+              });
+            })
+            .catch(err => {
+              console.error('Failed to load snippet:', err);
+            });
+        } else {
+          console.warn('openSnippetModal function not available');
+        }
+      });
+      
+      footer.appendChild(button);
+    });
+  }
+  
+"#
+        .to_string()
+    }
+}
+
+impl Default for EmbeddedSnippetCardJsGenerator {
+    fn default() -> Self {
+        Self::new().expect("Failed to create EmbeddedSnippetCardJsGenerator")
+    }
+}

@@ -544,3 +544,500 @@ mod tests {
         assert!(css.contains("1rem"));
     }
 }
+
+/// CSS generator for embedded snippet card styling
+pub struct EmbeddedSnippetCardCssGenerator {
+    /// Configuration
+    config: EmbeddedSnippetCardConfig,
+}
+
+/// Configuration for embedded snippet card CSS generation
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct EmbeddedSnippetCardConfig {
+    /// Border radius
+    pub border_radius: String,
+    /// Border color
+    pub border_color: String,
+    /// Background color
+    pub background_color: String,
+    /// Shadow
+    pub shadow: String,
+    /// Header background
+    pub header_background: String,
+    /// Header border
+    pub header_border: String,
+    /// Title color
+    pub title_color: String,
+    /// Tag color
+    pub tag_color: String,
+    /// Content padding
+    pub content_padding: String,
+    /// Content background
+    pub content_background: String,
+    /// Footer background
+    pub footer_background: String,
+    /// Footer border
+    pub footer_border: String,
+    /// Link color
+    pub link_color: String,
+}
+
+impl Default for EmbeddedSnippetCardConfig {
+    fn default() -> Self {
+        Self {
+            border_radius: "0.5rem".to_string(),
+            border_color: "#e2e8f0".to_string(),
+            background_color: "#eff6ff".to_string(),
+            shadow: "0 2px 4px rgba(0, 0, 0, 0.05)".to_string(),
+            header_background: "#dbeafe".to_string(),
+            header_border: "#bfdbfe".to_string(),
+            title_color: "#1e40af".to_string(),
+            tag_color: "#3b82f6".to_string(),
+            content_padding: "1.5rem".to_string(),
+            content_background: "#ffffff".to_string(),
+            footer_background: "#dbeafe".to_string(),
+            footer_border: "#bfdbfe".to_string(),
+            link_color: "#3b82f6".to_string(),
+        }
+    }
+}
+
+impl EmbeddedSnippetCardCssGenerator {
+    /// Create a new embedded snippet card CSS generator
+    pub fn new() -> Result<Self> {
+        Ok(Self {
+            config: EmbeddedSnippetCardConfig::default(),
+        })
+    }
+
+    /// Create a CSS generator with custom configuration
+    pub fn with_config(config: EmbeddedSnippetCardConfig) -> Result<Self> {
+        Ok(Self { config })
+    }
+
+    /// Generate complete CSS for embedded snippet cards
+    pub fn generate(&self) -> Result<String> {
+        let mut css = String::new();
+
+        css.push_str("/* Embedded Snippet Card Styles */\n\n");
+
+        // Base styles
+        css.push_str(&self.generate_base_styles());
+
+        // Header styles
+        css.push_str(&self.generate_header_styles());
+
+        // Content styles
+        css.push_str(&self.generate_content_styles());
+
+        // Footer styles
+        css.push_str(&self.generate_footer_styles());
+
+        // Tag styles
+        css.push_str(&self.generate_tag_styles());
+
+        // Error styles
+        css.push_str(&self.generate_error_styles());
+
+        // Responsive styles
+        css.push_str(&self.generate_responsive_styles());
+
+        Ok(css)
+    }
+
+    /// Generate base styles
+    fn generate_base_styles(&self) -> String {
+        format!(
+            r#"
+.embedded-snippet-card {{
+  margin: 2rem 0;
+  border-radius: {};
+  border: 1px solid #bfdbfe;
+  border-left: 4px solid #3b82f6;
+  background: {};
+  box-shadow: {};
+  overflow: hidden;
+  position: relative;
+  transition: all 0.3s ease;
+}}
+
+.embedded-snippet-card::before {{
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  opacity: 0.6;
+}}
+
+.embedded-snippet-card:hover {{
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  transform: translateX(4px);
+}}
+"#,
+            self.config.border_radius,
+            self.config.background_color,
+            self.config.shadow
+        )
+    }
+
+    /// Generate header styles
+
+        fn generate_header_styles(&self) -> String {
+
+            format!(
+
+                r#"
+
+    .embedded-snippet-header {{
+
+      padding: 1rem 1.25rem;
+
+      background: {};
+
+      border-bottom: 1px solid {};
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      flex-wrap: wrap;
+
+      gap: 0.5rem;
+
+    }}
+
+    
+
+    .embedded-snippet-title {{
+
+      font-size: 1.125rem;
+
+      font-weight: 600;
+
+      color: {};
+
+      margin: 0;
+
+      flex: 1;
+
+      min-width: 0;
+
+    }}
+
+    
+
+    .embedded-snippet-title a {{
+
+      color: inherit;
+
+      text-decoration: none;
+
+      display: block;
+
+      overflow: hidden;
+
+      text-overflow: ellipsis;
+
+      white-space: nowrap;
+
+    }}
+
+    
+
+    .embedded-snippet-title a:hover {{
+
+      text-decoration: underline;
+
+    }}
+
+    "#,
+
+                self.config.header_background,
+
+                self.config.header_border,
+
+                self.config.title_color
+
+            )
+
+        }
+
+/// Generate content styles
+    fn generate_content_styles(&self) -> String {
+        format!(
+            r#"
+.embedded-snippet-content {{
+  padding: {};
+  background: {};
+}}
+
+.embedded-snippet-content h2 {{
+  color: #3b82f6;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}}
+
+.embedded-snippet-content h2:first-child {{
+  margin-top: 0;
+}}
+
+.embedded-snippet-content h3 {{
+  color: #60a5fa;
+  margin-top: 1.25rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+}}
+
+.embedded-snippet-content p {{
+  line-height: 1.75;
+  margin-bottom: 1rem;
+}}
+
+.embedded-snippet-content pre {{
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}}
+
+.embedded-snippet-content code {{
+  background: #f1f5f9;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}}
+
+.embedded-snippet-content pre code {{
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}}
+
+.embedded-snippet-content > *:first-child {{
+  margin-top: 0;
+}}
+
+.embedded-snippet-content > *:last-child {{
+  margin-bottom: 0;
+}}
+"#,
+            self.config.content_padding,
+            self.config.content_background
+        )
+    }
+
+/// Generate footer styles
+    fn generate_footer_styles(&self) -> String {
+        format!(
+            r#"
+.embedded-snippet-footer {{
+  padding: 0.75rem 1.25rem;
+  background: {};
+  border-top: 1px solid {};
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  color: #1e40af;
+}}
+
+.embedded-snippet-date {{
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}}
+
+.embedded-snippet-date::before {{
+  content: '📅';
+}}
+
+.embedded-snippet-actions {{
+  display: flex;
+  gap: 0.5rem;
+}}
+
+.embedded-snippet-toggle {{
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}}
+
+.embedded-snippet-toggle:hover {{
+  background: #2563eb;
+}}
+
+.embedded-snippet-link {{
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+}}
+
+.embedded-snippet-link:hover {{
+  text-decoration: underline;
+}}
+"#,
+            self.config.footer_background,
+            self.config.footer_border
+        )
+    }
+
+/// Generate tag styles
+    fn generate_tag_styles(&self) -> String {
+        format!(
+            r#"
+.embedded-snippet-tags {{
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}}
+
+.embedded-snippet-tag {{
+  background: #dbeafe;
+  color: {};
+  padding: 0.25rem 0.625rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}}
+
+.embedded-snippet-tag:hover {{
+  background: #bfdbfe;
+}}
+"#,
+            self.config.tag_color
+        )
+    }
+
+    /// Generate error styles
+    fn generate_error_styles(&self) -> String {
+        r#"
+.embedded-snippet-card.error {
+  background: #fef2f2;
+  border-left-color: #ef4444;
+}
+
+.embedded-snippet-card.error::before {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+.embedded-snippet-card.error .embedded-snippet-header {
+  background: #fee2e2;
+  border-bottom-color: #fecaca;
+}
+
+.embedded-snippet-card.error .embedded-snippet-title {
+  color: #991b1b;
+}
+
+.embedded-snippet-card.error .embedded-snippet-title::before {
+  content: '⚠️';
+}
+
+.embedded-snippet-card.error .embedded-snippet-footer {
+  background: #fee2e2;
+  border-top-color: #fecaca;
+}
+
+.embedded-snippet-card.error .embedded-snippet-link {
+  color: #dc2626;
+}
+"#
+        .to_string()
+    }
+
+    /// Generate responsive styles
+    fn generate_responsive_styles(&self) -> String {
+        r#"
+@media (max-width: 768px) {
+  .embedded-snippet-card {
+    margin: 1.5rem 0;
+    border-radius: 0.5rem;
+  }
+
+  .embedded-snippet-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .embedded-snippet-title {
+    font-size: 1rem;
+  }
+
+  .embedded-snippet-content {
+    padding: 1rem;
+  }
+
+  .embedded-snippet-content h3 {
+    font-size: 1.125rem;
+  }
+
+  .embedded-snippet-content h4 {
+    font-size: 1rem;
+  }
+
+  .embedded-snippet-content h5 {
+    font-size: 0.875rem;
+  }
+
+  .embedded-snippet-footer {
+    padding: 0.75rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .embedded-snippet-card {
+    margin: 1rem 0;
+    border-radius: 0.375rem;
+  }
+
+  .embedded-snippet-header {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .embedded-snippet-title {
+    font-size: 0.875rem;
+  }
+
+  .embedded-snippet-content {
+    padding: 0.75rem;
+  }
+
+  .embedded-snippet-footer {
+    padding: 0.5rem 0.75rem;
+  }
+}
+"#
+        .to_string()
+    }
+
+    /// Set configuration
+    pub fn set_config(&mut self, config: EmbeddedSnippetCardConfig) {
+        self.config = config;
+    }
+
+    /// Get configuration
+    pub fn config(&self) -> &EmbeddedSnippetCardConfig {
+        &self.config
+    }
+}
+
+impl Default for EmbeddedSnippetCardCssGenerator {
+    fn default() -> Self {
+        Self::new().expect("Failed to create EmbeddedSnippetCardCssGenerator")
+    }
+}

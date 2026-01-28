@@ -31,7 +31,7 @@ impl RstParser {
         );
         directive_handlers.insert(
             "snippet-card".to_string(),
-            Box::new(crate::content::rst::directives::SnippetCardHandler),
+            Box::new(crate::content::rst::directives::SnippetCardHandler::new()),
         );
         directive_handlers.insert(
             "toctree".to_string(),
@@ -205,7 +205,7 @@ impl RstParser {
             // So we need to look at the characters between the end of the directive and the start of the indented content
             let content_after_directive = &content[end..];
             let first_newline = content_after_directive.find('\n').unwrap_or(content_after_directive.len());
-            let language = content_after_directive[..first_newline].trim();
+            let mut language = content_after_directive[..first_newline].trim();
 
             // The actual code content starts after the language line
             let content_start = end + first_newline + 1; // +1 to skip the newline
@@ -214,14 +214,11 @@ impl RstParser {
             let mut found_indented_content = false;
 
             if directive_name == "snippet-card" {
-                for line in lines_after_directive.iter() {
-                    if line.trim().is_empty() {
-                        continue;
-                    }
-                    let line_end = content_start + line.len();
-                    content_end = line_end;
-                    break;
-                }
+                // For snippet-card, the snippet ID is on the same line as the directive
+                // Format: ".. snippet-card:: snippet-id"
+                // The language variable already contains the snippet ID (extracted from content_after_directive)
+                // Set content_end to content_start (empty content)
+                content_end = content_start;
             } else {
                 for (line_idx, line) in lines_after_directive.iter().enumerate() {
                     let line_start_pos = content_start

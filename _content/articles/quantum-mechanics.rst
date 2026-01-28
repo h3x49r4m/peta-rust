@@ -7,7 +7,7 @@ author: "Dr. Jane Smith"
 
 Quantum mechanics is the fundamental theory that describes nature at the smallest scales of energy levels of atoms and subatomic particles.
 
-.. snippet-card:: wave-function
+.. snippet-card:: the-wave-function
 
 The Wave Function
 -----------------
@@ -37,7 +37,7 @@ This principle states that there is a fundamental limit to the precision with wh
 Applications
 ------------
 
-.. snippet-card:: quantum-computing
+.. snippet-card:: quantum-computing-applications
 
 Quantum mechanics has numerous practical applications, including:
 

@@ -154,10 +154,57 @@ impl SiteBuilder {
     
     /// Resolve snippet references and cross-links
     async fn resolve_references(&mut self) -> Result<()> {
-        // Resolve snippet-card directives
+        use crate::content::resolver::ContentResolver;
+        use regex::Regex;
+
+        // Build resolver with all snippets
+        let mut resolver = ContentResolver::new();
+        resolver.build_index(&self.rst_content)?;
+
+        // Regex to match snippet-card placeholders (with or without content)
+        let card_regex = Regex::new(r#"<div class="embedded-snippet-card" data-snippet="([^"]+)">(.*?)</div>"#)
+            .map_err(|e| Error::content(format!("Failed to compile snippet card regex: {}", e)))?;
+
+// Resolve snippet-card directives in all content
+        for content in self.rst_content.iter_mut() {
+            let mut result = content.html.clone();
+            let mut offset = 0;
+
+            for mat in card_regex.find_iter(&content.html) {
+                // Extract snippet_id from the data-snippet attribute
+                let match_text = mat.as_str();
+                let snippet_id = match_text
+                    .split("data-snippet=\"")
+                    .nth(1)
+                    .and_then(|s| s.split("\"").next())
+                    .unwrap_or("");
+                
+                if let Some(snippet) = resolver.find_snippet(snippet_id) {
+                    // Render the actual snippet card
+                    let renderer = crate::content::rst::EmbeddedSnippetCardRenderer::new()?;
+                    let rendered_card = renderer.render(snippet)?;
+
+                    // Replace the placeholder with the rendered card
+                    let before = &result[..mat.start() + offset];
+                    let after = &result[mat.end() + offset..];
+                    result = format!("{}{}{}", before, rendered_card, after);
+                    offset += rendered_card.len() - mat.len();
+                }
+            }
+
+            content.html = result;
+        }
+
         // Resolve internal links
         // Process toctree directives
         Ok(())
+    }
+
+    /// Get directive handler (placeholder for implementation)
+    fn get_directive_handler(&mut self) -> Option<&mut crate::content::rst::directives::SnippetCardHandler> {
+        // This would need to return the actual directive handler from the parser
+        // For now, return None
+        None
     }
     
     /// Build search index for client-side search

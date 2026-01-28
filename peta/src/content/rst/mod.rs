@@ -13,3 +13,7 @@ pub use code_blocks::*;
 // Math formulas module
 pub mod math_formulas;
 pub use math_formulas::*;
+
+// Embedded snippet cards module
+pub mod embedded_snippet_cards;
+pub use embedded_snippet_cards::*;
