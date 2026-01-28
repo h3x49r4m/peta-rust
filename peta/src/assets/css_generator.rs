@@ -837,28 +837,6 @@ impl EmbeddedSnippetCardCssGenerator {
   margin-bottom: 1rem;
 }}
 
-.embedded-snippet-content pre {{
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.375rem;
-  padding: 1rem;
-  overflow-x: auto;
-  margin: 1rem 0;
-}}
-
-.embedded-snippet-content code {{
-  background: #f1f5f9;
-  padding: 0.125rem 0.25rem;
-  border-radius: 0.25rem;
-  font-size: 0.875rem;
-}}
-
-.embedded-snippet-content pre code {{
-  background: none;
-  padding: 0;
-  border-radius: 0;
-}}
-
 .embedded-snippet-content > *:first-child {{
   margin-top: 0;
 }}
