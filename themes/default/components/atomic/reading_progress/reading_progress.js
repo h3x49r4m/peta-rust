@@ -14,10 +14,10 @@ function initializeReadingProgress(component) {
   const progressBar = component;
   if (!progressBar) return;
 
-  // Find the main content body (.article-body, .book-main-content, .project-body)
+  // Find the main content body (.article-body, .book-content-wrapper, .project-body)
   // This is the actual scrollable content area
   const contentBody = document.querySelector('.article-body') ||
-                      document.querySelector('.book-main-content') ||
+                      document.querySelector('.book-content-wrapper') ||
                       document.querySelector('.project-body');
   if (!contentBody) return;
 

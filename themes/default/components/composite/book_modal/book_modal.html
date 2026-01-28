@@ -1,6 +1,8 @@
 <!-- Book Modal Component -->
 <div class="book-modal-overlay" id="book-modal-overlay" data-component="book_modal">
   <div class="book-modal-container">
+    {{ component(name="reading_progress") | safe }}
+    
     <!-- Modal Header -->
     <div class="book-modal-header">
       <div class="book-modal-header-content">
