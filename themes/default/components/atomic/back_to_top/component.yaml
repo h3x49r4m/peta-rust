@@ -1,0 +1,6 @@
+name: back_to_top
+category: atomic
+version: 1.0.0
+description: Back to top button component that appears when scrolling down
+enabled: true
+dependencies: []

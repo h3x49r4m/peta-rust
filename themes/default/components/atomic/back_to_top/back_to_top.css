@@ -1,0 +1,156 @@
+/* Back to Top Button */
+.back-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  z-index: 1000;
+  box-shadow: 
+    0 4px 12px rgba(59, 130, 246, 0.3),
+    0 2px 6px rgba(139, 92, 246, 0.2);
+}
+
+/* Visible state */
+.back-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Hover effects */
+.back-to-top:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  transform: translateY(-4px);
+  box-shadow: 
+    0 8px 20px rgba(59, 130, 246, 0.4),
+    0 4px 12px rgba(139, 92, 246, 0.3),
+    0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* Active/pressed state */
+.back-to_top:active {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 4px 12px rgba(59, 130, 246, 0.3),
+    0 2px 6px rgba(139, 92, 246, 0.2);
+}
+
+/* Focus state for accessibility */
+.back-to-top:focus {
+  outline: none;
+  box-shadow: 
+    0 8px 20px rgba(59, 130, 246, 0.4),
+    0 4px 12px rgba(139, 92, 246, 0.3),
+    0 0 0 4px rgba(59, 130, 246, 0.3),
+    0 0 0 6px rgba(255, 255, 255, 0.5);
+}
+
+/* Icon styling */
+.back-to-top svg {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Icon animation on hover */
+.back-to-top:hover svg {
+  transform: translateY(-2px);
+}
+
+/* Mobile responsive design */
+@media (max-width: 768px) {
+  .back-to-top {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+  }
+  
+  .back-to-top svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .back-to-top {
+    bottom: 1rem;
+    right: 1rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+  }
+  
+  .back-to-top svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .back-to-top {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    box-shadow: 
+      0 4px 12px rgba(59, 130, 246, 0.4),
+      0 2px 6px rgba(139, 92, 246, 0.3);
+  }
+  
+  .back-to-top:hover {
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+    box-shadow: 
+      0 8px 20px rgba(59, 130, 246, 0.5),
+      0 4px 12px rgba(139, 92, 246, 0.4),
+      0 0 0 4px rgba(59, 130, 246, 0.2);
+  }
+  
+  .back-to-top:focus {
+    box-shadow: 
+      0 8px 20px rgba(59, 130, 246, 0.5),
+      0 4px 12px rgba(139, 92, 246, 0.4),
+      0 0 0 4px rgba(59, 130, 246, 0.4),
+      0 0 0 6px rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .back-to-top,
+  .back-to-top svg,
+  .back-to-top:hover,
+  .back-to-top:active,
+  .back-to-top:focus {
+    transition: none;
+    transform: none;
+  }
+  
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .back-to-top:hover svg {
+    transform: none;
+  }
+}
+
+/* Print styles - hide button when printing */
+@media print {
+  .back-to-top {
+    display: none !important;
+  }
+}
