@@ -17,9 +17,6 @@ function initializeArticleContent(component) {
   // Initialize image lightbox
   initializeImageLightbox(component);
 
-  // Initialize share functionality
-  initializeShareButtons(component);
-
   // Estimate reading time
   estimateReadingTime(component);
 
@@ -181,67 +178,6 @@ function createLightbox(src, alt) {
     }
   }
   document.addEventListener("keydown", handleEscape);
-}
-
-// Share Functionality
-function initializeShareButtons(component) {
-  const shareButtons = component.querySelectorAll(".share-button");
-
-  shareButtons.forEach((button) => {
-    button.addEventListener("click", function () {
-      const platform = this.dataset.platform;
-      handleShare(platform, this);
-    });
-  });
-}
-
-function handleShare(platform, button) {
-  const url = window.location.href;
-  const title = document.title;
-
-  switch (platform) {
-    case "twitter":
-      window.open(
-        `https://twitter.com/intent/tweet?url=${encodeURIComponent(
-          url
-        )}&text=${encodeURIComponent(title)}`,
-        "_blank"
-      );
-      break;
-    case "linkedin":
-      window.open(
-        `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-          url
-        )}`,
-        "_blank"
-      );
-      break;
-    case "copy":
-      navigator.clipboard.writeText(url).then(() => {
-        const originalText = button.innerHTML;
-        button.innerHTML = `
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
-          Copied!
-        `;
-        button.style.background = "linear-gradient(135deg, #10b981, #059669)";
-        button.style.borderColor = "#10b981";
-        button.style.color = "white";
-        button.style.transform = "translateY(-2px)";
-        button.style.boxShadow = "0 4px 12px rgba(16, 185, 129, 0.3)";
-
-        setTimeout(() => {
-          button.innerHTML = originalText;
-          button.style.background = "";
-          button.style.borderColor = "";
-          button.style.color = "";
-          button.style.transform = "";
-          button.style.boxShadow = "";
-        }, 2000);
-      });
-      break;
-  }
 }
 
 // Reading Time Estimation
