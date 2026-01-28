@@ -3,6 +3,7 @@
 use super::config::EmbeddedSnippetCardConfig;
 use crate::content::RstContent;
 use crate::core::Result;
+use regex::Regex;
 
 /// Embedded snippet card renderer
 pub struct EmbeddedSnippetCardRenderer {
@@ -31,7 +32,8 @@ impl EmbeddedSnippetCardRenderer {
         let snippet_id = Self::generate_snippet_id(&snippet.metadata.title);
 
         // Start card container with ID for TOC linking
-        html.push_str(&format!(r#"<div class="embedded-snippet-card" id="{}">"#, snippet_id));
+        // Add "snippet-" prefix to avoid conflicts with article headings
+        html.push_str(&format!(r#"<div class="embedded-snippet-card" id="snippet-{}">"#, snippet_id));
         html.push('\n');
 
         // Card header with metadata
@@ -82,37 +84,22 @@ impl EmbeddedSnippetCardRenderer {
         Ok(html)
     }
 
-    /// Adjust heading hierarchy to avoid conflicts with parent page
-    /// h1 → h3, h2 → h4, h3 → h5, h4 → h6, h5 → h6, h6 → h6
-    /// Also scope all IDs to prevent conflicts with parent page IDs
-    fn adjust_heading_hierarchy(&self, html: &str, snippet_id: &str) -> String {
-        let mut adjusted = html.to_string();
+// Adjust heading hierarchy to avoid conflicts with parent page
+        // Since embedded snippet cards have distinct visual styling, we keep original header levels
+        // and only scope the IDs to avoid conflicts
+        fn adjust_heading_hierarchy(&self, html: &str, snippet_id: &str) -> String {
+            let mut adjusted = html.to_string();
 
-        // Scope all IDs to prevent conflicts
-        // Find all id="..." attributes and prefix them with snippet_id
-        use regex::Regex;
-        let id_regex = Regex::new(r#"id="([^"]+)""#).unwrap();
-        adjusted = id_regex.replace_all(&adjusted, format!(r#"id="{}-$1""#, snippet_id)).to_string();
+            // Keep original header levels (h1, h2, h3, h4, h5, h6)
+            // But scope all IDs to avoid conflicts between snippets and parent page
+            // Pattern: id="something" -> id="snippet_id-something"
+            adjusted = regex::Regex::new(r#"id="([^"]+)""#)
+                .unwrap()
+                .replace_all(&adjusted, &format!(r#"id="{}-$1""#, snippet_id))
+                .to_string();
 
-        // Replace h1 with h3
-        adjusted = adjusted.replace("<h1", "<h3").replace("</h1>", "</h3>");
-        
-        // Replace h2 with h4
-        adjusted = adjusted.replace("<h2", "<h4").replace("</h2>", "</h4>");
-        
-        // Replace h3 with h5
-        adjusted = adjusted.replace("<h3", "<h5").replace("</h3>", "</h5>");
-        
-        // Replace h4 with h6
-        adjusted = adjusted.replace("<h4", "<h6").replace("</h4>", "</h6>");
-        
-        // Replace h5 with h6 (already at max)
-        adjusted = adjusted.replace("<h5", "<h6").replace("</h5>", "</h6>");
-        
-        // h6 stays as h6
-
-        adjusted
-    }
+            adjusted
+        }
     
     /// Generate a snippet ID from title (for ID scoping)
     pub fn generate_snippet_id(title: &str) -> String {

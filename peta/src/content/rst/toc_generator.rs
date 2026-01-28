@@ -71,6 +71,18 @@ impl TocGenerator {
         let mut current_heading_level: Option<usize> = None;
         let mut current_heading_id: Option<String> = None;
         
+        // Collect all snippet card IDs for filtering internal headings
+        // Snippet cards scope their internal headings with pattern: {snippet_id}-{heading_id}
+        let mut snippet_ids: std::collections::HashSet<String> = std::collections::HashSet::new();
+        for mat in snippet_card_regex.find_iter(html) {
+            if let Some(cap) = snippet_card_regex.captures(mat.as_str()) {
+                if let Some(title) = cap.get(1) {
+                    let snippet_id = crate::content::rst::embedded_snippet_cards::embedded_snippet_card_renderer::EmbeddedSnippetCardRenderer::generate_snippet_id(title.as_str().trim());
+                    snippet_ids.insert(snippet_id);
+                }
+            }
+        }
+        
         // Collect all matches with their positions
         let mut all_matches: Vec<(usize, bool, regex::Captures)> = Vec::new();
         
@@ -101,13 +113,13 @@ impl TocGenerator {
                     let id_str = id.as_str();
                     
                     // Skip empty headings or headings with excluded text
-                    // Also skip scoped snippet card internal headings (level 6 with hyphenated IDs)
+                    // Also skip snippet card internal headings (scoped with snippet_id-heading_id pattern)
                     if !title.is_empty() && 
                        !title.contains("Referenced Snippet:") &&
                        !title.contains("Table of Contents") &&
                        !title.contains("Articles") &&
                        !title.contains("Tags") &&
-                       !(level == 6 && id_str.contains('-')) {
+                       !snippet_ids.iter().any(|sid| id_str.starts_with(&format!("{}-", sid))) {
                         current_heading_level = Some(level);
                         current_heading_id = Some(id_str.to_string());
                         
@@ -131,7 +143,7 @@ impl TocGenerator {
                         let snippet_entry = TocEntry {
                             level: level + 1,
                             title: format!("Snippet: {}", snippet_title),
-                            anchor: snippet_id.clone(),
+                            anchor: format!("snippet-{}", snippet_id.clone()),
                             children: Vec::new(),
                         };
                         
@@ -146,7 +158,7 @@ impl TocGenerator {
                         entries.push(TocEntry {
                             level: 1,
                             title: format!("Snippet: {}", snippet_title),
-                            anchor: snippet_id.clone(),
+                            anchor: format!("snippet-{}", snippet_id.clone()),
                             children: Vec::new(),
                         });
                     }

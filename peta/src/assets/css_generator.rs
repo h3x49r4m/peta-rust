@@ -776,11 +776,23 @@ impl EmbeddedSnippetCardCssGenerator {
   background: {};
 }}
 
+.embedded-snippet-content h1 {{
+  color: #3b82f6;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-size: 2rem;
+  font-weight: 700;
+}}
+
+.embedded-snippet-content h1:first-child {{
+  margin-top: 0;
+}}
+
 .embedded-snippet-content h2 {{
   color: #3b82f6;
   margin-top: 1.5rem;
   margin-bottom: 1rem;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 600;
 }}
 
@@ -792,7 +804,31 @@ impl EmbeddedSnippetCardCssGenerator {
   color: #60a5fa;
   margin-top: 1.25rem;
   margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}}
+
+.embedded-snippet-content h4 {{
+  color: #60a5fa;
+  margin-top: 1.25rem;
+  margin-bottom: 0.75rem;
   font-size: 1.125rem;
+  font-weight: 600;
+}}
+
+.embedded-snippet-content h5 {{
+  color: #60a5fa;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+}}
+
+.embedded-snippet-content h6 {{
+  color: #60a5fa;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
   font-weight: 600;
 }}
 
