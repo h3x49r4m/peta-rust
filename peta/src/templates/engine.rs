@@ -293,15 +293,22 @@ impl TemplateEngine {
                 let template_content = std::fs::read_to_string(&template_path)
                     .map_err(|e| tera::Error::msg(format!("Failed to read component: {}", e)))?;
 
-                let mut tera = tera::Tera::default();
-                tera.autoescape_on(vec![]);
+                let mut nested_tera = tera::Tera::default();
+                nested_tera.autoescape_on(vec![]);
 
-                Self::load_component_templates_for_tera(&mut tera, &theme_dir)?;
-                tera.add_raw_template(component_name, &template_content)?;
+                Self::load_component_templates_for_tera(&mut nested_tera, &theme_dir)?;
+                Self::register_component_function_for_tera(
+                    &mut nested_tera,
+                    &component_manager_clone,
+                    &tag_collector,
+                    &template_cache,
+                    &theme_dir,
+                );
+                nested_tera.add_raw_template(component_name, &template_content)?;
 
                 let context = Self::build_component_context(component_name, &props, &tag_collector);
 
-                match tera.render(component_name, &context) {
+                match nested_tera.render(component_name, &context) {
                     Ok(mut rendered) => {
                         rendered = Self::handle_nested_components(component_name, &rendered, &props, &tag_collector, &template_cache, &theme_dir, &component_manager_clone2)
                             .map_err(|e| tera::Error::msg(e.to_string()))?;
@@ -477,6 +484,81 @@ impl TemplateEngine {
         Ok(())
     }
 
+    /// Register component function in a Tera instance for nested component rendering
+    fn register_component_function_for_tera(
+        tera: &mut tera::Tera,
+        component_manager: &Arc<RwLock<ComponentManager>>,
+        tag_collector: &Arc<RwLock<TagCollector>>,
+        template_cache: &Arc<RwLock<TemplateCache>>,
+        theme_dir: &Path,
+    ) {
+        let component_manager_clone = Arc::clone(component_manager);
+        let component_manager_clone2 = Arc::clone(component_manager);
+        let tag_collector_clone = Arc::clone(tag_collector);
+        let template_cache_clone = Arc::clone(template_cache);
+        let theme_dir_clone = theme_dir.to_path_buf();
+
+        tera.register_function(
+            "component",
+            Box::new(move |args: &HashMap<String, Value>| -> tera::Result<Value> {
+                let component_name = args.get("0")
+                    .or_else(|| args.get("name"))
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| tera::Error::msg("Component name is required"))?;
+
+                let props = Self::extract_props(args);
+                
+                let category = if let Ok(manager) = component_manager_clone.read() {
+                    manager.get_component_category(component_name).unwrap_or_else(|| "content".to_string())
+                } else {
+                    "content".to_string()
+                };
+
+                let component_path = theme_dir_clone.join("components").join(&category).join(component_name);
+                let template_path = component_path.join(format!("{}.html", component_name));
+
+                if component_name == "code_block" {
+                    return Ok(Value::String(String::new()));
+                }
+
+                if !template_path.exists() {
+                    return Ok(Value::String(format!("Component not found: {}", component_name)));
+                }
+
+                let template_content = std::fs::read_to_string(&template_path)
+                    .map_err(|e| tera::Error::msg(format!("Failed to read component: {}", e)))?;
+
+                let mut nested_tera = tera::Tera::default();
+                nested_tera.autoescape_on(vec![]);
+
+                Self::load_component_templates_for_tera(&mut nested_tera, &theme_dir_clone)?;
+                Self::register_component_function_for_tera(
+                    &mut nested_tera,
+                    &component_manager_clone,
+                    &tag_collector_clone,
+                    &template_cache_clone,
+                    &theme_dir_clone,
+                );
+                nested_tera.add_raw_template(component_name, &template_content)?;
+
+                let context = Self::build_component_context(component_name, &props, &tag_collector_clone);
+
+                match nested_tera.render(component_name, &context) {
+                    Ok(mut rendered) => {
+                        rendered = Self::handle_nested_components(component_name, &rendered, &props, &tag_collector_clone, &template_cache_clone, &theme_dir_clone, &component_manager_clone2)
+                            .map_err(|e| tera::Error::msg(e.to_string()))?;
+                        Ok(Value::String(rendered))
+                    }
+                    Err(e) => {
+                        eprintln!("Component render error for {}: {}", component_name, e);
+                        eprintln!("Props: {:?}", props);
+                        Ok(Value::String(format!("Component render error: {}", e)))
+                    }
+                }
+            })
+        );
+    }
+
     fn build_component_context(
         component_name: &str,
         props: &Value,
@@ -551,15 +633,18 @@ impl TemplateEngine {
 
         match component_name {
             "header" => {
-                result = Self::render_nested_component(
-                    "navbar",
-                    "<!-- Navbar component will be injected here -->\n      <div id=\"navbar-placeholder\"></div>",
-                    &result,
-                    props,
-                    template_cache,
-                    theme_dir,
-                    component_manager,
-                )?;
+                // Skip processing if header already uses component() function calls
+                if !result.contains("component(name=") {
+                    result = Self::render_nested_component(
+                        "navbar",
+                        "<!-- Navbar component will be injected here -->\n      <div id=\"navbar-placeholder\"></div>",
+                        &result,
+                        props,
+                        template_cache,
+                        theme_dir,
+                        component_manager,
+                    )?;
+                }
             }
             "page_tags" => {
                 result = Self::render_tag_cloud_nested(&result, props, tag_collector, template_cache, theme_dir, component_manager)?;
@@ -597,21 +682,40 @@ impl TemplateEngine {
         }
 
         let template_content = if let Ok(cache) = template_cache.read() {
-            cache.load(template_path.to_str().unwrap())?
-        } else {
-            std::fs::read_to_string(&template_path)?
-        };
 
-        let mut tera = tera::Tera::default();
-        tera.autoescape_on(vec![]);
-        Self::load_component_templates_for_tera(&mut tera, theme_dir)?;
-        tera.add_raw_template(component_name, &template_content)?;
+                            cache.load(template_path.to_str().unwrap())?
 
-        let context = Self::build_nested_context(component_name, props);
-        let nested_rendered = tera.render(component_name, &context)
-            .map_err(|e| Error::template(format!("Failed to render nested component {}: {}", component_name, e)))?;
+                        } else {
 
-        Ok(rendered.replace(placeholder, &nested_rendered))
+                            std::fs::read_to_string(&template_path)?
+
+                        };
+
+        
+
+                let mut nested_tera = tera::Tera::default();
+
+                nested_tera.autoescape_on(vec![]);
+
+                Self::load_component_templates_for_tera(&mut nested_tera, theme_dir)?;
+
+                // Note: We don't register component function here since nested components use placeholders
+
+                nested_tera.add_raw_template(component_name, &template_content)?;
+
+        
+
+                let context = Self::build_nested_context(component_name, props);
+
+        
+
+                let nested_rendered = nested_tera.render(component_name, &context)
+
+                    .map_err(|e| Error::template(format!("Failed to render nested component {}: {}", component_name, e)))?;
+
+        
+
+                Ok(rendered.replace(placeholder, &nested_rendered))
     }
 
     fn render_tag_cloud_nested(

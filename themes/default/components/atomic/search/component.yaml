@@ -1,5 +1,5 @@
 name: search
-category: Atomic
+category: atomic
 version: 1.0.0
 description: Search component for finding content
 dependencies: []

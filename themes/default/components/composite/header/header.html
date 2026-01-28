@@ -6,15 +6,13 @@
       </a>
     </div>
     
+    <div class="header-center">
+      {{ component(name="navbar") | safe }}
+    </div>
+    
     <div class="header-right">
-      <!-- Navbar component will be injected here -->
-      <div id="navbar-placeholder"></div>
+      {{ component(name="search", compact=true) | safe }}
     </div>
   </div>
   
-  {% if slot.children %}
-  <div class="header-children">
-    {{ slot.children }}
-  </div>
-  {% endif %}
 </header>

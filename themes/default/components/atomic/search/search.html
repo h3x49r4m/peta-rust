@@ -1,4 +1,4 @@
-<section class="search-section" data-component="search">
+<section class="search-section{% if props.compact %} compact{% endif %}" data-component="search">
     <div class="search-wrapper">
         <div class="search-container">
             <form class="search-form" action="{{ action | default(value="/search.html") }}" method="get">
@@ -7,10 +7,10 @@
                         <circle cx="11" cy="11" r="8"/>
                         <path d="m21 21-4.35-4.35"/>
                     </svg>
-                    <input 
-                        type="text" 
-                        name="{{ input_name | default(value="q") }}" 
-                        class="search-input" 
+                    <input
+                        type="text"
+                        name="{{ input_name | default(value="q") }}"
+                        class="search-input"
                         placeholder="{{ placeholder | default(value="What are you looking for?") }}"
                         autocomplete="off"
                     >
