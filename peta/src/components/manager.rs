@@ -174,45 +174,55 @@ impl ComponentManager {
     
     /// Remove component files
     fn remove_component_files(&self, name: &str) -> Result<()> {
+        // Get component category from discovery system
+        let category = self.get_component_category(name)
+            .unwrap_or_else(|| "atomic".to_string());
+
         let component_dir = self.theme_dir.join("components")
-            .join(self.get_component_category_dir(name))
+            .join(&category)
             .join(name);
-        
+
         if component_dir.exists() {
             std::fs::remove_dir_all(&component_dir)?;
         }
-        
+
         Ok(())
     }
     
     /// Install component files
     fn install_component_files(&self, component: &Component) -> Result<()> {
+        // Get category from component struct
+        let category = match component.category {
+            ComponentCategory::Atomic => "atomic",
+            ComponentCategory::Composite => "composite",
+        };
+
         let component_dir = self.theme_dir.join("components")
-            .join(self.get_component_category_dir(&component.name))
+            .join(category)
             .join(&component.name);
-        
+
         // Create component directory if it doesn't exist
         if !component_dir.exists() {
             std::fs::create_dir_all(&component_dir)?;
         }
-        
+
         // Install templates
         for template in &component.templates {
             let template_path = self.theme_dir.join("components")
-                .join(self.get_component_category_dir(&component.name))
+                .join(category)
                 .join(&component.name)
                 .join("templates")
                 .join(template);
-            
+
             let template_dir = template_path.parent().unwrap();
             if !template_dir.exists() {
                 std::fs::create_dir_all(template_dir)?;
             }
-            
+
             // In a real implementation, we'd copy from a template
             // For now, we just ensure the directory exists
         }
-        
+
         Ok(())
     }
     
@@ -220,7 +230,7 @@ impl ComponentManager {
     async fn load_component_from_registry(&self, name: &str, _version: Option<String>) -> Result<Component> {
         // In a real implementation, this would download from a registry
         // For now, we'll try to load from the theme directory
-        match self.loader.load_component(name) {
+        match self.loader.load_component(name, None) {
             Ok(component) => Ok(component),
             Err(_) => {
                 // Create a placeholder component
@@ -246,15 +256,7 @@ Ok(Component {
         }
     }
     
-    /// Get component category directory
-    fn get_component_category_dir(&self, name: &str) -> &str {
-        match name {
-            "footer" => "composite",
-            "grid_cards" => "composite",
-            _ => "content",
-        }
     }
-}
 
 /// Get the global component manager instance
 pub fn get_component_manager() -> &'static mut ComponentManager {

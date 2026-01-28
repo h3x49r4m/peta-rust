@@ -21,26 +21,26 @@ impl ComponentLoader {
     pub fn load_components_from_theme(&self, theme_dir: &Path) -> Result<Vec<Component>> {
         let mut components = Vec::new();
         let components_dir = theme_dir.join("components");
-        
+
         if !components_dir.exists() {
             return Ok(components);
         }
-        
+
         let component_categories = ["atomic", "composite"];
-        
+
         for category in &component_categories {
             let category_dir = components_dir.join(category);
             if category_dir.exists() {
                 for entry in std::fs::read_dir(&category_dir)? {
                     let entry = entry?;
                     let path = entry.path();
-                    
+
                     if path.is_dir() {
                         let component_name = path.file_name()
                             .and_then(|n| n.to_str())
                             .unwrap_or("unknown");
-                            
-                        match self.load_component(component_name) {
+
+                        match self.load_component(component_name, Some(category)) {
                             Ok(component) => components.push(component),
                             Err(e) => {
                                 eprintln!("Warning: Failed to load component '{}': {}", component_name, e);
@@ -50,31 +50,44 @@ impl ComponentLoader {
                 }
             }
         }
-        
+
         Ok(components)
     }
     
     /// Load a component from the theme directory
-    pub fn load_component(&self, name: &str) -> Result<Component> {
-        let component_dir = self.theme_dir.join("components")
-            .join(self.get_category_dir(name))
-            .join(name);
-        
+    pub fn load_component(&self, name: &str, category: Option<&str>) -> Result<Component> {
+        // Determine component directory based on provided category or discovery
+        let component_dir = if let Some(cat) = category {
+            self.theme_dir.join("components").join(cat).join(name)
+        } else {
+            // Try to find component in known categories
+            let categories = ["atomic", "composite"];
+            let mut found_dir = None;
+            for cat in &categories {
+                let dir = self.theme_dir.join("components").join(cat).join(name);
+                if dir.exists() {
+                    found_dir = Some(dir);
+                    break;
+                }
+            }
+            found_dir.ok_or_else(|| Error::Component(format!("Component '{}' not found in any category", name)))?
+        };
+
         if !component_dir.exists() {
             return Err(Error::Component(format!("Component directory not found: {}", component_dir.display())));
         }
-        
+
         // Load component configuration
         let config_path = component_dir.join("component.yaml");
         let config_content = std::fs::read_to_string(&config_path)
             .map_err(|e| Error::Component(format!("Failed to read component config: {}", e)))?;
-        
+
         let config: ComponentConfig = serde_yaml::from_str(&config_content)
             .map_err(|e| Error::Component(format!("Failed to parse component config: {}", e)))?;
-        
+
         // Validate component structure
         self.validate_component_structure(&component_dir, &config)?;
-        
+
         // Create component
         let component = Component {
             name: config.name.clone(),
@@ -94,7 +107,7 @@ impl ComponentLoader {
             default_config: config.default_config,
             seo: config.seo,
         };
-        
+
         Ok(component)
     }
     
@@ -102,30 +115,30 @@ impl ComponentLoader {
     pub fn load_all_components(&self) -> Result<Vec<Component>> {
         let mut components = Vec::new();
         let components_dir = self.theme_dir.join("components");
-        
+
         if !components_dir.exists() {
             return Ok(components);
         }
-        
+
         // Load components from each category
         let categories = ["atomic", "composite"];
-        
+
         for category in &categories {
             let category_dir = components_dir.join(category);
             if !category_dir.exists() {
                 continue;
             }
-            
+
             for entry in std::fs::read_dir(&category_dir)? {
                 let entry = entry?;
                 let path = entry.path();
-                
+
                 if path.is_dir() {
                     let component_name = path.file_name()
                         .and_then(|n| n.to_str())
                         .unwrap_or("unknown");
-                    
-                    match self.load_component(component_name) {
+
+                    match self.load_component(component_name, Some(category)) {
                         Ok(component) => components.push(component),
                         Err(e) => {
                             eprintln!("Warning: Failed to load component '{}': {}", component_name, e);
@@ -134,7 +147,7 @@ impl ComponentLoader {
                 }
             }
         }
-        
+
         Ok(components)
     }
     
@@ -160,36 +173,6 @@ impl ComponentLoader {
         }
         
         Ok(files)
-    }
-    
-    /// Get the category directory for a component name
-    fn get_category_dir(&self, name: &str) -> &'static str {
-        // This is a simple heuristic - in a real implementation,
-        // we might use a mapping or component metadata
-        match name {
-            "navbar" => "atomic",
-            "contacts" => "atomic",
-            "tag_cloud" => "atomic",
-            "grid_card" => "atomic",
-            "content_div" => "atomic",
-            "article_toc" => "atomic",
-            "article_content" => "atomic",
-            "book_toc" => "atomic",
-            "book_content" => "atomic",
-            "project_toc" => "atomic",
-            "project_content" => "atomic",
-            "site_stats" => "atomic",
-            "search" => "atomic",
-            "header" => "composite",
-            "footer" => "composite",
-            "page_tags" => "composite",
-            "snippet_card_modal" => "composite",
-            "grid_cards" => "composite",
-            "article_modal" => "composite",
-            "book_modal" => "composite",
-            "project_modal" => "composite",
-            _ => "content",
-        }
     }
     
     /// Validate that the component directory has the required structure

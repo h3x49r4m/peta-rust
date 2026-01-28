@@ -249,8 +249,10 @@ impl TemplateEngine {
         let component_manager_clone2 = Arc::clone(component_manager);
         let component_manager_clone3 = Arc::clone(component_manager);
         let component_manager_clone4 = Arc::clone(component_manager);
+        let component_manager_clone5 = Arc::clone(component_manager);
         let theme_dir_clone = Arc::new(RwLock::new(PathBuf::from("themes/default")));
         let theme_dir_clone2 = Arc::clone(&theme_dir_clone);
+        let theme_dir_clone3 = Arc::clone(&theme_dir_clone);
 
         tera.register_function(
             "component",
@@ -331,33 +333,41 @@ impl TemplateEngine {
 
         tera.register_function(
             "component_styles",
-            Box::new(|args: &HashMap<String, Value>| -> tera::Result<Value> {
+            Box::new(move |args: &HashMap<String, Value>| -> tera::Result<Value> {
                 let component_names = args.get("component_names")
                     .or_else(|| args.get("0"))
                     .and_then(|v| v.as_array())
                     .ok_or_else(|| tera::Error::msg("Component names array is required"))?;
 
                 let mut styles = String::new();
+                let theme_dir = if let Ok(dir) = theme_dir_clone3.read() {
+                    dir.clone()
+                } else {
+                    PathBuf::from("themes/default")
+                };
+
                 for component in component_names {
                     if let Some(name) = component.as_str() {
                         // Skip code_block as it's handled by Rust generators
                         if name == "code_block" {
                             continue;
                         }
+
                         styles.push_str(&format!("/* Styles for component: {} */\n", name));
-                        let css_paths = [
-                            format!("themes/default/components/composite/{}/{}.css", name, name),
-                            format!("themes/default/components/content/{}/{}.css", name, name),
-                            format!("themes/default/components/layout/{}/{}.css", name, name),
-                            format!("themes/default/components/atomic/{}/{}.css", name, name),
-                        ];
-                        for css_path in &css_paths {
-                            if std::path::Path::new(css_path).exists() {
-                                if let Ok(css_content) = std::fs::read_to_string(css_path) {
-                                    styles.push_str(&css_content);
-                                    styles.push('\n');
-                                    break;
-                                }
+
+                        // Get component category from manager
+                        let category = if let Ok(manager) = component_manager_clone5.read() {
+                            manager.get_component_category(name).unwrap_or_else(|| "atomic".to_string())
+                        } else {
+                            "atomic".to_string()
+                        };
+
+                        let css_path = theme_dir.join("components").join(&category).join(name).join(format!("{}.css", name));
+
+                        if css_path.exists() {
+                            if let Ok(css_content) = std::fs::read_to_string(&css_path) {
+                                styles.push_str(&css_content);
+                                styles.push('\n');
                             }
                         }
                     }
@@ -552,13 +562,13 @@ impl TemplateEngine {
                 )?;
             }
             "page_tags" => {
-                result = Self::render_tag_cloud_nested(&result, props, tag_collector, template_cache, theme_dir)?;
+                result = Self::render_tag_cloud_nested(&result, props, tag_collector, template_cache, theme_dir, component_manager)?;
             }
             "article_modal" => {
-                result = Self::render_article_modal_nested(&result, props, template_cache, theme_dir)?;
+                result = Self::render_article_modal_nested(&result, props, template_cache, theme_dir, component_manager)?;
             }
             "project_modal" => {
-                result = Self::render_project_modal_nested(&result, props, template_cache, theme_dir)?;
+                result = Self::render_project_modal_nested(&result, props, template_cache, theme_dir, component_manager)?;
             }
             _ => {}
         }
@@ -610,8 +620,16 @@ impl TemplateEngine {
         tag_collector: &Arc<RwLock<TagCollector>>,
         template_cache: &Arc<RwLock<TemplateCache>>,
         theme_dir: &Path,
+        component_manager: &Arc<RwLock<ComponentManager>>,
     ) -> Result<String> {
-        let template_path = theme_dir.join("components/atomic/tag_cloud/tag_cloud.html");
+        // Get component category from manager
+        let category = if let Ok(manager) = component_manager.read() {
+            manager.get_component_category("tag_cloud").unwrap_or_else(|| "atomic".to_string())
+        } else {
+            "atomic".to_string()
+        };
+
+        let template_path = theme_dir.join("components").join(&category).join("tag_cloud").join("tag_cloud.html");
         if !template_path.exists() {
             return Ok(rendered.to_string());
         }
@@ -652,11 +670,17 @@ impl TemplateEngine {
             props: &Value,
             template_cache: &Arc<RwLock<TemplateCache>>,
             theme_dir: &Path,
+            component_manager: &Arc<RwLock<ComponentManager>>,
         ) -> Result<String> {
             let mut result = rendered.to_string();
-    
+
             // Render article_toc
-            let toc_template_path = theme_dir.join("components/atomic/article_toc/article_toc.html");
+            let toc_category = if let Ok(manager) = component_manager.read() {
+                manager.get_component_category("article_toc").unwrap_or_else(|| "atomic".to_string())
+            } else {
+                "atomic".to_string()
+            };
+            let toc_template_path = theme_dir.join("components").join(&toc_category).join("article_toc").join("article_toc.html");
             if toc_template_path.exists() {
                 let template_content = if let Ok(cache) = template_cache.read() {
                     cache.load(toc_template_path.to_str().unwrap())?
@@ -684,8 +708,13 @@ impl TemplateEngine {
         }
 
         // Render article_content
-                let content_template_path = theme_dir.join("components/atomic/article_content/article_content.html");
-                if content_template_path.exists() {
+            let content_category = if let Ok(manager) = component_manager.read() {
+                manager.get_component_category("article_content").unwrap_or_else(|| "atomic".to_string())
+            } else {
+                "atomic".to_string()
+            };
+            let content_template_path = theme_dir.join("components").join(&content_category).join("article_content").join("article_content.html");
+            if content_template_path.exists() {
                     let template_content = if let Ok(cache) = template_cache.read() {
                         cache.load(content_template_path.to_str().unwrap())?
                     } else {
@@ -728,11 +757,17 @@ impl TemplateEngine {
             props: &Value,
             template_cache: &Arc<RwLock<TemplateCache>>,
             theme_dir: &Path,
+            component_manager: &Arc<RwLock<ComponentManager>>,
         ) -> Result<String> {
             let mut result = rendered.to_string();
-    
+
             // Render project_toc
-            let toc_template_path = theme_dir.join("components/atomic/project_toc/project_toc.html");
+            let toc_category = if let Ok(manager) = component_manager.read() {
+                manager.get_component_category("project_toc").unwrap_or_else(|| "atomic".to_string())
+            } else {
+                "atomic".to_string()
+            };
+            let toc_template_path = theme_dir.join("components").join(&toc_category).join("project_toc").join("project_toc.html");
             if toc_template_path.exists() {
                 let template_content = if let Ok(cache) = template_cache.read() {
                     cache.load(toc_template_path.to_str().unwrap())?
@@ -761,7 +796,12 @@ impl TemplateEngine {
             }
 
             // Render project_content
-            let content_template_path = theme_dir.join("components/atomic/project_content/project_content.html");
+            let content_category = if let Ok(manager) = component_manager.read() {
+                manager.get_component_category("project_content").unwrap_or_else(|| "atomic".to_string())
+            } else {
+                "atomic".to_string()
+            };
+            let content_template_path = theme_dir.join("components").join(&content_category).join("project_content").join("project_content.html");
             if content_template_path.exists() {
                 let template_content = if let Ok(cache) = template_cache.read() {
                     cache.load(content_template_path.to_str().unwrap())?
