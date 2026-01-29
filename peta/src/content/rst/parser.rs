@@ -511,70 +511,160 @@ impl RstParser {
     fn convert_lists(&self, content: &str) -> Result<String> {
         let lines: Vec<&str> = content.lines().collect();
         let mut result = Vec::new();
-        let mut list_stack = Vec::new();
-        let mut last_indent = 0;
-
-        for line in lines {
-            let trimmed = line.trim();
-
-            if trimmed.is_empty() || !self.is_list_item(line) {
-                while !list_stack.is_empty() {
-                    let (list_type, _) = list_stack.pop().unwrap();
-                    result.push(format!("</{}>", list_type));
-                }
-                last_indent = 0;
+        let mut i = 0;
+        
+        while i < lines.len() {
+            let line = lines[i];
+            
+            // Skip non-list lines
+            if !self.is_list_item(line) {
                 result.push(line.to_string());
+                i += 1;
                 continue;
             }
-
-            let current_indent = self.calculate_indent(line);
-            let (list_type, item_content) = self.parse_list_item(line)?;
-
-            if current_indent > last_indent {
-                result.push(format!("<{}>", list_type));
-                list_stack.push((list_type, current_indent));
-            } else if current_indent < last_indent {
-                while let Some((stack_type, stack_indent)) = list_stack.last() {
-                    if *stack_indent > current_indent {
-                        result.push(format!("</{}>", stack_type));
-                        list_stack.pop();
+            
+            // Found a list - collect all list items
+            let mut list_items = Vec::new();
+            let mut list_start_indent = self.calculate_indent(line);
+            
+            while i < lines.len() && self.is_list_item(lines[i]) {
+                let item_indent = self.calculate_indent(lines[i]);
+                
+                // Include this item
+                list_items.push((item_indent, lines[i].to_string()));
+                i += 1;
+                
+                // Look ahead for nested items
+                while i < lines.len() {
+                    let next_line = lines[i];
+                    if next_line.trim().is_empty() {
+                        i += 1;
+                        continue;
+                    }
+                    
+                    let next_indent = self.calculate_indent(next_line);
+                    if next_indent > item_indent && self.is_list_item(next_line) {
+                        // This is a nested item - include it
+                        list_items.push((next_indent, next_line.to_string()));
+                        i += 1;
                     } else {
                         break;
                     }
                 }
-
-                if let Some((stack_type, _)) = list_stack.last() {
-                    if *stack_type != list_type {
-                        result.push(format!("</{}>", stack_type));
-                        list_stack.pop();
-                        result.push(format!("<{}>", list_type));
-                        list_stack.push((list_type, current_indent));
+            }
+            
+            // Convert the collected list items to HTML
+            if !list_items.is_empty() {
+                let list_html = self.convert_list_group(&list_items, list_start_indent)?;
+                result.push(list_html);
+            }
+        }
+        
+        Ok(result.join("\n"))
+    }
+    
+    /// Convert a group of list items to HTML
+    fn convert_list_group(&self, items: &[(usize, String)], base_indent: usize) -> Result<String> {
+        let mut result = Vec::new();
+        let mut i = 0;
+        let mut list_type = "ul".to_string();
+        
+        while i < items.len() {
+            let (item_indent, item_line) = &items[i];
+            let (_, detected_type, item_content) = self.parse_list_item_raw(item_line)?;
+            
+            // Track the list type from the first item
+            if result.is_empty() {
+                list_type = detected_type.clone();
+            }
+            
+            // Open list tag if needed
+            if result.is_empty() || !self.contains_open_list(&result) {
+                result.push(format!("<{}>", list_type));
+            }
+            
+            result.push(format!("<li>{}</li>", item_content));
+            i += 1;
+            
+            // Check for nested items
+            let mut nested_items = Vec::new();
+            let mut nested_base_indent = None;
+            
+            while i < items.len() {
+                let (next_indent, _) = &items[i];
+                if *next_indent > *item_indent {
+                    if nested_base_indent.is_none() {
+                        nested_base_indent = Some(*next_indent);
                     }
-                }
-            } else {
-                if let Some((stack_type, _)) = list_stack.last() {
-                    if *stack_type != list_type {
-                        result.push(format!("</{}>", stack_type));
-                        list_stack.pop();
-                        result.push(format!("<{}>", list_type));
-                        list_stack.push((list_type, current_indent));
-                    }
+                    nested_items.push((*next_indent, items[i].1.clone()));
+                    i += 1;
                 } else {
-                    result.push(format!("<{}>", list_type));
-                    list_stack.push((list_type, current_indent));
+                    break;
                 }
             }
-
-            result.push(format!("<li>{}</li>", item_content));
-            last_indent = current_indent;
+            
+            // Process nested items
+            if !nested_items.is_empty() {
+                let nested_html = self.convert_list_group(&nested_items, *item_indent)?;
+                result.push(nested_html);
+            }
         }
-
-        while !list_stack.is_empty() {
-            let (list_type, _) = list_stack.pop().unwrap();
-            result.push(format!("</{}>", list_type));
-        }
-
+        
+        // Close list tag
+        result.push(format!("</{}>", list_type));
+        
         Ok(result.join("\n"))
+    }
+    
+    /// Check if there's an open list tag in the result
+    fn contains_open_list(&self, result: &[String]) -> bool {
+        let html = result.join("\n");
+        let mut open_count = 0;
+        
+        for tag in ["<ul>", "<ol>"] {
+            let start_tag: &str = tag;
+            let end_tag = tag.replace("<", "</");
+            
+            let mut pos = 0;
+            while let Some(found) = html[pos..].find(start_tag) {
+                open_count += 1;
+                pos += found + start_tag.len();
+            }
+            
+            pos = 0;
+            while let Some(found) = html[pos..].find(&end_tag) {
+                open_count -= 1;
+                pos += found + end_tag.len();
+            }
+        }
+        
+        open_count > 0
+    }
+    
+    /// Parse a list item without modifying the line
+    fn parse_list_item_raw(&self, line: &str) -> Result<(usize, String, String)> {
+        let trimmed = line.trim();
+
+        if trimmed.starts_with("- ") || trimmed.starts_with("* ") {
+            let content = trimmed.trim_start_matches("- ").trim_start_matches("* ");
+            return Ok((self.calculate_indent(line), "ul".to_string(), content.to_string()));
+        }
+
+        if let Some(first_char) = trimmed.chars().next() {
+            if first_char.is_numeric() {
+                if let Some(dot_pos) = trimmed.find('.') {
+                    let before_dot = &trimmed[..dot_pos];
+                    if before_dot.chars().all(|c| c.is_numeric()) {
+                        let content = trimmed[dot_pos + 1..].trim();
+                        return Ok((self.calculate_indent(line), "ol".to_string(), content.to_string()));
+                    }
+                }
+            }
+        }
+
+        Err(crate::core::Error::rst_parse(
+            "Invalid list item format".to_string(),
+        ))
     }
 
     /// Check if a line is a list item
