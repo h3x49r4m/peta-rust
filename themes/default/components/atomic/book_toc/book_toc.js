@@ -164,5 +164,44 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
     }
+    
+    // Scroll spy functionality - highlight active header based on scroll position
+    function updateActiveHeader() {
+      const headers = document.querySelectorAll('.book-content-wrapper h2, .book-content-wrapper h3, .book-content-wrapper h4');
+      const tocLinks = tocContent.querySelectorAll('.toc-header-link');
+      
+      let currentHeaderId = '';
+      const scrollPosition = window.scrollY + 150; // Offset for header
+      
+      // Find the last header that's above the scroll position
+      headers.forEach(function(header) {
+        if (header.offsetTop <= scrollPosition) {
+          currentHeaderId = header.id;
+        }
+      });
+      
+      // Remove active class from all links
+      tocLinks.forEach(function(link) {
+        link.classList.remove('active');
+      });
+      
+      // Add active class to current link
+      if (currentHeaderId) {
+        const activeLink = tocContent.querySelector(`.toc-header-link[href*="#${currentHeaderId}"]`);
+        if (activeLink) {
+          activeLink.classList.add('active');
+        }
+      }
+    }
+    
+    // Update active header on scroll
+    let scrollTimeout;
+    window.addEventListener('scroll', function() {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(updateActiveHeader, 100);
+    });
+    
+    // Initial call
+    updateActiveHeader();
   });
 });
