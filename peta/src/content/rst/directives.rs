@@ -104,42 +104,9 @@ impl DirectiveHandler for SnippetCardHandler {
 pub struct TocTreeHandler;
 
 impl DirectiveHandler for TocTreeHandler {
-    fn handle(&mut self, _directive_type: &str, content: &str) -> Result<String> {
-        let lines: Vec<&str> = content.lines().collect();
-        let mut _maxdepth = 2;
-        let mut caption = String::new();
-        let mut entries = Vec::new();
-        
-        for line in lines {
-            let trimmed = line.trim_start();
-            if trimmed.starts_with(":maxdepth:") {
-                _maxdepth = trimmed.split(':').nth(1).unwrap_or("2").trim().parse().unwrap_or(2);
-            } else if trimmed.starts_with(":caption:") {
-                caption = trimmed.split(':').nth(1).unwrap_or("").trim().to_string();
-            } else if !trimmed.starts_with(':') && !trimmed.is_empty() {
-                entries.push(trimmed.to_string());
-            }
-        }
-        
-        let mut toc_html = String::new();
-        
-        if !caption.is_empty() {
-            toc_html.push_str(&format!("<div class=\"toc-caption\">{}</div>", caption));
-        }
-        
-        toc_html.push_str("<div class=\"toc-tree\">");
-        
-        for entry in entries {
-            let title = entry.trim_end_matches(".rst");
-            let url = title.replace('_', "-").to_lowercase() + ".html";
-            toc_html.push_str(&format!(
-                "<div class=\"toc-item\"><a href=\"{}\">{}</a></div>",
-                url, title
-            ));
-        }
-        
-        toc_html.push_str("</div>");
-        
-        Ok(toc_html)
+    fn handle(&mut self, _directive_type: &str, _content: &str) -> Result<String> {
+        // Return empty HTML since the TOC is already generated separately
+        // in the book_toc component sidebar
+        Ok(String::new())
     }
 }

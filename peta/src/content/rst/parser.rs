@@ -224,6 +224,57 @@ impl RstParser {
                 // The language variable already contains the snippet ID (extracted from content_after_directive)
                 // Set content_end to content_start (empty content)
                 content_end = content_start;
+            } else if directive_name == "toctree" {
+                // For toctree, skip all indented content and options
+                // The toctree directive has options (:maxdepth:, :caption:) followed by indented chapter names
+                // We want to remove all of this from the output
+                for (line_idx, line) in lines_after_directive.iter().enumerate() {
+                    let line_start_pos = content_start
+                        + if line_idx > 0 {
+                            lines_after_directive[0..line_idx].join("\n").len() + 1
+                        } else {
+                            0
+                        };
+
+                    let trimmed = line.trim();
+
+                    // Skip options (lines starting with :)
+                    if trimmed.starts_with(':') {
+                        continue;
+                    }
+
+                    // Skip empty lines
+                    if trimmed.is_empty() {
+                        continue;
+                    }
+
+                    // Check if line is indented
+                    let is_indented = line.starts_with(' ') || line.starts_with('\t');
+
+                    if is_indented {
+                        found_indented_content = true;
+                        continue;
+                    }
+
+                    // If we hit a non-indented, non-option line, stop here
+                    if !is_indented && !trimmed.starts_with(':') {
+                        content_end = line_start_pos;
+                        break;
+                    }
+                }
+
+                // If we reached the end without finding a stopping point, use the end of content
+                if content_end == content.len() {
+                    // Keep content_end as is
+                }
+
+                // If we have more directives, don't go past them
+                if i + 1 < directive_starts.len() {
+                    let next_directive_start = directive_starts[i + 1].0;
+                    if content_end > next_directive_start {
+                        content_end = next_directive_start;
+                    }
+                }
             } else {
                 for (line_idx, line) in lines_after_directive.iter().enumerate() {
                     let line_start_pos = content_start

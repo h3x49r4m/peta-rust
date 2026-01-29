@@ -80,6 +80,7 @@
   margin-top: var(--spacing-8, 2rem);
   margin-bottom: var(--spacing-4, 1rem);
   line-height: 1.4;
+  scroll-margin-top: 120px;
 }
 
 .book-content-wrapper h1 {
@@ -106,10 +107,16 @@
 
 .book-content-wrapper h3 {
   font-size: var(--font-size-xl, 1.25rem);
+  margin-bottom: var(--spacing-6, 1.5rem);
+}
+
+.book-content-wrapper h3 + * {
+  margin-top: var(--spacing-2, 0.5rem);
 }
 
 .book-content-wrapper h4 {
   font-size: var(--font-size-lg, 1.125rem);
+  margin-bottom: var(--spacing-6, 1.5rem);
 }
 
 .book-content-wrapper p {

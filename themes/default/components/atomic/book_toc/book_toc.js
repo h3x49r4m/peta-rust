@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
     
-    // Toggle button functionality
+    // Toggle button functionality for the main panel
     toggleBtn.addEventListener('click', function() {
       const isExpanded = this.getAttribute('aria-expanded') === 'true';
       
@@ -25,6 +25,45 @@ document.addEventListener('DOMContentLoaded', function() {
       } else {
         this.style.transform = 'rotate(180deg)';
       }
+    });
+    
+    // Handle chapter header toggle buttons
+    const headerToggleBtns = tocContent.querySelectorAll('.toc-toggle-btn');
+    headerToggleBtns.forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const targetId = this.getAttribute('data-target');
+        const targetHeaders = document.getElementById(targetId);
+        
+        if (!targetHeaders) {
+          console.error('Target headers container not found:', targetId);
+          return;
+        }
+        
+        const isExpanded = this.getAttribute('aria-expanded') === 'true';
+        
+        // Toggle the expanded state
+        this.setAttribute('aria-expanded', !isExpanded);
+        
+        // Toggle icon rotation
+        const icon = this.querySelector('svg');
+        if (icon) {
+          if (!isExpanded) {
+            icon.style.transform = 'rotate(180deg)';
+          } else {
+            icon.style.transform = 'rotate(0deg)';
+          }
+        }
+        
+        // Toggle headers visibility
+        if (!isExpanded) {
+          targetHeaders.classList.add('expanded');
+        } else {
+          targetHeaders.classList.remove('expanded');
+        }
+      });
     });
     
     // Handle TOC link clicks

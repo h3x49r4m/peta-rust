@@ -11,6 +11,15 @@ pub struct BookChapter {
     pub url: String,
     pub slug: String,
     pub order: usize,
+    pub headers: Vec<ChapterHeader>,
+}
+
+/// Chapter header entry
+#[derive(Debug, Clone)]
+pub struct ChapterHeader {
+    pub level: usize,
+    pub title: String,
+    pub anchor: String,
 }
 
 /// Book table of contents generator
@@ -87,14 +96,16 @@ impl BookTocGenerator {
                     let chapter_path = book_dir.join(format!("{}.rst", chapter_slug));
                     
                     if chapter_path.exists() {
-                        // Read chapter file to get title
+                        // Read chapter file to get title and headers
                         let title = self.extract_chapter_title(&chapter_path)?;
+                        let headers = self.extract_chapter_headers(&chapter_path)?;
                         
                         chapters.push(BookChapter {
                             title,
                             url: format!("{}.html", chapter_slug),
                             slug: chapter_slug.to_string(),
                             order: current_order,
+                            headers,
                         });
                         
                         current_order += 1;
@@ -104,6 +115,87 @@ impl BookTocGenerator {
         }
 
         Ok(chapters)
+    }
+
+    /// Extract headers from chapter RST file
+    fn extract_chapter_headers(&self, chapter_path: &Path) -> Result<Vec<ChapterHeader>> {
+        let content = fs::read_to_string(chapter_path)?;
+        let mut headers = Vec::new();
+        let lines: Vec<&str> = content.lines().collect();
+        
+        let mut i = 0;
+        let mut in_frontmatter = false;
+        
+        while i < lines.len() {
+            let line = lines[i].trim();
+            
+            // Handle frontmatter delimiters
+            if line == "---" {
+                if !in_frontmatter {
+                    // Start of frontmatter
+                    in_frontmatter = true;
+                } else {
+                    // End of frontmatter
+                    in_frontmatter = false;
+                }
+                i += 1;
+                continue;
+            }
+            
+            // Skip all content inside frontmatter
+            if in_frontmatter {
+                i += 1;
+                continue;
+            }
+            
+            // Skip empty lines
+            if line.is_empty() {
+                i += 1;
+                continue;
+            }
+            
+            // Check if this is a heading (underlined with =, -, ~, or *)
+            if i + 1 < lines.len() {
+                let underline = lines[i + 1].trim();
+                
+                // Determine the heading level based on the underline character
+                if !underline.is_empty() && 
+                   (underline.starts_with("==") || 
+                    underline.starts_with("--") || 
+                    underline.starts_with("~~") || 
+                    underline.starts_with("**")) &&
+                   underline.chars().all(|c| c == '=' || c == '-' || c == '~' || c == '*') {
+                    
+                    // Calculate heading level based on character
+                    let level = match underline.chars().next() {
+                        Some('=') => 1,
+                        Some('-') => 2,
+                        Some('~') => 3,
+                        Some('*') => 4,
+                        _ => 2,
+                    };
+                    
+                    // Skip the chapter title (level 1) to avoid duplication
+                    if level > 1 {
+                        let title = line.trim().to_string();
+                        let anchor = self.slugify(&title);
+                        
+                        headers.push(ChapterHeader {
+                            level,
+                            title,
+                            anchor,
+                        });
+                    }
+                    
+                    i += 2; // Skip both the heading and its underline
+                    continue;
+                }
+            }
+            
+            i += 1;
+        }
+        
+        Ok(headers)
     }
 
     /// Extract title from chapter RST file
@@ -159,6 +251,53 @@ impl BookTocGenerator {
         Ok("Untitled".to_string())
     }
 
+    /// Convert title to URL-friendly slug
+    fn slugify(&self, title: &str) -> String {
+        let mut result = title.to_lowercase();
+        
+        // Handle common programming language notations first
+        result = result.replace("c++", "cpp");
+        result = result.replace("c#", "csharp");
+        result = result.replace("f#", "fsharp");
+        result = result.replace("c++/cli", "cpp-cli");
+        result = result.replace(".net", "dotnet");
+        result = result.replace("node.js", "nodejs");
+        result = result.replace("react.js", "reactjs");
+        result = result.replace("vue.js", "vuejs");
+        result = result.replace("angular.js", "angularjs");
+        
+        // Replace common symbols with words
+        result = result.replace("++", "plus");
+        result = result.replace("--", "minus");
+        result = result.replace("==", "equals");
+        result = result.replace("!=", "not-equals");
+        result = result.replace("<=", "less-equal");
+        result = result.replace(">=", "greater-equal");
+        result = result.replace("->", "arrow");
+        result = result.replace("=>", "fat-arrow");
+        result = result.replace("&&", "and");
+        result = result.replace("||", "or");
+        
+        // Replace spaces and punctuation with dashes
+        result = result.replace(&[' ', '-', '_', '.', ',', ';', ':', '!', '?', '@', '#', '$', '%', '^', '&', '*', '(', ')', '=', '[', ']', '{', '}', '\\', '|', '<', '>', '/', '"', '\''][..], "-");
+        
+        // Remove quotes completely
+        result = result.replace(['"', '\''], "");
+        
+        // Filter to only keep alphanumeric characters and dashes
+        result = result.chars()
+            .filter(|c| c.is_alphanumeric() || *c == '-')
+            .collect::<String>();
+        
+        // Collapse multiple dashes into single dashes
+        while result.contains("--") {
+            result = result.replace("--", "-");
+        }
+        
+        // Trim leading/trailing dashes
+        result.trim_matches('-').to_string()
+    }
+
     /// Convert book chapters to HTML
     pub fn render_html(&self, chapters: &[BookChapter]) -> String {
         if chapters.is_empty() {
@@ -169,9 +308,53 @@ impl BookTocGenerator {
 
         for chapter in chapters {
             html.push_str(&format!(
-                "  <div class=\"toc-item\"><a href=\"{}\">{}</a></div>\n",
+                "  <div class=\"toc-item\" data-chapter=\"{}\">\n",
+                chapter.slug
+            ));
+            
+            // Chapter link with toggle button
+            html.push_str(&format!(
+                "    <div class=\"toc-item-header\">\n",
+            ));
+            html.push_str(&format!(
+                "      <button class=\"toc-toggle-btn\" data-target=\"{}-headers\" aria-expanded=\"false\" aria-label=\"Toggle {} headers\">\n",
+                chapter.slug, chapter.title
+            ));
+            html.push_str("        <svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\">\n");
+            html.push_str("          <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 9l-7 7-7-7\" />\n");
+            html.push_str("        </svg>\n");
+            html.push_str("      </button>\n");
+            html.push_str(&format!(
+                "      <a href=\"{}\" class=\"toc-chapter-link\">{}</a>\n",
                 chapter.url, chapter.title
             ));
+            html.push_str("    </div>\n");
+            
+            // Chapter headers (nested)
+            if !chapter.headers.is_empty() {
+                html.push_str(&format!(
+                    "    <div class=\"toc-headers\" id=\"{}-headers\">\n",
+                    chapter.slug
+                ));
+                html.push_str("      <ul class=\"toc-header-list\">\n");
+                
+                for header in &chapter.headers {
+                    html.push_str(&format!(
+                        "        <li class=\"toc-header-item toc-level-{}\">\n",
+                        header.level
+                    ));
+                    html.push_str(&format!(
+                        "          <a href=\"{}#{}\" class=\"toc-header-link\">{}</a>\n",
+                        chapter.url, header.anchor, header.title
+                    ));
+                    html.push_str("        </li>\n");
+                }
+                
+                html.push_str("      </ul>\n");
+                html.push_str("    </div>\n");
+            }
+            
+            html.push_str("  </div>\n");
         }
 
         html.push_str("</div>\n");
