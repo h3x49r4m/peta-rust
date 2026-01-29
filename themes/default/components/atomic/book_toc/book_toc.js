@@ -82,6 +82,35 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
     
+    // Make header links with toggle buttons also trigger the toggle
+    const headerLinks = tocContent.querySelectorAll('.toc-header-link');
+    headerLinks.forEach(function(link) {
+      const headerContainer = link.closest('.toc-header-item-header');
+      if (headerContainer) {
+        const toggleBtn = headerContainer.querySelector('.toc-toggle-btn');
+        if (toggleBtn) {
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Trigger the toggle button click
+            toggleBtn.click();
+            
+            // Navigate to the anchor after a short delay
+            const href = link.getAttribute('href');
+            if (href && href.startsWith('#')) {
+              setTimeout(function() {
+                const targetElement = document.querySelector(href);
+                if (targetElement) {
+                  targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }, 350);
+            }
+          });
+        }
+      }
+    });
+    
     // Handle TOC link clicks - do NOT collapse the panel
     const tocLinks = tocContent.querySelectorAll('a');
     tocLinks.forEach(function(link) {

@@ -20,6 +20,7 @@ pub struct ChapterHeader {
     pub level: usize,
     pub title: String,
     pub anchor: String,
+    pub children: Vec<ChapterHeader>,
 }
 
 /// Book table of contents generator
@@ -118,87 +119,157 @@ impl BookTocGenerator {
     }
 
     /// Extract headers from chapter RST file
-    fn extract_chapter_headers(&self, chapter_path: &Path) -> Result<Vec<ChapterHeader>> {
-        let content = fs::read_to_string(chapter_path)?;
-        let mut headers = Vec::new();
-        let lines: Vec<&str> = content.lines().collect();
-        
-        let mut i = 0;
-        let mut in_frontmatter = false;
-        
-        while i < lines.len() {
-            let line = lines[i].trim();
+        fn extract_chapter_headers(&self, chapter_path: &Path) -> Result<Vec<ChapterHeader>> {
+            let content = fs::read_to_string(chapter_path)?;
+            let mut headers = Vec::new();
+            let lines: Vec<&str> = content.lines().collect();
             
-            // Handle frontmatter delimiters
-            if line == "---" {
-                if !in_frontmatter {
-                    // Start of frontmatter
-                    in_frontmatter = true;
-                } else {
-                    // End of frontmatter
-                    in_frontmatter = false;
-                }
-                i += 1;
-                continue;
-            }
+            let mut i = 0;
+            let mut in_frontmatter = false;
             
-            // Skip all content inside frontmatter
-            if in_frontmatter {
-                i += 1;
-                continue;
-            }
-            
-            // Skip empty lines
-            if line.is_empty() {
-                i += 1;
-                continue;
-            }
-            
-            // Check if this is a heading (underlined with =, -, ~, or *)
-            if i + 1 < lines.len() {
-                let underline = lines[i + 1].trim();
+            while i < lines.len() {
+                let line = lines[i].trim();
                 
-                // Determine the heading level based on the underline character
-                if !underline.is_empty() && 
-                   (underline.starts_with("==") || 
-                    underline.starts_with("--") || 
-                    underline.starts_with("~~") || 
-                    underline.starts_with("**")) &&
-                   underline.chars().all(|c| c == '=' || c == '-' || c == '~' || c == '*') {
-                    
-                    // Calculate heading level based on character
-                    let level = match underline.chars().next() {
-                        Some('=') => 1,
-                        Some('-') => 2,
-                        Some('~') => 3,
-                        Some('*') => 4,
-                        _ => 2,
-                    };
-                    
-                    // Skip the chapter title (level 1) to avoid duplication
-                    if level > 1 {
-                        let title = line.trim().to_string();
-                        let anchor = self.slugify(&title);
-                        
-                        headers.push(ChapterHeader {
-                            level,
-                            title,
-                            anchor,
-                        });
+                // Handle frontmatter delimiters
+                if line == "---" {
+                    if !in_frontmatter {
+                        // Start of frontmatter
+                        in_frontmatter = true;
+                    } else {
+                        // End of frontmatter
+                        in_frontmatter = false;
                     }
-                    
-                    i += 2; // Skip both the heading and its underline
+                    i += 1;
                     continue;
                 }
+                
+                // Skip all content inside frontmatter
+                if in_frontmatter {
+                    i += 1;
+                    continue;
+                }
+                
+                // Skip empty lines
+                if line.is_empty() {
+                    i += 1;
+                    continue;
+                }
+                
+                // Check if this is a heading (underlined with =, -, ~, or *)
+                if i + 1 < lines.len() {
+                    let underline = lines[i + 1].trim();
+                    
+                    // Determine the heading level based on the underline character
+                    if !underline.is_empty() && 
+                       (underline.starts_with("==") || 
+                        underline.starts_with("--") || 
+                        underline.starts_with("~~") || 
+                        underline.starts_with("**")) &&
+                       underline.chars().all(|c| c == '=' || c == '-' || c == '~' || c == '*') {
+                        
+                        // Calculate heading level based on character
+                        let level = match underline.chars().next() {
+                            Some('=') => 1,
+                            Some('-') => 2,
+                            Some('~') => 3,
+                            Some('*') => 4,
+                            _ => 2,
+                        };
+                        
+                        // Skip the chapter title (level 1) to avoid duplication
+                        if level > 1 {
+                            let title = line.trim().to_string();
+                            let anchor = self.slugify(&title);
+                            
+                            headers.push(ChapterHeader {
+                                level,
+                                title,
+                                anchor,
+                                children: Vec::new(),
+                            });
+                        }
+                        
+                        i += 2; // Skip both the heading and its underline
+                        continue;
+                    }
+                }
+                
+                i += 1;
             }
-            
-            i += 1;
+    
+            // Build hierarchy from flat list
+            Ok(self.build_header_hierarchy(headers))
         }
         
-        Ok(headers)
-    }
-
-    /// Extract title from chapter RST file
+        /// Build hierarchical structure from flat header list
+        
+            fn build_header_hierarchy(&self, headers: Vec<ChapterHeader>) -> Vec<ChapterHeader> {
+        
+                let mut result: Vec<ChapterHeader> = Vec::new();
+        
+                let mut stack: Vec<(usize, usize)> = Vec::new(); // (level, index in result)
+        
+                
+        
+                for header in headers {
+        
+                    let level = header.level;
+        
+                    
+        
+                    // Find the correct parent based on level
+        
+                    while let Some(&(stack_level, _)) = stack.last() {
+        
+                        if stack_level < level {
+        
+                            break;
+        
+                        }
+        
+                        stack.pop();
+        
+                    }
+        
+                    
+        
+                    if let Some((_, parent_idx)) = stack.last() {
+        
+                        // Add as child of parent
+        
+                        let parent = &mut result[*parent_idx];
+        
+                        let child_id = format!("{}-{}", parent.anchor, header.anchor);
+        
+                        parent.children.push(ChapterHeader {
+        
+                            level: header.level,
+        
+                            title: header.title,
+        
+                            anchor: child_id,
+        
+                            children: Vec::new(),
+        
+                        });
+        
+                    } else {
+        
+                        // Add as top-level header
+        
+                        result.push(header);
+        
+                        stack.push((level, result.len() - 1));
+        
+                    }
+        
+                }
+        
+                
+        
+                result
+        
+            }    /// Extract title from chapter RST file
     fn extract_chapter_title(&self, chapter_path: &Path) -> Result<String> {
         let content = fs::read_to_string(chapter_path)?;
         
@@ -299,67 +370,216 @@ impl BookTocGenerator {
     }
 
     /// Convert book chapters to HTML
-    pub fn render_html(&self, chapters: &[BookChapter]) -> String {
-        if chapters.is_empty() {
-            return String::new();
-        }
 
-        let mut html = String::from("<div class=\"toc-tree\">\n");
+        pub fn render_html(&self, chapters: &[BookChapter]) -> String {
 
-        for chapter in chapters {
-            html.push_str(&format!(
-                "  <div class=\"toc-item\" data-chapter=\"{}\">\n",
-                chapter.slug
-            ));
-            
-            // Chapter link with toggle button
-            html.push_str(&format!(
-                "    <div class=\"toc-item-header\">\n",
-            ));
-            html.push_str(&format!(
-                "      <button class=\"toc-toggle-btn\" data-target=\"{}-headers\" aria-expanded=\"false\" aria-label=\"Toggle {} headers\">\n",
-                chapter.slug, chapter.title
-            ));
-            html.push_str("        <svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\">\n");
-            html.push_str("          <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 9l-7 7-7-7\" />\n");
-            html.push_str("        </svg>\n");
-            html.push_str("      </button>\n");
-            html.push_str(&format!(
-                "      <a href=\"{}\" class=\"toc-chapter-link\">{}</a>\n",
-                chapter.url, chapter.title
-            ));
-            html.push_str("    </div>\n");
-            
-            // Chapter headers (nested)
-            if !chapter.headers.is_empty() {
-                html.push_str(&format!(
-                    "    <div class=\"toc-headers\" id=\"{}-headers\">\n",
-                    chapter.slug
-                ));
-                html.push_str("      <ul class=\"toc-header-list\">\n");
-                
-                for header in &chapter.headers {
-                    html.push_str(&format!(
-                        "        <li class=\"toc-header-item toc-level-{}\">\n",
-                        header.level
-                    ));
-                    html.push_str(&format!(
-                        "          <a href=\"{}#{}\" class=\"toc-header-link\">{}</a>\n",
-                        chapter.url, header.anchor, header.title
-                    ));
-                    html.push_str("        </li>\n");
-                }
-                
-                html.push_str("      </ul>\n");
-                html.push_str("    </div>\n");
+            if chapters.is_empty() {
+
+                return String::new();
+
             }
-            
-            html.push_str("  </div>\n");
+
+    
+
+            let mut html = String::from("<div class=\"toc-tree\">\n");
+
+    
+
+            for chapter in chapters {
+
+                html.push_str(&format!(
+
+                    "  <div class=\"toc-item\" data-chapter=\"{}\">\n",
+
+                    chapter.slug
+
+                ));
+
+                
+
+                // Chapter link with toggle button
+
+                html.push_str(&format!(
+
+                    "    <div class=\"toc-item-header\">\n",
+
+                ));
+
+                html.push_str(&format!(
+
+                    "      <button class=\"toc-toggle-btn\" data-target=\"{}-headers\" aria-expanded=\"false\" aria-label=\"Toggle {} headers\">\n",
+
+                    chapter.slug, chapter.title
+
+                ));
+
+                html.push_str("        <svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\">\n");
+
+                html.push_str("          <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 9l-7 7-7-7\" />\n");
+
+                html.push_str("        </svg>\n");
+
+                html.push_str("      </button>\n");
+
+                html.push_str(&format!(
+
+                    "      <a href=\"{}\" class=\"toc-chapter-link\">{}</a>\n",
+
+                    chapter.url, chapter.title
+
+                ));
+
+                html.push_str("    </div>\n");
+
+                
+
+                // Chapter headers (nested)
+
+                if !chapter.headers.is_empty() {
+
+                    html.push_str(&format!(
+
+                        "    <div class=\"toc-headers\" id=\"{}-headers\">\n",
+
+                        chapter.slug
+
+                    ));
+
+                    html.push_str("      <ul class=\"toc-header-list\">\n");
+
+                    
+
+                    for header in &chapter.headers {
+
+                        html.push_str(&self.render_header_html(header, &chapter.url));
+
+                    }
+
+                    
+
+                    html.push_str("      </ul>\n");
+
+                    html.push_str("    </div>\n");
+
+                }
+
+                
+
+                html.push_str("  </div>\n");
+
+            }
+
+    
+
+            html.push_str("</div>\n");
+
+    
+
+            html
+
         }
 
-        html.push_str("</div>\n");
-        html
-    }
+        
+
+        /// Render header HTML recursively
+
+        fn render_header_html(&self, header: &ChapterHeader, chapter_url: &str) -> String {
+
+            let has_children = !header.children.is_empty();
+
+            let header_id = format!("{}-{}", chapter_url.trim_end_matches(".html"), header.anchor);
+
+            
+
+            let mut html = String::new();
+
+            html.push_str(&format!(
+
+                "        <li class=\"toc-header-item toc-level-{}\">\n",
+
+                header.level
+
+            ));
+
+            
+
+            if has_children {
+
+                html.push_str(&format!(
+
+                    "          <div class=\"toc-header-item-header\">\n"
+
+                ));
+
+                html.push_str(&format!(
+
+                    "            <button class=\"toc-toggle-btn\" data-target=\"{}-subheaders\" aria-expanded=\"false\" aria-label=\"Toggle {} subheaders\">\n",
+
+                    header_id, header.title
+
+                ));
+
+                html.push_str("              <svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\">\n");
+
+                html.push_str("                <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 9l-7 7-7-7\" />\n");
+
+                html.push_str("              </svg>\n");
+
+                html.push_str("            </button>\n");
+
+                html.push_str(&format!(
+
+                    "            <a href=\"{}#{}\" class=\"toc-header-link\">{}</a>\n",
+
+                    chapter_url, header.anchor, header.title
+
+                ));
+
+                html.push_str("          </div>\n");
+
+                
+
+                // Render children
+
+                html.push_str(&format!(
+
+                    "          <div class=\"toc-headers\" id=\"{}-subheaders\">\n",
+
+                    header_id
+
+                ));
+
+                html.push_str("            <ul class=\"toc-header-list\">\n");
+
+                for child in &header.children {
+
+                    html.push_str(&self.render_header_html(child, chapter_url));
+
+                }
+
+                html.push_str("            </ul>\n");
+
+                html.push_str("          </div>\n");
+
+            } else {
+
+                html.push_str(&format!(
+
+                    "          <a href=\"{}#{}\" class=\"toc-header-link\">{}</a>\n",
+
+                    chapter_url, header.anchor, header.title
+
+                ));
+
+            }
+
+            
+
+            html.push_str("        </li>\n");
+
+            html
+
+        }
 }
 
 impl Default for BookTocGenerator {
