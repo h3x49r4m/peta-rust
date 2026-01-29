@@ -8,6 +8,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // Initialize toggle button
     initializeToggleButton(component);
 
+    // Add snippet icons to snippet headers
+    addSnippetIcons(component);
+
     // Add smooth scrolling to TOC links
     const tocLinks = component.querySelectorAll('a[href^="#"]');
     tocLinks.forEach(function (link) {
@@ -34,6 +37,34 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 });
+
+function addSnippetIcons(component) {
+  const tocLinks = component.querySelectorAll('.toc-link');
+  
+  // Create snippet icon SVG
+  const snippetIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  snippetIcon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  snippetIcon.setAttribute('fill', 'none');
+  snippetIcon.setAttribute('viewBox', '0 0 24 24');
+  snippetIcon.setAttribute('stroke', 'currentColor');
+  snippetIcon.setAttribute('class', 'snippet-icon');
+  snippetIcon.style.width = '14px';
+  snippetIcon.style.height = '14px';
+  snippetIcon.style.marginRight = '6px';
+  snippetIcon.style.display = 'inline-block';
+  snippetIcon.style.verticalAlign = 'middle';
+  snippetIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />';
+  
+  tocLinks.forEach(function(link) {
+    const text = link.textContent.trim();
+    if (text.startsWith('Snippet:')) {
+      // Clone the icon for each link
+      const iconClone = snippetIcon.cloneNode(true);
+      // Prepend the icon to the link
+      link.insertBefore(iconClone, link.firstChild);
+    }
+  });
+}
 
 function initializeToggleButton(component) {
   const toggleBtn = component.querySelector('.toc-toggle-btn');
