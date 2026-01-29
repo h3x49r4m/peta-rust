@@ -7,31 +7,88 @@
 .search-layout {
     display: grid;
     grid-template-columns: 75% 25%;
-    gap: var(--spacing-8);
+    gap: var(--spacing-8, 2rem);
     align-items: start;
+    padding: var(--spacing-4, 1rem) 0;
 }
 
 .search-results-column {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4, 1rem);
 }
 
 .page-info-column {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-6);
+    gap: var(--spacing-6, 1.5rem);
+    position: sticky;
+    top: var(--spacing-4, 1rem);
+    align-self: start;
 }
 
 .page-info-column .page-title {
-    margin: 0;
-    font-size: 1.5rem;
+    margin: 0 0 var(--spacing-2, 0.5rem) 0;
+    font-size: 2rem;
     font-weight: 700;
-    color: var(--text-color);
+    color: var(--text-color, #1e293b);
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+    position: relative;
+    display: inline-block;
+}
+
+.page-info-column .page-title::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color, #3b82f6), var(--info-color, #06b6d4));
+    border-radius: 2px;
+}
+
+/* Decorative element for sidebar */
+.sidebar-decoration {
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--border-color, #e2e8f0), transparent);
+    margin: var(--spacing-4, 1rem) 0;
+}
+
+/* Search hint */
+.search-hint {
+    font-size: 0.875rem;
+    color: var(--text-muted, #94a3b8);
+    font-weight: 500;
+    padding: var(--spacing-3, 0.75rem);
+    background: var(--background-tertiary, #f1f5f9);
+    border-radius: var(--radius-md, 0.375rem);
+    border-left: 3px solid var(--primary-color, #3b82f6);
+    margin-top: var(--spacing-2, 0.5rem);
 }
 
 @media (max-width: 768px) {
     .search-layout {
         grid-template-columns: 1fr;
+        gap: var(--spacing-6, 1.5rem);
+    }
+
+    .page-info-column {
+        position: static;
+        order: -1;
+        gap: var(--spacing-4, 1rem);
+    }
+
+    .page-info-column .page-title {
+        font-size: 1.5rem;
+    }
+
+    .search-hint {
+        font-size: 0.8125rem;
     }
 }
 </style>
@@ -44,6 +101,7 @@
     </div>
     <div class="page-info-column">
         <h1 class="page-title">Search</h1>
+        <div class="sidebar-decoration"></div>
         {{ component(name="tag_cloud") | safe }}
     </div>
 </div>
