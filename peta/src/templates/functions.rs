@@ -62,32 +62,10 @@ impl Function for ComponentScriptsFunction {
         
         for component_name_value in component_names {
             if let Some(component_name) = component_name_value.as_str() {
-                let category = match component_name {
-                    "navbar" => "atomic",
-                    "contacts" => "atomic",
-                    "search" => "atomic",
-                    "tag_cloud" => "atomic",
-                    "grid_card" => "atomic",
-                    "content_div" => "atomic",
-                    "article_toc" => "atomic",
-                    "article_content" => "atomic",
-                    "book_toc" => "atomic",
-                    "book_content" => "atomic",
-                    "project_toc" => "atomic",
-                    "project_content" => "atomic",
-                    "project_modal" => "composite",
-                    "back_to_top" => "atomic",
-                    "reading_progress" => "atomic",
-                    "site_stats" => "atomic",
-                    "header" => "composite",
-                    "footer" => "composite",
-                    "page_tags" => "composite",
-                    "snippet_card_modal" => "composite",
-                    "grid_cards" => "composite",
-                    "article_modal" => "composite",
-                    "book_modal" => "composite",
-                    _ => continue,
-                };
+                // Use component manager to automatically discover category
+                let category = crate::components::manager::get_component_manager()
+                    .get_component_category(component_name)
+                    .unwrap_or_else(|| "atomic".to_string());
                 
                 let script_path = format!("themes/default/components/{}/{}/{}.js", category, component_name, component_name);
                 
