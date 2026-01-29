@@ -1,0 +1,9 @@
+name: search_results
+category: atomic
+version: 1.0.0
+description: Search results display component
+dependencies: []
+styles:
+  - search_results.css
+scripts:
+  - search_results.js

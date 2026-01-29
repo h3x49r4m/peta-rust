@@ -3,19 +3,15 @@
 {% block title %}Search - {{ site.title }}{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h1 class="page-title">Search</h1>
-    <p class="page-description">Find articles, books, snippets, and projects</p>
-</div>
+
+{{ component(name="page_tags", title="Search", page_url="/search.html") | safe }}
 
 <div class="search-form" style="margin-bottom: var(--spacing-8);">
     <input type="text" class="search-input" placeholder="Search articles, books, snippets, projects..." id="searchInput" 
            style="width: 100%; padding: var(--spacing-4); font-size: var(--font-size-base); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
 </div>
 
-<div class="search-results" id="searchResults">
-    <p style="color: var(--text-secondary); text-align: center; padding: var(--spacing-8);">Enter a search term to find content.</p>
-</div>
+{{ component(name="search_results") | safe }}
 {% endblock %}
 
 {% block scripts %}
