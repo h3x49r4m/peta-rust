@@ -19,40 +19,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-    document.getElementById('searchInput').addEventListener('input', function(e) {
-        const query = e.target.value.toLowerCase();
-        const resultsDiv = document.getElementById('searchResults');
-        
-        if (query.length < 2) {
-            resultsDiv.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: var(--spacing-8);">Enter at least 2 characters to search.</p>';
-            return;
-        }
-        
-        // Mock search results - replace with actual search implementation
-        const mockResults = [
-            { title: 'Sample Article', excerpt: 'This is a sample article...', type: 'article', url: '/articles/sample' },
-            { title: 'Sample Book', excerpt: 'This is a sample book...', type: 'book', url: '/books/sample' },
-            { title: 'Sample Snippet', excerpt: 'This is a sample snippet...', type: 'snippet', url: '/snippets/sample' },
-            { title: 'Sample Project', excerpt: 'This is a sample project...', type: 'project', url: '/projects/sample' }
-        ];
-        
-        const filteredResults = mockResults.filter(item => 
-            item.title.toLowerCase().includes(query) || 
-            item.excerpt.toLowerCase().includes(query)
-        );
-        
-        if (filteredResults.length === 0) {
-            resultsDiv.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: var(--spacing-8);">No results found.</p>';
-        } else {
-            resultsDiv.innerHTML = '<div class="content-grid">' + filteredResults.map(result => `
-                <div class="content-card">
-                    <div class="content-type-badge">${result.type}</div>
-                    <h3><a href="${result.url}">${result.title}</a></h3>
-                    <p>${result.excerpt}</p>
-                </div>
-            `).join('') + '</div>';
-        }
-    });
-</script>
+<!-- Search component scripts are included via component_scripts in base.html -->
 {% endblock %}
