@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (wasExpanded) {
       toggleBtn.setAttribute('aria-expanded', 'true');
-      toggleBtn.style.transform = 'rotate(180deg)';
     }
     
     // Toggle button functionality for the main panel
@@ -34,13 +33,6 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Save to localStorage
       localStorage.setItem(storageKey, newExpanded.toString());
-      
-      // Toggle icon rotation
-      if (isExpanded) {
-        this.style.transform = 'rotate(0deg)';
-      } else {
-        this.style.transform = 'rotate(180deg)';
-      }
     });
     
     // Handle chapter header toggle buttons

@@ -13,23 +13,25 @@
 
 /* Toggle Button */
 .book-toc-toggle-btn {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: white;
+  border: 1px solid #e2e8f0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-  color: white;
+  color: #3b82f6;
+  position: relative;
 }
 
 .book-toc-toggle-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: #3b82f6;
 }
 
 .book-toc-toggle-btn:focus {
@@ -38,14 +40,31 @@
 }
 
 .toc-icon {
-  width: 26px;
-  height: 26px;
-  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-  stroke-width: 2.5;
+  width: 24px;
+  height: 24px;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  stroke-width: 2;
 }
 
-.book-toc-toggle-btn[aria-expanded="true"] .toc-icon {
-  transform: rotate(-90deg);
+.toc-icon-closed {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.toc-icon-open {
+  opacity: 0;
+  transform: scale(0.7);
+  position: absolute;
+}
+
+.book-toc-toggle-btn[aria-expanded="true"] .toc-icon-closed {
+  opacity: 0;
+  transform: scale(0.7);
+}
+
+.book-toc-toggle-btn[aria-expanded="true"] .toc-icon-open {
+  opacity: 1;
+  transform: scale(1);
 }
 
 /* TOC Panel */
