@@ -202,73 +202,73 @@ impl BookTocGenerator {
         }
         
         /// Build hierarchical structure from flat header list
-        
+
             fn build_header_hierarchy(&self, headers: Vec<ChapterHeader>) -> Vec<ChapterHeader> {
-        
+
                 let mut result: Vec<ChapterHeader> = Vec::new();
-        
+
                 let mut stack: Vec<(usize, usize)> = Vec::new(); // (level, index in result)
-        
-                
-        
+
+
+
                 for header in headers {
-        
+
                     let level = header.level;
-        
-                    
-        
+
+
+
                     // Find the correct parent based on level
-        
+
                     while let Some(&(stack_level, _)) = stack.last() {
-        
+
                         if stack_level < level {
-        
+
                             break;
-        
+
                         }
-        
+
                         stack.pop();
-        
+
                     }
-        
-                    
-        
+
+
+
                     if let Some((_, parent_idx)) = stack.last() {
-        
+
                         // Add as child of parent
-        
+
                         let parent = &mut result[*parent_idx];
-        
-                        let child_id = format!("{}-{}", parent.anchor, header.anchor);
-        
+
+                        // Use only the child's anchor, not concatenated with parent
+
                         parent.children.push(ChapterHeader {
-        
+
                             level: header.level,
-        
+
                             title: header.title,
-        
-                            anchor: child_id,
-        
+
+                            anchor: header.anchor,
+
                             children: Vec::new(),
-        
+
                         });
-        
+
                     } else {
-        
+
                         // Add as top-level header
-        
+
                         result.push(header);
-        
+
                         stack.push((level, result.len() - 1));
-        
+
                     }
-        
+
                 }
-        
-                
-        
+
+
+
                 result
-        
+
             }    /// Extract title from chapter RST file
     fn extract_chapter_title(&self, chapter_path: &Path) -> Result<String> {
         let content = fs::read_to_string(chapter_path)?;

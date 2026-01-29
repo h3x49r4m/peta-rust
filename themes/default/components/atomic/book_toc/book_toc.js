@@ -84,23 +84,27 @@ document.addEventListener('DOMContentLoaded', function() {
           link.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             // Trigger the toggle button click
             toggleBtn.click();
-            
+
             // Navigate to the anchor after a short delay
             const href = link.getAttribute('href');
-            if (href && href.startsWith('#')) {
-              setTimeout(function() {
-                const targetElement = document.querySelector(href);
-                if (targetElement) {
-                  targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-              }, 350);
+            if (href) {
+              const anchorId = href.includes('#') ? href.split('#')[1] : href;
+              if (anchorId) {
+                setTimeout(function() {
+                  const targetElement = document.querySelector('#' + anchorId);
+                  if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }, 350);
+              }
             }
           });
         }
       }
+      // Links without toggle buttons (like subsubheaders) navigate normally
     });
     
     // Handle TOC link clicks - do NOT collapse the panel
