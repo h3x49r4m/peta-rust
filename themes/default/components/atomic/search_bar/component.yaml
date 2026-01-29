@@ -1,0 +1,9 @@
+name: search_bar
+category: atomic
+version: 1.0.0
+description: Search bar component for finding content
+dependencies: []
+styles:
+  - search_bar.css
+scripts:
+  - search_bar.js

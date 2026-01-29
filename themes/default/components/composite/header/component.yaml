@@ -4,4 +4,4 @@ version: 1.0.0
 description: Site header component with site name, navbar, and search
 dependencies:
   - navbar
-  - search
+  - search_bar

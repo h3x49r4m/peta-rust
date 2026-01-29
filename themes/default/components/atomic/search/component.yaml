@@ -1,7 +1,0 @@
-name: search
-category: atomic
-version: 1.0.0
-description: Search component for finding content
-dependencies: []
-scripts:
-  - search.js
