@@ -577,6 +577,18 @@ impl TemplateEngine {
             context.insert("page", page);
         }
 
+        // Pass book_toc and book_title to book_toc component
+        if component_name == "book_toc" {
+            if let Some(props_obj) = props.as_object() {
+                if let Some(book_toc) = props_obj.get("book_toc") {
+                    context.insert("book_toc", book_toc);
+                }
+                if let Some(book_title) = props_obj.get("book_title") {
+                    context.insert("book_title", book_title);
+                }
+            }
+        }
+
         let page_type = Self::detect_page_type(component_name, props);
         let all_tags = Self::get_tags_for_page_type(&page_type, tag_collector);
 
@@ -948,7 +960,7 @@ impl TemplateEngine {
             Ok(result)
         }
 
-    fn build_nested_context(_component_name: &str, props: &Value) -> Context {
+    fn build_nested_context(component_name: &str, props: &Value) -> Context {
         let mut context = Context::new();
         context.insert("props", props);
         if let Some(props_obj) = props.as_object() {
@@ -959,6 +971,17 @@ impl TemplateEngine {
         if let Some(page) = props.get("page") {
             context.insert("page", page);
         }
+        
+        // Pass book_toc to book_toc component
+        if component_name == "book_toc" {
+            if let Some(book_toc) = props.get("book_toc") {
+                context.insert("book_toc", book_toc);
+            }
+            if let Some(book_title) = props.get("book_title") {
+                context.insert("book_title", book_title);
+            }
+        }
+        
         context
     }
 
