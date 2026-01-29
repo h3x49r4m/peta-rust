@@ -3,7 +3,6 @@
   
   // Configuration
   const SCROLL_THRESHOLD = 300; // Show button after scrolling 300px
-  const SCROLL_DEBOUNCE = 100; // Debounce scroll events by 100ms
   
   let backToTopButton = null;
   let lastScrollTop = 0;

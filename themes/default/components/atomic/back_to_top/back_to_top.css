@@ -1,7 +1,7 @@
 /* Back to Top Button */
 .back-to-top {
   position: fixed;
-  bottom: 6rem;
+  bottom: 2rem;
   right: 2rem;
   width: 48px;
   height: 48px;
@@ -29,6 +29,8 @@
   visibility: visible;
   transform: translateY(0);
 }
+
+/* Footer visible state - button positioned via JS */
 
 /* Hover effects */
 .back-to-top:hover {
@@ -73,7 +75,7 @@
 /* Mobile responsive design */
 @media (max-width: 768px) {
   .back-to-top {
-    bottom: 5rem;
+    bottom: 2.5rem;
     right: 1.5rem;
     width: 44px;
     height: 44px;
@@ -88,7 +90,7 @@
 
 @media (max-width: 480px) {
   .back-to-top {
-    bottom: 4rem;
+    bottom: 2rem;
     right: 1rem;
     width: 40px;
     height: 40px;
