@@ -314,11 +314,10 @@ class PetaSearch {
 
 // Initialize search functionality
 document.addEventListener('DOMContentLoaded', async () => {
-    const searchInput = document.getElementById('searchInput');
     const resultsDiv = document.getElementById('searchResults');
 
-    if (!searchInput || !resultsDiv) {
-        console.warn('Search elements not found');
+    if (!resultsDiv) {
+        console.warn('Search results container not found');
         return;
     }
 
@@ -367,16 +366,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         petaSearch.renderResults(results, trimmedQuery);
     };
 
-    // Debounced search on input
-    searchInput.addEventListener('input', (e) => {
-        petaSearch.debounce(handleSearch, e.target.value);
-    });
-
     // Handle URL query parameter
     const urlParams = new URLSearchParams(window.location.search);
     const queryParam = urlParams.get('q');
     if (queryParam) {
-        searchInput.value = queryParam;
         handleSearch(queryParam);
     }
 });
