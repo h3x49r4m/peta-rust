@@ -39,7 +39,7 @@
     </main>
     
     <!-- Footer -->
-    {% include "footer.html" %}
+    {{ component(name="footer", variant="default") | safe }}
     
     <!-- Back to Top Button -->
     {{ component(name="back_to_top") | safe }}

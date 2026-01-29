@@ -184,6 +184,7 @@ impl Default for TemplateCache {
 pub struct TemplateEngine {
     tera: Tera,
     theme_dir: PathBuf,
+    config: crate::core::config::SiteConfig,
     component_registry: Option<ComponentRegistry>,
     #[allow(dead_code)]
     component_manager: Arc<RwLock<ComponentManager>>,
@@ -199,6 +200,13 @@ pub struct TemplateEngine {
 impl TemplateEngine {
     /// Create a new template engine
     pub fn new(theme: &Theme) -> Result<Self> {
+        let config = crate::core::config::SiteConfig::load_from_file("peta.toml")
+            .unwrap_or_default();
+        Self::new_with_config(theme, config)
+    }
+
+    /// Create a new template engine with config
+    pub fn new_with_config(theme: &Theme, config: crate::core::config::SiteConfig) -> Result<Self> {
         let mut tera = Tera::default();
         filters::register(&mut tera);
         functions::register(&mut tera);
@@ -211,13 +219,14 @@ impl TemplateEngine {
             let _ = manager.initialize();
         }
         
-        Self::register_component_functions(&mut tera, &component_manager);
+        Self::register_component_functions(&mut tera, &component_manager, &config);
         Self::register_theme_functions(&mut tera);
         Self::load_templates(&mut tera, &theme.templates_dir)?;
         
         Ok(Self { 
             tera,
             theme_dir,
+            config,
             component_registry: None,
             component_manager,
             component_renderer: None,
@@ -242,7 +251,7 @@ impl TemplateEngine {
     }
 
     /// Register component functions
-    fn register_component_functions(tera: &mut Tera, component_manager: &Arc<RwLock<ComponentManager>>) {
+    fn register_component_functions(tera: &mut Tera, component_manager: &Arc<RwLock<ComponentManager>>, config: &crate::core::config::SiteConfig) {
         let tag_collector = Arc::new(RwLock::new(TagCollector::new()));
         let template_cache = Arc::new(RwLock::new(TemplateCache::new()));
         let component_manager_clone = Arc::clone(component_manager);
@@ -253,6 +262,7 @@ impl TemplateEngine {
         let theme_dir_clone = Arc::new(RwLock::new(PathBuf::from("themes/default")));
         let theme_dir_clone2 = Arc::clone(&theme_dir_clone);
         let theme_dir_clone3 = Arc::clone(&theme_dir_clone);
+        let config_clone = config.clone();
 
         tera.register_function(
             "component",
@@ -303,10 +313,11 @@ impl TemplateEngine {
                     &tag_collector,
                     &template_cache,
                     &theme_dir,
+                    &config_clone,
                 );
                 nested_tera.add_raw_template(component_name, &template_content)?;
 
-                let context = Self::build_component_context(component_name, &props, &tag_collector);
+                let context = Self::build_component_context(component_name, &props, &tag_collector, &config_clone);
 
                 match nested_tera.render(component_name, &context) {
                     Ok(mut rendered) => {
@@ -491,12 +502,14 @@ impl TemplateEngine {
         tag_collector: &Arc<RwLock<TagCollector>>,
         template_cache: &Arc<RwLock<TemplateCache>>,
         theme_dir: &Path,
+        config: &crate::core::config::SiteConfig,
     ) {
         let component_manager_clone = Arc::clone(component_manager);
         let component_manager_clone2 = Arc::clone(component_manager);
         let tag_collector_clone = Arc::clone(tag_collector);
         let template_cache_clone = Arc::clone(template_cache);
         let theme_dir_clone = theme_dir.to_path_buf();
+        let config_clone = config.clone();
 
         tera.register_function(
             "component",
@@ -538,10 +551,11 @@ impl TemplateEngine {
                     &tag_collector_clone,
                     &template_cache_clone,
                     &theme_dir_clone,
+                    &config_clone,
                 );
                 nested_tera.add_raw_template(component_name, &template_content)?;
 
-                let context = Self::build_component_context(component_name, &props, &tag_collector_clone);
+                let context = Self::build_component_context(component_name, &props, &tag_collector_clone, &config_clone);
 
                 match nested_tera.render(component_name, &context) {
                     Ok(mut rendered) => {
@@ -563,9 +577,11 @@ impl TemplateEngine {
         component_name: &str,
         props: &Value,
         tag_collector: &Arc<RwLock<TagCollector>>,
+        config: &crate::core::config::SiteConfig,
     ) -> Context {
         let mut context = Context::new();
         context.insert("props", props);
+        context.insert("config", &config);
 
         if let Some(props_obj) = props.as_object() {
             for (key, value) in props_obj {
