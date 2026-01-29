@@ -215,26 +215,6 @@
   position: relative;
 }
 
-.toc-content ul ul a::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(59, 130, 246, 0.3);
-  transition: all 0.25s ease;
-}
-
-.toc-content ul ul a:hover::after,
-.toc-content ul ul a.active::after {
-  background: #3b82f6;
-  transform: translateY(-50%) scale(1.2);
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
-}
-
 .toc-empty {
   color: #94a3b8;
   font-style: italic;
