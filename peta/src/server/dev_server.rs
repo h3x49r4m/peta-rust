@@ -33,9 +33,13 @@ impl DevServer {
         // Create channel for file change events
         let (event_sender, mut event_receiver) = tokio_mpsc::channel::<std::path::PathBuf>(100);
         
-        // Create and start file watcher
-        let file_watcher = FileWatcher::new(&self.site.config.build.content_dir)?;
-        file_watcher.start(event_sender).await?;
+        // Create and start file watcher for content directory
+        let content_watcher = FileWatcher::new(&self.site.config.build.content_dir)?;
+        content_watcher.start(event_sender.clone()).await?;
+        
+        // Create and start file watcher for themes directory
+        let theme_watcher = FileWatcher::new(&self.site.config.theme_dir())?;
+        theme_watcher.start(event_sender).await?;
         
         // Start live reload
         self.livereload.lock().await.start(self.port).await?;
