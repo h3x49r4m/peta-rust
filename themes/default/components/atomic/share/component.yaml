@@ -1,0 +1,12 @@
+name: share
+category: atomic
+version: 1.0.0
+description: Share component for social media sharing (X, LinkedIn, Copy Link)
+enabled: true
+templates:
+  - share.html
+styles:
+  - share.css
+scripts:
+  - share.js
+dependencies: []
