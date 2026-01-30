@@ -24,8 +24,19 @@ impl SequenceRenderer {
         let diagram_id = format!("sequence-{}", uuid::Uuid::new_v4().to_string().split('-').next().unwrap_or("0"));
 
         let html = format!(
-            "<div class=\"diagram-container\" data-diagram-id=\"{}\" data-diagram-type=\"sequence\">\n  <svg viewBox=\"0 0 {} {}\" xmlns=\"http://www.w3.org/2000/svg\" class=\"diagram-svg\">\n    {}\n  </svg>\n  <details class=\"diagram-source\">\n    <summary>View source</summary>\n    <pre>sequence\n</pre>\n  </details>\n</div>",
-            diagram_id, layout.width, layout.height, svg
+            r#"<div class="diagram-container" data-diagram-id="{}" data-diagram-type="sequence">
+  <button class="diagram-download" data-diagram-id="{}" data-diagram-type="sequence" aria-label="Download diagram as SVG">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+  </button>
+  <svg viewBox="0 0 {} {}" xmlns="http://www.w3.org/2000/svg" class="diagram-svg">
+    {}
+  </svg>
+</div>"#,
+            diagram_id, diagram_id, layout.width, layout.height, svg
         );
 
         Ok(html)

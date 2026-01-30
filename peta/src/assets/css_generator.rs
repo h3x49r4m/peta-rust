@@ -1129,8 +1129,8 @@ impl DiagramCssGenerator {
         // SVG styles
         css.push_str(&self.generate_svg_styles());
 
-        // Source code styles
-        css.push_str(&self.generate_source_styles());
+        // Download button styles
+        css.push_str(&self.generate_download_button_styles());
 
         // Dark mode styles
         css.push_str(&self.generate_dark_mode_styles());
@@ -1148,22 +1148,13 @@ impl DiagramCssGenerator {
 .diagram-container {{
   margin: 2rem 0;
   padding: 1.5rem;
+  padding-top: 3rem;
   border: 1px solid {};
   border-radius: {};
   background: {};
   box-shadow: {};
   overflow-x: auto;
-}}
-
-.diagram-container::before {{
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
-  opacity: 0.6;
+  position: relative;
 }}
 "#,
             self.config.border_color,
@@ -1190,43 +1181,47 @@ impl DiagramCssGenerator {
         .to_string()
     }
 
-    /// Generate source code styles
-    fn generate_source_styles(&self) -> String {
-        format!(
-            r#"
-.diagram-source {{
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
-}}
-
-.diagram-source summary {{
-  cursor: pointer;
-  font-size: 0.875rem;
-  color: #6b7280;
+    /// Generate download button styles
+    fn generate_download_button_styles(&self) -> String {
+        r#"
+.diagram-download {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
   font-weight: 500;
-  padding: 0.5rem;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}}
-
-.diagram-source summary:hover {{
-  background-color: #f9fafb;
   color: #374151;
-}}
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
 
-.diagram-source pre {{
-  margin: 0.5rem 0 0 0;
-  padding: 0.75rem;
-  background: {};
-  border-radius: 4px;
-  font-size: 0.8rem;
-  overflow-x: auto;
-  color: #475569;
-}}
-"#,
-            self.config.source_background
-        )
+.diagram-download:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #111827;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.diagram-download:active {
+  background: #f3f4f6;
+  transform: translateY(1px);
+}
+
+.diagram-download svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+"#
+        .to_string()
     }
 
     /// Generate dark mode styles
@@ -1239,28 +1234,21 @@ impl DiagramCssGenerator {
     background: {};
   }}
   
-  .diagram-source {{
-    border-top-color: #374151;
-  }}
-  
-  .diagram-source summary {{
-    color: #9ca3af;
-  }}
-  
-  .diagram-source summary:hover {{
-    background-color: #374151;
+  .diagram-download {{
+    background: #1f2937;
+    border-color: #374151;
     color: #e5e7eb;
   }}
   
-  .diagram-source pre {{
-    background: {};
-    color: #e2e8f0;
+  .diagram-download:hover {{
+    background: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
   }}
 }}
 "#,
             self.config.dark_border_color,
-            self.config.dark_background_color,
-            self.config.source_dark_background
+            self.config.dark_background_color
         )
     }
 
@@ -1270,11 +1258,13 @@ impl DiagramCssGenerator {
 @media (max-width: 768px) {
   .diagram-container {
     padding: 1rem;
+    padding-top: 2.5rem;
     margin: 1rem 0;
   }
   
-  .diagram-source {
-    font-size: 0.8rem;
+  .diagram-download {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.75rem;
   }
 }
 "#
