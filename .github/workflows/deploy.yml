@@ -46,7 +46,7 @@ jobs:
         run: cargo build --release
 
       - name: Generate site
-        run: ./target/release/peta build
+        run: ./_out/target/release/peta build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
