@@ -4,45 +4,85 @@ use crate::core::{Site, Result};
 use crate::server::file_watcher::FileWatcher;
 use crate::server::livereload::LiveReload;
 use std::net::SocketAddr;
+use std::sync::Arc;
 use axum::{Router, routing::get, response::Html};
-
+use tokio::sync::mpsc as tokio_mpsc;
+use tokio::sync::Mutex;
 
 /// Development server
 pub struct DevServer {
     port: u16,
     site: Site,
-    file_watcher: FileWatcher,
-    livereload: LiveReload,
+    livereload: Arc<Mutex<LiveReload>>,
 }
 
 impl DevServer {
     /// Create a new development server
     pub fn new(port: u16, site: Site) -> Result<Self> {
-        let file_watcher = FileWatcher::new(&site.config.build.content_dir)?;
-        let livereload = LiveReload::new();
+        let livereload = Arc::new(Mutex::new(LiveReload::new()));
         
         Ok(Self {
             port,
             site,
-            file_watcher,
             livereload,
         })
     }
     
     /// Start the development server
     pub async fn start(&mut self) -> Result<()> {
-        // Start file watcher
-        self.file_watcher.start().await?;
+        // Create channel for file change events
+        let (event_sender, mut event_receiver) = tokio_mpsc::channel::<std::path::PathBuf>(100);
+        
+        // Create and start file watcher
+        let file_watcher = FileWatcher::new(&self.site.config.build.content_dir)?;
+        file_watcher.start(event_sender).await?;
         
         // Start live reload
-        self.livereload.start(self.port).await?;
+        self.livereload.lock().await.start(self.port).await?;
+        
+        // Spawn task to handle file changes
+        let livereload = self.livereload.clone();
+        let config = self.site.config.clone();
+        
+        tokio::spawn(async move {
+            let mut last_rebuild_time = std::time::Instant::now();
+            let rebuild_delay = std::time::Duration::from_millis(300); // Debounce rebuilds
+            
+            while let Some(_changed_path) = event_receiver.recv().await {
+                let now = std::time::Instant::now();
+                
+                // Debounce rebuilds to avoid rebuilding on every file change
+                if now.duration_since(last_rebuild_time) < rebuild_delay {
+                    tokio::time::sleep(rebuild_delay).await;
+                }
+                
+                // Rebuild site
+                println!("🔄 Rebuilding site...");
+                let mut builder = crate::core::builder::SiteBuilder::new(config.clone());
+                match builder.build().await {
+                    Ok(_) => {
+                        println!("✓ Site rebuilt successfully");
+                        // Trigger live reload
+                        if let Err(e) = livereload.lock().await.trigger().await {
+                            eprintln!("Failed to trigger live reload: {}", e);
+                        }
+                    }
+                    Err(e) => {
+                        eprintln!("Failed to rebuild site: {}", e);
+                    }
+                }
+                
+                last_rebuild_time = std::time::Instant::now();
+            }
+        });
         
         // Create router
         let router = self.create_router();
         
         // Start HTTP server
-let addr = SocketAddr::from(([127, 0, 0, 1], self.port));
+        let addr = SocketAddr::from(([127, 0, 0, 1], self.port));
         let listener = tokio::net::TcpListener::bind(addr).await?;
+        println!("🚀 Development server running at http://{}", addr);
         axum::serve(listener, router.into_make_service()).await?;
         
         Ok(())
@@ -89,18 +129,6 @@ let addr = SocketAddr::from(([127, 0, 0, 1], self.port));
                 }
             }))
             .route("/*path", get(serve_file))
-    }
-    
-    /// Handle file change
-    pub async fn on_file_change(&mut self, _path: &std::path::Path) -> Result<()> {
-        // Rebuild site
-        let mut builder = crate::core::builder::SiteBuilder::new(self.site.config.clone());
-        let _site = builder.build().await?;
-        
-        // Trigger live reload
-        self.livereload.trigger().await?;
-        
-        Ok(())
     }
 }
 
