@@ -37,6 +37,11 @@ impl RstParser {
             "toctree".to_string(),
             Box::new(crate::content::rst::directives::TocTreeHandler),
         );
+        directive_handlers.insert(
+            "diagram".to_string(),
+            Box::new(crate::content::rst::directives::DiagramHandler::new()
+                .map_err(|e| Error::Content(format!("Failed to create DiagramHandler: {}", e)))?),
+        );
 
         Ok(Self {
             math_renderer: MathRenderer::new(),
@@ -814,6 +819,13 @@ impl RstParser {
 
         while i < lines.len() {
             let line = lines[i];
+            
+            // Skip HTML tags (already processed content)
+            if line.trim().starts_with('<') {
+                result.push(line.to_string());
+                i += 1;
+                continue;
+            }
             
             // Check if this line looks like a table separator (contains at least 3 dashes and plus signs)
             if self.is_table_separator(line) {

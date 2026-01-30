@@ -17,3 +17,7 @@ pub use math_formulas::*;
 // Embedded snippet cards module
 pub mod embedded_snippet_cards;
 pub use embedded_snippet_cards::*;
+
+// Diagrams module
+pub mod diagrams;
+pub use diagrams::*;

@@ -1055,3 +1055,245 @@ impl Default for EmbeddedSnippetCardCssGenerator {
         Self::new().expect("Failed to create EmbeddedSnippetCardCssGenerator")
     }
 }
+
+/// CSS generator for diagram styling
+pub struct DiagramCssGenerator {
+    /// Configuration
+    config: DiagramCssConfig,
+}
+
+/// Configuration for diagram CSS generation
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DiagramCssConfig {
+    /// Border radius
+    pub border_radius: String,
+    /// Border color
+    pub border_color: String,
+    /// Background color
+    pub background_color: String,
+    /// Shadow
+    pub shadow: String,
+    /// Font family
+    pub font_family: String,
+    /// Font size
+    pub font_size: String,
+    /// Dark mode border color
+    pub dark_border_color: String,
+    /// Dark mode background color
+    pub dark_background_color: String,
+    /// Source code background
+    pub source_background: String,
+    /// Source code dark background
+    pub source_dark_background: String,
+}
+
+impl Default for DiagramCssConfig {
+    fn default() -> Self {
+        Self {
+            border_radius: "8px".to_string(),
+            border_color: "#e5e7eb".to_string(),
+            background_color: "#ffffff".to_string(),
+            shadow: "0 1px 3px rgba(0, 0, 0, 0.1)".to_string(),
+            font_family: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif".to_string(),
+            font_size: "14px".to_string(),
+            dark_border_color: "#374151".to_string(),
+            dark_background_color: "#1f2937".to_string(),
+            source_background: "#f8fafc".to_string(),
+            source_dark_background: "#111827".to_string(),
+        }
+    }
+}
+
+impl DiagramCssGenerator {
+    /// Create a new diagram CSS generator
+    pub fn new() -> Result<Self> {
+        Ok(Self {
+            config: DiagramCssConfig::default(),
+        })
+    }
+
+    /// Create a CSS generator with custom configuration
+    pub fn with_config(config: DiagramCssConfig) -> Result<Self> {
+        Ok(Self { config })
+    }
+
+    /// Generate complete CSS for diagrams
+    pub fn generate(&self) -> Result<String> {
+        let mut css = String::new();
+
+        css.push_str("/* Diagram Styles */\n\n");
+
+        // Base styles
+        css.push_str(&self.generate_base_styles());
+
+        // SVG styles
+        css.push_str(&self.generate_svg_styles());
+
+        // Source code styles
+        css.push_str(&self.generate_source_styles());
+
+        // Dark mode styles
+        css.push_str(&self.generate_dark_mode_styles());
+
+        // Responsive styles
+        css.push_str(&self.generate_responsive_styles());
+
+        Ok(css)
+    }
+
+    /// Generate base styles
+    fn generate_base_styles(&self) -> String {
+        format!(
+            r#"
+.diagram-container {{
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border: 1px solid {};
+  border-radius: {};
+  background: {};
+  box-shadow: {};
+  overflow-x: auto;
+}}
+
+.diagram-container::before {{
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+  opacity: 0.6;
+}}
+"#,
+            self.config.border_color,
+            self.config.border_radius,
+            self.config.background_color,
+            self.config.shadow
+        )
+    }
+
+    /// Generate SVG styles
+    fn generate_svg_styles(&self) -> String {
+        r#"
+.diagram-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+.diagram-svg text {
+  font-family: inherit;
+}
+"#
+        .to_string()
+    }
+
+    /// Generate source code styles
+    fn generate_source_styles(&self) -> String {
+        format!(
+            r#"
+.diagram-source {{
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}}
+
+.diagram-source summary {{
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}}
+
+.diagram-source summary:hover {{
+  background-color: #f9fafb;
+  color: #374151;
+}}
+
+.diagram-source pre {{
+  margin: 0.5rem 0 0 0;
+  padding: 0.75rem;
+  background: {};
+  border-radius: 4px;
+  font-size: 0.8rem;
+  overflow-x: auto;
+  color: #475569;
+}}
+"#,
+            self.config.source_background
+        )
+    }
+
+    /// Generate dark mode styles
+    fn generate_dark_mode_styles(&self) -> String {
+        format!(
+            r#"
+@media (prefers-color-scheme: dark) {{
+  .diagram-container {{
+    border-color: {};
+    background: {};
+  }}
+  
+  .diagram-source {{
+    border-top-color: #374151;
+  }}
+  
+  .diagram-source summary {{
+    color: #9ca3af;
+  }}
+  
+  .diagram-source summary:hover {{
+    background-color: #374151;
+    color: #e5e7eb;
+  }}
+  
+  .diagram-source pre {{
+    background: {};
+    color: #e2e8f0;
+  }}
+}}
+"#,
+            self.config.dark_border_color,
+            self.config.dark_background_color,
+            self.config.source_dark_background
+        )
+    }
+
+    /// Generate responsive styles
+    fn generate_responsive_styles(&self) -> String {
+        r#"
+@media (max-width: 768px) {
+  .diagram-container {
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+  
+  .diagram-source {
+    font-size: 0.8rem;
+  }
+}
+"#
+        .to_string()
+    }
+
+    /// Set configuration
+    pub fn set_config(&mut self, config: DiagramCssConfig) {
+        self.config = config;
+    }
+
+    /// Get configuration
+    pub fn config(&self) -> &DiagramCssConfig {
+        &self.config
+    }
+}
+
+impl Default for DiagramCssGenerator {
+    fn default() -> Self {
+        Self::new().expect("Failed to create DiagramCssGenerator")
+    }
+}

@@ -2,7 +2,7 @@
 
 use crate::core::{Error, Result};
 use crate::components::ComponentRegistry;
-use crate::assets::{CssGenerator, CssConfig, JsGenerator, JsConfig};
+use crate::assets::{CssGenerator, CssConfig, JsGenerator, JsConfig, DiagramCssGenerator, DiagramJsGenerator};
 use crate::content::rst::{MathCssGenerator, MathJsGenerator};
 use std::collections::HashMap;
 use std::fs;
@@ -116,6 +116,9 @@ impl AssetPipeline {
         // Generate embedded snippet card assets (from Rust)
         self.generate_embedded_snippet_card_assets()?;
 
+        // Generate diagram assets (from Rust)
+        self.generate_diagram_assets()?;
+
         // Process component assets
         self.process_component_assets()?;
 
@@ -211,7 +214,32 @@ impl AssetPipeline {
 
         Ok(())
     }
-    
+
+    /// Generate diagram CSS and JS from Rust generators
+    fn generate_diagram_assets(&mut self) -> Result<()> {
+        // Generate diagram CSS
+        let css_generator = DiagramCssGenerator::new()?;
+        let css_content = css_generator.generate()?;
+
+        let css_output_path = self.output_dir.join("css").join("diagrams.css");
+        fs::create_dir_all(css_output_path.parent().unwrap())
+            .map_err(|e| Error::asset(format!("Failed to create diagram CSS directory: {}", e)))?;
+        fs::write(&css_output_path, css_content)
+            .map_err(|e| Error::asset(format!("Failed to write diagrams.css: {}", e)))?;
+
+        // Generate diagram JS
+        let js_generator = DiagramJsGenerator::new()?;
+        let js_content = js_generator.generate()?;
+
+        let js_output_path = self.output_dir.join("js").join("diagrams.js");
+        fs::create_dir_all(js_output_path.parent().unwrap())
+            .map_err(|e| Error::asset(format!("Failed to create diagram JS directory: {}", e)))?;
+        fs::write(&js_output_path, js_content)
+            .map_err(|e| Error::asset(format!("Failed to write diagrams.js: {}", e)))?;
+
+        Ok(())
+    }
+
     /// Create output directories
     fn create_output_directories(&self) -> Result<()> {
         let dirs = [

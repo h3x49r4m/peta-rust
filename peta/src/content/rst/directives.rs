@@ -110,3 +110,28 @@ impl DirectiveHandler for TocTreeHandler {
         Ok(String::new())
     }
 }
+
+/// Diagram directive handler
+pub struct DiagramHandler {
+    renderer: crate::content::rst::diagrams::DiagramRenderer,
+}
+
+impl DiagramHandler {
+    pub fn new() -> Result<Self> {
+        Ok(Self {
+            renderer: crate::content::rst::diagrams::DiagramRenderer::new()?,
+        })
+    }
+}
+
+impl DirectiveHandler for DiagramHandler {
+    fn handle(&mut self, diagram_type: &str, content: &str) -> Result<String> {
+        // Clean up the diagram content
+        let content = content
+            .replace("<p>", "")
+            .replace("</p>", "\n");
+
+        // Render the diagram
+        self.renderer.render(diagram_type, &content)
+    }
+}
