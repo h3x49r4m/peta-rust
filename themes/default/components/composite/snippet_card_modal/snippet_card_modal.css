@@ -148,6 +148,8 @@
   padding: 1rem 1.5rem;
   border-top: 1px solid #e5e7eb;
   background: #f9fafb;
+  overflow: visible;
+  position: relative;
 }
 
 .snippet-modal-meta {

@@ -38,6 +38,26 @@
   transform: translateY(-50%);
 }
 
+/* Share Button in snippet_card_modal - inline positioning (beside copy button) */
+.snippet-modal-overlay .share {
+  position: static;
+  display: inline-flex;
+  top: auto;
+  right: auto;
+  transform: none;
+  margin-left: 0.5rem;
+}
+
+.snippet-modal-overlay .share-toggle {
+  width: 40px;
+  height: 40px;
+}
+
+.snippet-modal-overlay .share-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
 /* For future icons, use offsets like:
    Icon 1: top: calc(50% - (var(--utility-icon-gap) * 2))
    Icon 2: top: calc(50% - var(--utility-icon-gap))
@@ -97,6 +117,7 @@
   visibility: hidden;
   transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
   pointer-events: none;
+  z-index: 2000;
 }
 
 .share-dropdown.active {
@@ -104,6 +125,19 @@
   visibility: visible;
   transform: translateY(-50%) translateX(0);
   pointer-events: auto;
+}
+
+/* Share Dropdown in snippet_card_modal - appears above button */
+.snippet-modal-overlay .share-dropdown {
+  bottom: 100%;
+  right: 0;
+  left: auto;
+  top: auto;
+  transform: translateY(-10px);
+}
+
+.snippet-modal-overlay .share-dropdown.active {
+  transform: translateY(0);
 }
 
 .share-dropdown-inner {
