@@ -3,7 +3,7 @@ Peta (Rust) - High-Performance Static Site Generator
 
 A modern static site generator written in Rust with RST-first architecture, component-based theming (V4), and advanced rendering capabilities. Peta processes reStructuredText (RST) files directly to HTML, providing exceptional performance and flexibility.
 
-.. code-block::
+::
 
     ┌─────────────────────────────────────────────────────────────────────┐
     │                        PETA - CLI Interface                         │
