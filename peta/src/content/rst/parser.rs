@@ -324,8 +324,32 @@ impl RstParser {
 
             let directive_content = &content[content_start..content_end];
 
+            // Extract field list options (lines starting with ":")
+            let mut options = std::collections::HashMap::new();
+            let mut content_lines: Vec<&str> = Vec::new();
+            
+            for line in directive_content.lines() {
+                let trimmed = line.trim();
+                if trimmed.starts_with(':') && trimmed.len() > 1 {
+                    // This is a field list option
+                    if let Some(colon_pos) = trimmed[1..].find(':') {
+                        let actual_colon_pos = colon_pos + 1;
+                        let key = trimmed[1..actual_colon_pos].trim().to_string();
+                        let value = trimmed[actual_colon_pos + 1..].trim().to_string();
+                        if !key.is_empty() {
+                            options.insert(key, value);
+                        }
+                    }
+                } else {
+                    // This is content
+                    content_lines.push(line);
+                }
+            }
+            
+            let actual_content = content_lines.join("\n");
+
             if let Some(handler) = self.directive_handlers.get_mut(directive_name) {
-                let processed = handler.handle(language, directive_content)?;
+                let processed = handler.handle(language, &actual_content, &options)?;
                 result.push_str(&processed);
             }
 

@@ -32,15 +32,15 @@ impl DiagramRenderer {
     }
 
     /// Render a diagram from text
-    pub fn render(&self, diagram_type: &str, content: &str) -> Result<String> {
+    pub fn render(&self, diagram_type: &str, content: &str, title: Option<&str>) -> Result<String> {
         let diagram = self.parser.parse(diagram_type, content)?;
         
         match diagram {
-            Diagram::Flowchart(d) => FlowchartRenderer::new()?.render(&d),
-            Diagram::Gantt(d) => GanttRenderer::new()?.render(&d),
-            Diagram::Sequence(d) => SequenceRenderer::new()?.render(&d),
-            Diagram::Class(d) => ClassRenderer::new()?.render(&d),
-            Diagram::State(d) => StateRenderer::new()?.render(&d),
+            Diagram::Flowchart(d) => FlowchartRenderer::new()?.render(&d, title),
+            Diagram::Gantt(d) => GanttRenderer::new()?.render(&d, title),
+            Diagram::Sequence(d) => SequenceRenderer::new()?.render(&d, title),
+            Diagram::Class(d) => ClassRenderer::new()?.render(&d, title),
+            Diagram::State(d) => StateRenderer::new()?.render(&d, title),
         }
     }
 }

@@ -13,12 +13,12 @@ impl FlowchartRenderer {
     }
 
     /// Render a flowchart to HTML with embedded SVG
-    pub fn render(&self, diagram: &FlowchartDiagram) -> Result<String> {
+    pub fn render(&self, diagram: &FlowchartDiagram, title: Option<&str>) -> Result<String> {
         // Calculate layout
-        let layout = Self::calculate_layout(diagram);
+        let layout = Self::calculate_layout(diagram, title);
 
         // Generate SVG
-        let svg = self.generate_svg(diagram, &layout);
+        let svg = self.generate_svg(diagram, &layout, title);
 
         // Generate HTML container
         let diagram_id = format!("flowchart-{}", uuid::Uuid::new_v4().to_string().split('-').next().unwrap_or("0"));
@@ -43,13 +43,20 @@ impl FlowchartRenderer {
     }
 
     /// Calculate node positions (simple hierarchical layout)
-    fn calculate_layout(diagram: &FlowchartDiagram) -> FlowchartLayout {
+    fn calculate_layout(diagram: &FlowchartDiagram, title: Option<&str>) -> FlowchartLayout {
         let mut layout = FlowchartLayout {
             nodes: Vec::new(),
             edges: Vec::new(),
             width: 800.0,
             height: 400.0,
         };
+
+        // Adjust height if title is present
+        if title.is_some() {
+            layout.height += 40.0;
+        }
+
+        let y_offset = title.map(|_| 40.0).unwrap_or(0.0);
 
         // Simple horizontal layout with levels
         let mut levels: std::collections::HashMap<String, usize> = std::collections::HashMap::new();
@@ -120,7 +127,7 @@ impl FlowchartRenderer {
 
             for (idx, node) in nodes_at_level.iter().enumerate() {
                 let x = start_x + idx as f64 * (node_width + 20.0);
-                let y = 50.0 + *level as f64 * level_height;
+                let y = 50.0 + *level as f64 * level_height + y_offset;
                 
                 layout.nodes.push(NodePosition {
                     id: node.id.clone(),
@@ -135,15 +142,24 @@ impl FlowchartRenderer {
         // Update canvas size
         if !level_nodes.is_empty() {
             let max_level = level_nodes.keys().max().unwrap_or(&0);
-            layout.height = 100.0 + (max_level + 1) as f64 * level_height + 50.0;
+            layout.height = 100.0 + (max_level + 1) as f64 * level_height + 50.0 + y_offset;
         }
 
         layout
     }
 
     /// Generate SVG content
-    fn generate_svg(&self, diagram: &FlowchartDiagram, layout: &FlowchartLayout) -> String {
+    fn generate_svg(&self, diagram: &FlowchartDiagram, layout: &FlowchartLayout, title: Option<&str>) -> String {
         let mut svg = String::new();
+
+        // Add title if present
+        if let Some(title_text) = title {
+            svg.push_str(&format!(
+                r##"    <text x="{}" y="25" text-anchor="middle" font-size="18" font-weight="bold" font-family="Inter" fill="#1f2937">{}</text>
+"##,
+                layout.width / 2.0, title_text
+            ));
+        }
 
         // Add definitions for arrowhead
         svg.push_str(r##"

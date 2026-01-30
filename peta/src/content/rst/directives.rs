@@ -6,7 +6,12 @@ use crate::core::Result;
 /// Trait for RST directive handlers
 pub trait DirectiveHandler {
     /// Handle the directive and return HTML
-    fn handle(&mut self, directive_type: &str, content: &str) -> Result<String>;
+    /// 
+    /// # Arguments
+    /// * `directive_type` - The type of directive (e.g., "code-block", "diagram")
+    /// * `content` - The content of the directive
+    /// * `options` - Field list options (key-value pairs, e.g., {"title": "My Title"})
+    fn handle(&mut self, directive_type: &str, content: &str, options: &std::collections::HashMap<String, String>) -> Result<String>;
 }
 
 /// Code block directive handler
@@ -30,7 +35,7 @@ impl Default for CodeBlockHandler {
 }
 
 impl DirectiveHandler for CodeBlockHandler {
-    fn handle(&mut self, language: &str, content: &str) -> Result<String> {
+    fn handle(&mut self, language: &str, content: &str, _options: &std::collections::HashMap<String, String>) -> Result<String> {
         // Language is passed directly from the directive (e.g., "python", "rust", "typescript")
         // If no language specified, default to "text"
         let language = if language.is_empty() {
@@ -80,7 +85,7 @@ impl Default for SnippetCardHandler {
 }
 
 impl DirectiveHandler for SnippetCardHandler {
-    fn handle(&mut self, directive_type: &str, content: &str) -> Result<String> {
+    fn handle(&mut self, directive_type: &str, content: &str, _options: &std::collections::HashMap<String, String>) -> Result<String> {
         // For snippet-card, directive_type is actually the snippet ID (language parameter)
         // content is empty for snippet-card
         let snippet_id = if content.trim().is_empty() {
@@ -104,7 +109,7 @@ impl DirectiveHandler for SnippetCardHandler {
 pub struct TocTreeHandler;
 
 impl DirectiveHandler for TocTreeHandler {
-    fn handle(&mut self, _directive_type: &str, _content: &str) -> Result<String> {
+    fn handle(&mut self, _directive_type: &str, _content: &str, _options: &std::collections::HashMap<String, String>) -> Result<String> {
         // Return empty HTML since the TOC is already generated separately
         // in the book_toc component sidebar
         Ok(String::new())
@@ -125,13 +130,16 @@ impl DiagramHandler {
 }
 
 impl DirectiveHandler for DiagramHandler {
-    fn handle(&mut self, diagram_type: &str, content: &str) -> Result<String> {
+    fn handle(&mut self, diagram_type: &str, content: &str, options: &std::collections::HashMap<String, String>) -> Result<String> {
         // Clean up the diagram content
         let content = content
             .replace("<p>", "")
             .replace("</p>", "\n");
 
+        // Extract title from options
+        let title = options.get("title").map(|t| t.as_str());
+
         // Render the diagram
-        self.renderer.render(diagram_type, &content)
+        self.renderer.render(diagram_type, &content, title)
     }
 }

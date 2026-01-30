@@ -13,12 +13,12 @@ impl SequenceRenderer {
     }
 
     /// Render a sequence diagram to HTML with embedded SVG
-    pub fn render(&self, diagram: &SequenceDiagram) -> Result<String> {
+    pub fn render(&self, diagram: &SequenceDiagram, title: Option<&str>) -> Result<String> {
         // Calculate layout
-        let layout = Self::calculate_layout(diagram);
+        let layout = Self::calculate_layout(diagram, title);
 
         // Generate SVG
-        let svg = self.generate_svg(diagram, &layout);
+        let svg = self.generate_svg(diagram, &layout, title);
 
         // Generate HTML container
         let diagram_id = format!("sequence-{}", uuid::Uuid::new_v4().to_string().split('-').next().unwrap_or("0"));
@@ -43,13 +43,20 @@ impl SequenceRenderer {
     }
 
     /// Calculate layout
-    fn calculate_layout(diagram: &SequenceDiagram) -> SequenceLayout {
+    fn calculate_layout(diagram: &SequenceDiagram, title: Option<&str>) -> SequenceLayout {
         let mut layout = SequenceLayout {
             actors: Vec::new(),
             messages: Vec::new(),
             width: 600.0,
             height: 400.0,
         };
+
+        // Adjust height if title is present
+        if title.is_some() {
+            layout.height += 40.0;
+        }
+
+        let y_offset = title.map(|_| 40.0).unwrap_or(0.0);
 
         // Calculate actor positions
         let actor_width = 100.0;
@@ -62,10 +69,10 @@ impl SequenceRenderer {
                 id: actor.id.clone(),
                 label: actor.label.clone(),
                 x,
-                y: 30.0,
+                y: 30.0 + y_offset,
                 width: actor_width,
                 height: 40.0,
-                line_end_y: 350.0,
+                line_end_y: 350.0 + y_offset,
             });
         }
 
@@ -75,7 +82,7 @@ impl SequenceRenderer {
                 layout.actors.iter().find(|a| a.id == message.from),
                 layout.actors.iter().find(|a| a.id == message.to),
             ) {
-                let y = 100.0 + idx as f64 * 50.0;
+                let y = 100.0 + idx as f64 * 50.0 + y_offset;
                 layout.messages.push(MessagePosition {
                     from: message.from.clone(),
                     to: message.to.clone(),
@@ -88,15 +95,24 @@ impl SequenceRenderer {
             }
         }
 
-        layout.height = 380.0;
+        layout.height = 380.0 + y_offset;
         layout.width = 50.0 + diagram.actors.len() as f64 * (actor_width + spacing) + 50.0;
 
         layout
     }
 
     /// Generate SVG content
-    fn generate_svg(&self, _diagram: &SequenceDiagram, layout: &SequenceLayout) -> String {
+    fn generate_svg(&self, _diagram: &SequenceDiagram, layout: &SequenceLayout, title: Option<&str>) -> String {
         let mut svg = String::new();
+
+        // Add title if present
+        if let Some(title_text) = title {
+            svg.push_str(&format!(
+                r##"    <text x="{}" y="25" text-anchor="middle" font-size="18" font-weight="bold" font-family="Inter" fill="#1f2937">{}</text>
+"##,
+                layout.width / 2.0, title_text
+            ));
+        }
 
         // Add definitions for arrowhead
         svg.push_str(r##"

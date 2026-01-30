@@ -14,12 +14,12 @@ impl GanttRenderer {
     }
 
     /// Render a gantt chart to HTML with embedded SVG
-    pub fn render(&self, diagram: &GanttDiagram) -> Result<String> {
+    pub fn render(&self, diagram: &GanttDiagram, title: Option<&str>) -> Result<String> {
         // Calculate layout
-        let layout = Self::calculate_layout(diagram);
+        let layout = Self::calculate_layout(diagram, title);
 
         // Generate SVG
-        let svg = self.generate_svg(diagram, &layout);
+        let svg = self.generate_svg(diagram, &layout, title);
 
         // Generate HTML container
         let diagram_id = format!("gantt-{}", uuid::Uuid::new_v4().to_string().split('-').next().unwrap_or("0"));
@@ -44,12 +44,19 @@ impl GanttRenderer {
     }
 
     /// Calculate layout
-    fn calculate_layout(diagram: &GanttDiagram) -> GanttLayout {
+    fn calculate_layout(diagram: &GanttDiagram, title: Option<&str>) -> GanttLayout {
         let mut layout = GanttLayout {
             tasks: Vec::new(),
             width: 800.0,
             height: 400.0,
         };
+
+        // Adjust height if title is present
+        if title.is_some() {
+            layout.height += 40.0;
+        }
+
+        let y_offset = title.map(|_| 40.0).unwrap_or(0.0);
 
         // Calculate date range
         let start_date = NaiveDate::parse_from_str(&diagram.start_date, "%Y-%m-%d")
@@ -64,7 +71,7 @@ impl GanttRenderer {
         let row_height = 40.0;
         let header_height = 50.0;
         let left_margin = 20.0;
-        let top_margin = header_height;
+        let top_margin = header_height + y_offset;
 
         for (idx, task) in diagram.tasks.iter().enumerate() {
             let task_start = NaiveDate::parse_from_str(&task.start_date, "%Y-%m-%d")
@@ -86,14 +93,25 @@ impl GanttRenderer {
             });
         }
 
-        layout.height = header_height + diagram.tasks.len() as f64 * row_height + 20.0;
+        layout.height = header_height + diagram.tasks.len() as f64 * row_height + 20.0 + y_offset;
 
         layout
     }
 
     /// Generate SVG content
-    fn generate_svg(&self, diagram: &GanttDiagram, layout: &GanttLayout) -> String {
+    fn generate_svg(&self, diagram: &GanttDiagram, layout: &GanttLayout, title: Option<&str>) -> String {
         let mut svg = String::new();
+
+        // Add title if present
+        if let Some(title_text) = title {
+            svg.push_str(&format!(
+                r##"    <text x="{}" y="25" text-anchor="middle" font-size="18" font-weight="bold" font-family="Inter" fill="#1f2937">{}</text>
+"##,
+                layout.width / 2.0, title_text
+            ));
+        }
+
+        let y_offset = title.map(|_| 40.0).unwrap_or(0.0);
 
         // Calculate date range
         let start_date = NaiveDate::parse_from_str(&diagram.start_date, "%Y-%m-%d")
@@ -109,9 +127,9 @@ impl GanttRenderer {
             let day = week * 7;
             let x = 20.0 + day as f64 / days_per_pixel;
             svg.push_str(&format!(
-                r##"    <line x1="{}" y1="50" x2="{}" y2="{}" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4"/>
+                r##"    <line x1="{}" y1="{}" x2="{}" y2="{}" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4"/>
 "##,
-                x, x, layout.height - 20.0
+                x, 50.0 + y_offset, x, layout.height - 20.0
             ));
         }
 
@@ -121,9 +139,9 @@ impl GanttRenderer {
             let date = start_date + Duration::days(day);
             let x = 20.0 + day as f64 / days_per_pixel;
             svg.push_str(&format!(
-                r##"    <text x="{}" y="30" text-anchor="middle" font-size="10" font-family="Inter" fill="#6b7280">{}</text>
+                r##"    <text x="{}" y="{}" text-anchor="middle" font-size="10" font-family="Inter" fill="#6b7280">{}</text>
 "##,
-                x, date.format("%m/%d")
+                x, 30.0 + y_offset, date.format("%m/%d")
             ));
         }
 

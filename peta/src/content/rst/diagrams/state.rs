@@ -13,12 +13,12 @@ impl StateRenderer {
     }
 
     /// Render a state diagram to HTML with embedded SVG
-    pub fn render(&self, diagram: &StateDiagram) -> Result<String> {
+    pub fn render(&self, diagram: &StateDiagram, title: Option<&str>) -> Result<String> {
         // Calculate layout
-        let layout = Self::calculate_layout(diagram);
+        let layout = Self::calculate_layout(diagram, title);
 
         // Generate SVG
-        let svg = self.generate_svg(diagram, &layout);
+        let svg = self.generate_svg(diagram, &layout, title);
 
         // Generate HTML container
         let diagram_id = format!("state-{}", uuid::Uuid::new_v4().to_string().split('-').next().unwrap_or("0"));
@@ -43,7 +43,7 @@ impl StateRenderer {
     }
 
     /// Calculate layout (circular layout for states)
-    fn calculate_layout(diagram: &StateDiagram) -> StateLayout {
+    fn calculate_layout(diagram: &StateDiagram, title: Option<&str>) -> StateLayout {
         let mut layout = StateLayout {
             states: Vec::new(),
             transitions: Vec::new(),
@@ -51,9 +51,16 @@ impl StateRenderer {
             height: 400.0,
         };
 
+        // Adjust height if title is present
+        if title.is_some() {
+            layout.height += 40.0;
+        }
+
+        let y_offset = title.map(|_| 40.0).unwrap_or(0.0);
+
         // Circular layout
         let center_x = 300.0;
-        let center_y = 200.0;
+        let center_y = 200.0 + y_offset;
         let radius = 120.0;
         let state_count = diagram.states.len() as f64;
 
@@ -79,12 +86,23 @@ impl StateRenderer {
             });
         }
 
+        layout.height = 400.0 + y_offset;
+
         layout
     }
 
     /// Generate SVG content
-    fn generate_svg(&self, diagram: &StateDiagram, layout: &StateLayout) -> String {
+    fn generate_svg(&self, diagram: &StateDiagram, layout: &StateLayout, title: Option<&str>) -> String {
         let mut svg = String::new();
+
+        // Add title if present
+        if let Some(title_text) = title {
+            svg.push_str(&format!(
+                r##"    <text x="{}" y="25" text-anchor="middle" font-size="18" font-weight="bold" font-family="Inter" fill="#1f2937">{}</text>
+"##,
+                layout.width / 2.0, title_text
+            ));
+        }
 
         // Add definitions for arrowhead
         svg.push_str(r##"

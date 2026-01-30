@@ -13,12 +13,12 @@ impl ClassRenderer {
     }
 
     /// Render a class diagram to HTML with embedded SVG
-    pub fn render(&self, diagram: &ClassDiagram) -> Result<String> {
+    pub fn render(&self, diagram: &ClassDiagram, title: Option<&str>) -> Result<String> {
         // Calculate layout
-        let layout = Self::calculate_layout(diagram);
+        let layout = Self::calculate_layout(diagram, title);
 
         // Generate SVG
-        let svg = self.generate_svg(diagram, &layout);
+        let svg = self.generate_svg(diagram, &layout, title);
 
         // Generate HTML container
         let diagram_id = format!("class-{}", uuid::Uuid::new_v4().to_string().split('-').next().unwrap_or("0"));
@@ -43,13 +43,20 @@ impl ClassRenderer {
     }
 
     /// Calculate layout (simple tree-like layout)
-    fn calculate_layout(diagram: &ClassDiagram) -> ClassLayout {
+    fn calculate_layout(diagram: &ClassDiagram, title: Option<&str>) -> ClassLayout {
         let mut layout = ClassLayout {
             classes: Vec::new(),
             relationships: Vec::new(),
             width: 600.0,
             height: 400.0,
         };
+
+        // Adjust height if title is present
+        if title.is_some() {
+            layout.height += 40.0;
+        }
+
+        let y_offset = title.map(|_| 40.0).unwrap_or(0.0);
 
         // Simple horizontal layout
         let class_width = 140.0;
@@ -62,21 +69,30 @@ impl ClassRenderer {
                 id: class.id.clone(),
                 label: class.label.clone(),
                 x,
-                y: 100.0,
+                y: 100.0 + y_offset,
                 width: class_width,
                 height: 120.0,
             });
         }
 
         layout.width = 50.0 + diagram.classes.len() as f64 * (class_width + spacing) + 50.0;
-        layout.height = 400.0;
+        layout.height = 400.0 + y_offset;
 
         layout
     }
 
     /// Generate SVG content
-    fn generate_svg(&self, diagram: &ClassDiagram, layout: &ClassLayout) -> String {
+    fn generate_svg(&self, diagram: &ClassDiagram, layout: &ClassLayout, title: Option<&str>) -> String {
         let mut svg = String::new();
+
+        // Add title if present
+        if let Some(title_text) = title {
+            svg.push_str(&format!(
+                r##"    <text x="{}" y="25" text-anchor="middle" font-size="18" font-weight="bold" font-family="Inter" fill="#1f2937">{}</text>
+"##,
+                layout.width / 2.0, title_text
+            ));
+        }
 
         // Add definitions for relationship markers
         svg.push_str(r##"

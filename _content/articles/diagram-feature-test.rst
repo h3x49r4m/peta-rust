@@ -22,6 +22,34 @@ Flowchart Example
 
 This is a simple flowchart showing a decision-making process. The flowchart renderer automatically calculates node positions and draws edges with arrowheads.
 
+Flowchart with Title
+--------------------
+
+.. diagram:: flowchart
+   :title: Order Processing Flow
+   
+   Customer -> Order Received -> Check Stock -> Process Order -> Ship Order
+   Check Stock -> Out of Stock -> Notify Customer
+   Notify Customer -> End
+   Process Order -> End
+   Ship Order -> End
+
+This flowchart demonstrates the order processing workflow with a custom title. Notice how the title is displayed at the top of the diagram.
+
+Complex Flowchart
+-----------------
+
+.. diagram:: flowchart
+   :title: Software Development Lifecycle
+   
+   Requirements -> Design -> Development -> Testing -> Deployment
+   Design -> Approved -> Development
+   Design -> Rejected -> Requirements
+   Testing -> Passed -> Deployment
+   Testing -> Failed -> Development
+
+This flowchart shows the iterative nature of software development with feedback loops.
+
 Gantt Chart Example
 -------------------
 
@@ -33,6 +61,20 @@ Gantt Chart Example
    Deployment [2024-01-21] : 2d
 
 This Gantt chart shows a typical software development timeline with tasks, dates, and durations.
+
+Gantt Chart with Title
+----------------------
+
+.. diagram:: gantt
+   :title: Q1 2024 Project Timeline
+   
+   Research [2024-01-01] : 10d
+   Design [2024-01-11] : 7d
+   Implementation [2024-01-18] : 15d
+   Testing [2024-02-02] : 8d
+   Documentation [2024-02-10] : 5d
+
+This Gantt chart displays a quarterly project timeline with overlapping phases.
 
 Sequence Diagram Example
 ------------------------
@@ -46,6 +88,24 @@ Sequence Diagram Example
 
 This sequence diagram illustrates the interaction between a user, system, and database during a login process.
 
+Sequence Diagram with Title
+---------------------------
+
+.. diagram:: sequence
+   :title: E-commerce Checkout Flow
+   
+   Customer -> Website: Add to Cart
+   Website -> Cart: Store Item
+   Cart -> Website: Update Total
+   Customer -> Website: Proceed to Checkout
+   Website -> Payment: Process Payment
+   Payment -> Website: Payment Confirmed
+   Website -> Order: Create Order
+   Order -> Website: Order Created
+   Website -> Customer: Confirmation
+
+This sequence diagram shows the complete e-commerce checkout process with multiple actors.
+
 Class Diagram Example
 --------------------
 
@@ -56,6 +116,21 @@ Class Diagram Example
    API |o| Cache
 
 This class diagram shows the relationships between different components in a system, including composition (+|+) and aggregation (|o|).
+
+Class Diagram with Title
+-----------------------
+
+.. diagram:: class-diagram
+   :title: Blog System Architecture
+   
+   Post |+| Comment
+   Post |+| Category
+   Post |+| Tag
+   User |+| Post
+   User |+| Comment
+   Comment |o| Post
+
+This class diagram illustrates the relationships in a blog system with multiple interconnected entities.
 
 State Diagram Example
 --------------------
@@ -68,6 +143,19 @@ State Diagram Example
    Running -> Idle : stop
 
 This state diagram demonstrates the state transitions in a simple system with start, pause, resume, and stop actions.
+
+State Diagram with Title
+------------------------
+
+.. diagram:: state
+   :title: Traffic Light System
+   
+   Red -> Green : timer
+   Green -> Yellow : timer
+   Yellow -> Red : timer
+   Red -> Yellow : emergency
+
+This state diagram models a traffic light system with both automatic and emergency state transitions.
 
 How Diagrams Work
 -----------------
