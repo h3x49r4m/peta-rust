@@ -2,6 +2,18 @@
 members = ["peta"]
 resolver = "2"
 
+[profile.dev]
+# Optimize debug builds to prevent 99% CPU usage issues
+opt-level = 1          # Optimize for performance while keeping debug info
+debug = true           # Keep debug symbols
+overflow-checks = true # Keep overflow checks for safety
+lto = false            # Disable link-time optimization for faster builds
+incremental = true     # Enable incremental compilation
+
+[profile.dev.package."*"]
+# Optimize dependencies more heavily in debug builds
+opt-level = 3
+
 [workspace.dependencies]
 # Core dependencies
 tokio = { version = "1.0", features = ["full"] }
