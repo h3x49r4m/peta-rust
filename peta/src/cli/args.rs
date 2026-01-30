@@ -26,6 +26,10 @@ pub enum Commands {
     
     /// Build the static site
     Build {
+        /// Content directory (default: "_content")
+        #[arg(short, long)]
+        content_dir: Option<String>,
+        
         /// Output directory (default: "_out/dist")
         #[arg(short, long)]
         output: Option<String>,
@@ -41,6 +45,10 @@ pub enum Commands {
     
     /// Serve the site locally
     Serve {
+        /// Content directory (default: "_content")
+        #[arg(short, long)]
+        content_dir: Option<String>,
+        
         /// Port to serve on (default: 3566)
         #[arg(short, long, default_value = "3566")]
         port: u16,

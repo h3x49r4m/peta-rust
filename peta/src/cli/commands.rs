@@ -184,18 +184,23 @@ clean:
 }
 
 /// Build the static site
-pub async fn build_site(output_dir: Option<String>, theme: Option<String>, draft: bool, output: &mut OutputFormatter) -> Result<()> {
+pub async fn build_site(content_dir: Option<String>, output_dir: Option<String>, theme: Option<String>, draft: bool, output: &mut OutputFormatter) -> Result<()> {
     output.info("Building static site...");
     
     let mut config = SiteConfig::load_from_file("peta.toml")?;
     
+    // Override content directory if specified
+    if let Some(ref dir) = content_dir {
+        config.build.content_dir = dir.clone();
+    }
+    
     // Override output directory if specified
-    if let Some(out_dir) = output_dir {
+    if let Some(ref out_dir) = output_dir {
         config.build.output_dir = out_dir.clone();
     }
     
     // Override theme if specified
-    if let Some(theme_name) = theme {
+    if let Some(ref theme_name) = theme {
         config.build.theme_dir = format!("themes/{}", theme_name);
     }
     
@@ -217,7 +222,7 @@ pub async fn build_site(output_dir: Option<String>, theme: Option<String>, draft
 }
 
 /// Serve the site locally
-pub async fn serve_site(port: u16, host: &str, _open: bool, draft: bool, output: &mut OutputFormatter) -> Result<()> {
+pub async fn serve_site(content_dir: Option<String>, port: u16, host: &str, _open: bool, draft: bool, output: &mut OutputFormatter) -> Result<()> {
     output.info(&format!("Starting development server on http://{}:{}", host, port));
     
     let mut config = SiteConfig::load_from_file("peta.toml")?;
@@ -225,8 +230,13 @@ pub async fn serve_site(port: u16, host: &str, _open: bool, draft: bool, output:
     config.server.host = host.to_string();
     config.build.drafts = draft;
     
+    // Override content directory if specified
+    if let Some(ref dir) = content_dir {
+        config.build.content_dir = dir.clone();
+    }
+    
     // Build the site first
-    build_site(None, None, draft, output).await?;
+    build_site(content_dir, None, None, draft, output).await?;
     
     // Create site instance
     let site = crate::core::Site::with_content(config.clone(), vec![]);
@@ -247,7 +257,7 @@ pub async fn deploy_site(target: &str, output: &mut OutputFormatter) -> Result<(
     let _config = SiteConfig::load_from_file("peta.toml")?;
     
     // Build the site first
-    build_site(None, None, false, output).await?;
+    build_site(None, None, None, false, output).await?;
     
     // For now, just indicate deployment would happen
     output.warn(&format!("Deployment to {} is not yet implemented", target));

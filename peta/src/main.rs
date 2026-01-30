@@ -23,11 +23,11 @@ async fn main() -> Result<()> {
                 }
             }
         }
-        Commands::Build { output: output_dir, theme, draft } => {
-            commands::build_site(output_dir, theme, draft, &mut output).await?;
+        Commands::Build { content_dir, output: output_dir, theme, draft } => {
+            commands::build_site(content_dir, output_dir, theme, draft, &mut output).await?;
         }
-        Commands::Serve { port, host, open, draft } => {
-            commands::serve_site(port, &host, open, draft, &mut output).await?;
+        Commands::Serve { content_dir, port, host, open, draft } => {
+            commands::serve_site(content_dir, port, &host, open, draft, &mut output).await?;
         }
         Commands::Deploy { target } => {
             commands::deploy_site(&target, &mut output).await?;

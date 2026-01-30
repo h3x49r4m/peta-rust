@@ -128,6 +128,96 @@ For faster development workflow:
     peta build
     peta serve
 
+Deployment Options
+===================
+
+Standalone Site (Self-Contained)
+---------------------------------
+
+Use ``peta init site`` to create a self-contained site with peta source code included:
+
+.. code-block:: bash
+
+    peta init site myblog
+    cd myblog
+    make build-peta
+    ./target/release/peta init content article "My Article"
+    make serve
+
+**Pros:**
+- Self-contained, no external dependencies
+- Easy to version control the entire site
+- No need to manage peta updates separately
+
+**Cons:**
+- Larger repository size (includes peta source)
+- Need to rebuild peta when updating
+
+Git Submodule (Shared peta)
+-----------------------------
+
+Use peta as a git submodule to share the peta binary across multiple sites:
+
+.. code-block:: bash
+
+    # Create a new site directory
+    mkdir myblog
+    cd myblog
+
+    # Initialize git repository
+    git init
+
+    # Add peta as a git submodule
+    git submodule add https://github.com/h3x49r4m/peta-rust.git peta-rust
+
+    # Create content directory
+    mkdir _content
+    mkdir _content/articles
+    mkdir _content/books
+    mkdir _content/projects
+    mkdir _content/snippets
+
+    # Create peta.toml configuration
+    # (see Configuration section below)
+
+    # Clone themes (optional)
+    git clone https://github.com/h3x49r4m/peta-rust-themes.git themes
+
+    # Initialize content
+    ./peta-rust/target/release/peta init content article "My Article"
+
+    # Build the site
+    ./peta-rust/target/release/peta build --content-dir _content
+
+    # Serve the site
+    ./peta-rust/target/release/peta serve --content-dir _content
+
+**Updating peta submodule:**
+
+.. code-block:: bash
+
+    # Pull latest changes from peta submodule
+    cd peta-rust
+    git pull origin main
+
+    # Rebuild peta
+    cargo build --release
+
+    # Go back to site root
+    cd ..
+
+    # Build and serve
+    ./peta-rust/target/release/peta serve --content-dir _content
+
+**Pros:**
+- Smaller repository size
+- Share peta updates across multiple sites
+- Easier to update peta globally
+
+**Cons:**
+- Requires managing submodule updates
+- Slightly more complex setup
+
 Build Commands
 ==============
 
@@ -161,8 +251,14 @@ Build and Serve Commands
     # Build the site
     peta build
 
+    # Build with custom content directory (for git submodule setup)
+    peta build --content-dir _content
+
     # Start development server (default port 3566)
     peta serve
+
+    # Serve with custom content directory (for git submodule setup)
+    peta serve --content-dir _content
 
     # Start server on custom port
     peta serve --port 8080
