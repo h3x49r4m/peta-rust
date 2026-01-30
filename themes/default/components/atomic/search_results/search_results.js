@@ -3,10 +3,10 @@
 class SearchResultsRenderer {
     constructor() {
         this.typeIcons = {
-            article: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
-            book: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
-            snippet: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
-            project: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>'
+            article: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
+            book: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
+            snippet: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
+            project: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>'
         };
     }
 
@@ -93,7 +93,7 @@ class SearchResultsRenderer {
             const highlight = result.highlights.find(h => h.type === 'excerpt');
 
             html += `
-                <div class="search-result-item">
+                <div class="search-result-item" onmousemove="this.style.setProperty('--mouse-x', event.offsetX + 'px'); this.style.setProperty('--mouse-y', event.offsetY + 'px')">
                     <div class="result-header">
                         <span class="result-type-icon">${icon}</span>
                         <div>
@@ -102,9 +102,9 @@ class SearchResultsRenderer {
                             </h3>
                             <div class="result-meta">
                                 <span class="result-type">${doc.content_type}</span>
-                                <span>•</span>
+                                <span class="separator">•</span>
                                 <span class="result-date">${this.formatDate(doc.date)}</span>
-                                ${doc.reading_time ? `<span>•</span><span class="result-time">${doc.reading_time} min read</span>` : ''}
+                                ${doc.reading_time ? `<span class="separator">•</span><span class="result-time">${doc.reading_time} min read</span>` : ''}
                             </div>
                         </div>
                         <div class="result-score">${Math.round(result.score * 10) / 10}</div>
@@ -125,6 +125,35 @@ class SearchResultsRenderer {
 
         html += '</div>';
         resultsDiv.innerHTML = html;
+
+        // Add click event listeners to result cards
+        const resultItems = resultsDiv.querySelectorAll('.search-result-item');
+        resultItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                // Remove clicked class and reset icon colors from all items
+                resultItems.forEach(i => {
+                    i.classList.remove('clicked');
+                    const icon = i.querySelector('.result-type-icon svg');
+                    if (icon) {
+                        const type = i.querySelector('.result-type')?.textContent.toLowerCase();
+                        const originalColors = {
+                            article: '#3b82f6',
+                            book: '#8b5cf6',
+                            snippet: '#10b981',
+                            project: '#f59e0b'
+                        };
+                        icon.setAttribute('stroke', originalColors[type] || '#3b82f6');
+                    }
+                });
+
+                // Add clicked class and change icon color for clicked item
+                item.classList.add('clicked');
+                const icon = item.querySelector('.result-type-icon svg');
+                if (icon) {
+                    icon.setAttribute('stroke', '#3b82f6');
+                }
+            });
+        });
     }
 
     highlightText(text, query) {

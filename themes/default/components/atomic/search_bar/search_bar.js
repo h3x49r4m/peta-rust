@@ -281,6 +281,35 @@ class PetaSearch {
 
         html += '</div>';
         resultsDiv.innerHTML = html;
+
+        // Add click event listeners to result items
+        const resultItems = resultsDiv.querySelectorAll('.search-result-item');
+        resultItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                // Remove clicked class and reset icon colors from all items
+                resultItems.forEach(i => {
+                    i.classList.remove('clicked');
+                    const icon = i.querySelector('.result-type-icon svg');
+                    if (icon) {
+                        const type = i.querySelector('.result-type')?.textContent.toLowerCase();
+                        const originalColors = {
+                            article: '#3b82f6',
+                            book: '#8b5cf6',
+                            snippet: '#10b981',
+                            project: '#f59e0b'
+                        };
+                        icon.setAttribute('stroke', originalColors[type] || '#3b82f6');
+                    }
+                });
+
+                // Add clicked class and change icon color for clicked item
+                item.classList.add('clicked');
+                const icon = item.querySelector('.result-type-icon svg');
+                if (icon) {
+                    icon.setAttribute('stroke', '#3b82f6');
+                }
+            });
+        });
     }
 
     highlightText(text, query) {
