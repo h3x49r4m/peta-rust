@@ -252,7 +252,6 @@ impl RstParser {
                     let is_indented = line.starts_with(' ') || line.starts_with('\t');
 
                     if is_indented {
-                        found_indented_content = true;
                         continue;
                     }
 
@@ -525,7 +524,7 @@ impl RstParser {
             
             // Found a list - collect all list items
             let mut list_items = Vec::new();
-            let mut list_start_indent = self.calculate_indent(line);
+            let list_start_indent = self.calculate_indent(line);
             
             while i < lines.len() && self.is_list_item(lines[i]) {
                 let item_indent = self.calculate_indent(lines[i]);
@@ -564,7 +563,7 @@ impl RstParser {
     }
     
     /// Convert a group of list items to HTML
-    fn convert_list_group(&self, items: &[(usize, String)], base_indent: usize) -> Result<String> {
+    fn convert_list_group(&self, items: &[(usize, String)], _base_indent: usize) -> Result<String> {
         let mut result = Vec::new();
         let mut i = 0;
         let mut list_type = "ul".to_string();
@@ -694,6 +693,7 @@ impl RstParser {
     }
 
     /// Parse a list item
+    #[allow(dead_code)]
     fn parse_list_item(&self, line: &str) -> Result<(String, String)> {
         let trimmed = line.trim();
 

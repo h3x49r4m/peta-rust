@@ -184,6 +184,7 @@ impl Default for TemplateCache {
 pub struct TemplateEngine {
     tera: Tera,
     theme_dir: PathBuf,
+    #[allow(dead_code)]
     config: crate::core::config::SiteConfig,
     component_registry: Option<ComponentRegistry>,
     #[allow(dead_code)]
