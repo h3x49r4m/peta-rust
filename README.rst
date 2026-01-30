@@ -1,19 +1,35 @@
 Peta (Rust) - High-Performance Static Site Generator
 ====================================================
 
-A modern static site generator written in Rust with component-based themes and RST-first architecture. Peta processes reStructuredText (RST) files directly to HTML, providing exceptional performance and flexibility.
+A modern static site generator written in Rust with RST-first architecture, component-based theming (V4), and advanced rendering capabilities. Peta processes reStructuredText (RST) files directly to HTML, providing exceptional performance and flexibility.
 
 .. code-block::
 
-    ┌─────────────────────────────────────────────────────────────────┐
-    │                    PETA - Static Site Generator                 │
-    └─────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-    ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-    │   RST Files     │───▶│  Component       │───▶│  Static HTML    │
-    │   (_content/)   │    │  Rendering       │    │  (_out/dist/)   │
-    └─────────────────┘    └──────────────────┘    └─────────────────┘
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │                        PETA - CLI Interface                         │
+    └─────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │                      SiteBuilder (Orchestrator)                     │
+    │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │
+    │  │ RST Parser   │  │ Template     │  │ Asset        │               │
+    │  │ (Direct      │→ │ Engine       │→ │ Pipeline     │               │
+    │  │  RST→HTML)   │  │ (Tera-based) │  │ (Minify/Opt) │               │
+    │  └──────────────┘  └──────────────┘  └──────────────┘               │
+    │         │                  │                  │                     │
+    │         ▼                  ▼                  ▼                     │
+    │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │
+    │  │ Content      │  │ Component    │  │ Search       │               │
+    │  │ Resolver     │  │ Manager      │  │ Indexer      │               │
+    │  └──────────────┘  └──────────────┘  └──────────────┘               │
+    └─────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+                        ┌─────────────────┐
+                        │  Static HTML    │
+                        │  (_out/dist/)   │
+                        └─────────────────┘
 
 Features
 ========
@@ -21,29 +37,30 @@ Features
 Core Features
 -------------
 
-* **Component-Based Themes (V4)**: Atomic, composite, and content components with flexible theming system
-* **RST-First Architecture**: Direct RST→HTML conversion with advanced parsing capabilities
+* **RST-First Architecture**: Direct RST→HTML conversion without intermediate JSON, pure build-time processing
+* **Component-Based Themes (V4)**: React-inspired architecture with atomic, composite, and content components
 * **Site Initialization**: Create new sites with complete peta source code and theme included
 * **Content CLI**: Initialize articles, books, snippets, and projects with template generation
-* **Math Rendering**: KaTeX integration for LaTeX equations with automatic detection and fallback support
+* **Math Rendering**: KaTeX integration for LaTeX equations with automatic detection and on-demand loading
 * **Code Highlighting**: Syntect-based syntax highlighting with 30+ language support, line numbers, and copy button
 * **Development Server**: Live reload with file watching and WebSocket support on port 3566
 * **Asset Processing**: CSS/JS minification and image optimization pipeline
-* **Search Functionality**: Client-side search with metadata indexing, relevance scoring, and real-time filtering
-* **Modern UI**: Clean, responsive design with component-based theming
+* **Search Functionality**: Client-side search with Tantivy indexing, metadata support, and relevance scoring
 * **Performance Optimized**: Rust-based performance with efficient compilation and serving
 
 Advanced Features
 -----------------
 
-* **Embedded Snippet Cards**: Automatically embed code snippets from files with syntax highlighting
+* **Embedded Snippet Cards**: Inline snippet rendering using ``.. snippet-card::<id>`` with automatic heading hierarchy adjustment
+* **Diagrams**: Flowchart, Gantt, sequence, class, and state diagrams with Rust-based SVG rendering and download support
+* **Music Scores**: ABC notation support with SVG rendering, staff lines, clefs, and multi-voice support
 * **Cross-References**: Automatic linking between documents using RST ``:ref:`` directives
 * **Table of Contents**: Auto-generated TOC with customizable depth and navigation
-* **Book Support**: Multi-section book structure with chapter navigation
-* **Project Portfolio**: Showcase projects with metadata and descriptions
+* **Book Support**: Multi-section book structure with chapter navigation and book-specific TOC
+* **Project Portfolio**: Showcase projects with metadata, GitHub URLs, and demo links
 * **Tag System**: Organize content with tags and tag clouds
 * **Social Links**: Configurable social media integration
-* **Deployment Tools**: GitHub Pages, Netlify, Vercel, and S3 deployment support
+* **Theme Variables**: CSS custom properties for light/dark mode and comprehensive theming
 * **Component Scripts**: JavaScript hooks for interactive components
 * **Theme Manager**: Dynamic theme switching and component loading
 
@@ -142,6 +159,7 @@ Use ``peta init site`` to create a self-contained site with peta source code inc
     cd myblog
     make build-peta
     ./target/release/peta init content article "My Article"
+    make build
     make serve
 
 **Pros:**
@@ -171,11 +189,7 @@ Use peta as a git submodule to share the peta binary across multiple sites:
     git submodule add https://github.com/h3x49r4m/peta-rust.git peta-rust
 
     # Create content directory
-    mkdir _content
-    mkdir _content/articles
-    mkdir _content/books
-    mkdir _content/projects
-    mkdir _content/snippets
+    mkdir -p _content/{articles,books,projects,snippets}
 
     # Create peta.toml configuration
     # (see Configuration section below)
@@ -218,6 +232,23 @@ Use peta as a git submodule to share the peta binary across multiple sites:
 - Requires managing submodule updates
 - Slightly more complex setup
 
+GitHub Pages Deployment
+------------------------
+
+Automated deployment using GitHub Actions on every push to main branch:
+
+**Setup:**
+
+1. Create GitHub Actions workflow (already included in ``.github/workflows/deploy.yml``)
+2. Enable GitHub Pages: Go to repository Settings → Pages → Build and deployment → Source: GitHub Actions
+3. Push changes - deployment happens automatically
+
+**Workflow features:**
+- Caches Cargo registry, index, and build artifacts for faster builds
+- Builds peta from source
+- Generates the site in ``_out/dist``
+- Deploys to GitHub Pages automatically
+
 Build Commands
 ==============
 
@@ -254,6 +285,15 @@ Build and Serve Commands
     # Build with custom content directory (for git submodule setup)
     peta build --content-dir _content
 
+    # Build with custom output directory
+    peta build --output custom_output
+
+    # Build with custom theme
+    peta build --theme custom_theme
+
+    # Include draft content
+    peta build --draft
+
     # Start development server (default port 3566)
     peta serve
 
@@ -263,11 +303,40 @@ Build and Serve Commands
     # Start server on custom port
     peta serve --port 8080
 
+    # Start server on custom host
+    peta serve --host 0.0.0.0
+
     # Start server and open browser
-    peta serve --port 3566 --open
+    peta serve --open
+
+    # Serve draft content
+    peta serve --draft
 
     # Clean build artifacts
     peta clean
+
+    # Clean all artifacts including cache
+    peta clean --all
+
+Theme Management Commands
+---------------------------
+
+.. code-block:: bash
+
+    # List available themes
+    peta theme list
+
+    # Create a new theme
+    peta theme create mytheme --base default
+
+    # Validate theme configuration
+    peta theme validate mytheme
+
+    # Show theme information
+    peta theme info mytheme
+
+    # Install theme from repository
+    peta theme install https://github.com/user/theme.git
 
 Makefile Commands (New Sites)
 -----------------------------
@@ -312,6 +381,8 @@ Create a ``peta.toml`` file in your project root:
     [components]
     enabled = true
     enabled_components = ["footer", "contacts", "navbar", "header"]
+    component_configs = {}
+    layout = "default"
     theme = "default"
 
     [build]
@@ -327,6 +398,11 @@ Create a ``peta.toml`` file in your project root:
     toc_depth = 3
     cross_references = true
 
+    [rst.math]
+    katex_delimiters = ["$$", "$", "\\[", "\\]"]
+    fallback_mathjax = true
+    cache_rendered = true
+
     [math_rendering]
     engine = "katex"
     auto_detect = true
@@ -336,12 +412,64 @@ Create a ``peta.toml`` file in your project root:
     version = "0.16.9"
     cdn_base = "https://cdn.jsdelivr.net/npm/katex"
 
+    [math_rendering.css]
+    theme = "default"
+    font_scale = 1.0
+    line_height = 1.5
+
+    [math_rendering.js]
+    auto_render = true
+    debug_mode = false
+    modal_support = true
+
     [code_blocks]
     default_theme = "one-dark"
     enable_line_numbers = true
     enable_copy_button = true
     enable_keyboard_shortcuts = true
     enable_line_hover = true
+
+    [code_blocks.languages]
+    python = { aliases = ["py", "python3"] }
+    javascript = { aliases = ["js", "node"] }
+    typescript = { aliases = ["ts", "tsx"] }
+    rust = { aliases = ["rs"] }
+    go = { aliases = [] }
+    bash = { aliases = ["sh", "shell", "zsh"] }
+    ruby = { aliases = ["rb"] }
+    php = { aliases = [] }
+    java = { aliases = [] }
+    kotlin = { aliases = ["kt"] }
+    scala = { aliases = [] }
+    csharp = { aliases = ["cs"] }
+    cpp = { aliases = ["c++", "cxx", "cc", "hpp"] }
+    c = { aliases = ["h"] }
+    sql = { aliases = [] }
+    html = { aliases = ["htm"] }
+    xml = { aliases = [] }
+    css = { aliases = ["scss", "sass", "less"] }
+    json = { aliases = [] }
+    yaml = { aliases = ["yml"] }
+    toml = { aliases = [] }
+    dockerfile = { aliases = [] }
+    makefile = { aliases = [] }
+    cmake = { aliases = [] }
+    diff = { aliases = ["patch"] }
+    log = { aliases = [] }
+
+    [code_blocks.themes]
+    one-dark = { name = "One Dark", description: "Dark theme based on Atom's One Dark" }
+    solarized = { name = "Solarized", description: "Precision colors for solarized theme" }
+
+    [code_blocks.styles]
+    font_family = "SF Mono, Monaco, 'Inconsolata', 'Roboto Mono', 'Source Code Pro', monospace"
+    font_size = "0.9rem"
+    line_height = "1.6"
+    border_radius = "1rem"
+    background_gradient_start = "#1e293b"
+    background_gradient_end = "#0f172a"
+    header_background = "rgba(15, 23, 42, 0.6)"
+    copy_success_duration = 2000
 
     [server]
     port = 3566
@@ -366,17 +494,346 @@ Create a ``peta.toml`` file in your project root:
     branch = "gh-pages"
     domain = "username.github.io"
 
+Content Types
+=============
+
+Articles
+--------
+
+Blog posts and articles with automatic TOC generation and cross-reference support.
+
+**Frontmatter:**
+
+.. code-block:: yaml
+
+    ---
+    title: "Article Title"
+    date: "2026-01-30T00:00:00"
+    tags: ["tag1", "tag2"]
+    author: "Author Name"
+    excerpt: "Brief description"
+    ---
+
+**Example:**
+
+.. code-block:: rst
+
+    Getting Started
+    ===============
+
+    Introduction
+    ------------
+
+    Write your article content here.
+
+    Features
+    --------
+
+    * Feature one
+    * Feature two
+
+    Code Example
+    ~~~~~~~~~~~
+
+    .. code-block:: rust
+
+        fn main() {
+            println!("Hello, world!");
+        }
+
+    .. snippet-card:: example-snippet
+
+    .. _features: #features
+
+    See the Features section above.
+
+Books
+-----
+
+Multi-section books with chapter navigation and book-specific TOC.
+
+**Frontmatter:**
+
+.. code-block:: yaml
+
+    ---
+    title: "Book Title"
+    date: "2026-01-30T00:00:00"
+    tags: ["tag1", "tag2"]
+    author: "Author Name"
+    description: "A brief description of the book"
+    ---
+
+**Example:**
+
+.. code-block:: rst
+
+    My Book
+    =======
+
+    This book provides comprehensive coverage of the topic.
+
+    .. toctree::
+       :maxdepth: 2
+       :caption: Contents:
+
+       chapter1
+       chapter2
+       chapter3
+
+    What This Book Covers
+    ---------------------
+
+    - Topic 1
+    - Topic 2
+    - Topic 3
+
+Snippets
+--------
+
+Code snippets that can be embedded in other content using ``.. snippet-card::<id>``.
+
+**Frontmatter:**
+
+.. code-block:: yaml
+
+    ---
+    title: "Snippet Title"
+    date: "2026-01-30T00:00:00"
+    tags: [language, topic]
+    ---
+
+**Example:**
+
+.. code-block:: rst
+
+    Python Example
+    ==============
+
+    .. code-block:: python
+
+        def example():
+            print("Hello, world!")
+            return True
+
+Projects
+--------
+
+Project portfolio entries with metadata and links.
+
+**Frontmatter:**
+
+.. code-block:: yaml
+
+    ---
+    title: "Project Title"
+    date: "2026-01-30T00:00:00"
+    tags: ["tag1", "tag2"]
+    author: "Author Name"
+    github_url: "https://github.com/username/project"
+    demo_url: "https://project.example.com"
+    ---
+
+RST Directives
+================
+
+Peta supports a comprehensive set of RST directives for advanced content creation.
+
+Code Blocks
+~~~~~~~~~~~
+
+Syntax-highlighted code blocks with copy button and line numbers:
+
+.. code-block:: rst
+
+    .. code-block:: rust
+        :line-numbers:
+        :copy-button:
+
+        fn main() {
+            println!("Hello, world!");
+        }
+
+**Supported Languages:** Python, JavaScript, TypeScript, Rust, Go, Bash, Ruby, PHP, Java, Kotlin, Scala, C#, C++, C, SQL, HTML, XML, CSS, JSON, YAML, TOML, Dockerfile, Makefile, CMake, Diff, and more.
+
+Embedded Snippet Cards
+~~~~~~~~~~~~~~~~~~~~~~
+
+Inline snippet rendering with automatic heading hierarchy adjustment:
+
+.. code-block:: rst
+
+    .. snippet-card:: my-snippet-id
+
+This will:
+- Resolve the snippet by ID across the site
+- Display the snippet with its metadata
+- Adjust heading levels (h1→h3, h2→h4, etc.) to fit the context
+
+Math Formulas
+~~~~~~~~~~~~
+
+LaTeX equation rendering with KaTeX:
+
+.. code-block:: rst
+
+    Inline math: $E = mc^2$
+
+    Display math:
+
+    .. math::
+
+        \int_0^\infty e^{-x^2} dx = \frac{\sqrt{\pi}}{2}
+
+**Features:**
+- Automatic math detection
+- On-demand loading (only loads KaTeX when math is detected)
+- Custom delimiters: ``$$`` for display, ``$`` for inline
+- Fallback to MathJax support
+
+Diagrams
+~~~~~~~~
+
+Create various types of diagrams with Rust-based SVG rendering:
+
+**Flowchart:**
+
+.. code-block:: rst
+
+    .. diagram:: flowchart
+        :title: Deployment Process
+
+        A[Start] --> B[Build]
+        B --> C[Test]
+        C --> D[Deploy]
+        C -->|Fail| B
+
+**Gantt Chart:**
+
+.. code-block:: rst
+
+    .. diagram:: gantt
+        :title: Project Timeline
+
+        task1 : 2024-01-01, 3d
+        task2 : after task1, 5d
+        task3 : after task2, 2d
+
+**Sequence Diagram:**
+
+.. code-block:: rst
+
+    .. diagram:: sequence
+        :title: Request Flow
+
+        User->>Server: Request
+        Server->>Database: Query
+        Database-->>Server: Result
+        Server-->>User: Response
+
+**Class Diagram:**
+
+.. code-block:: rst
+
+    .. diagram:: class
+        :title: User System
+
+        class User {
+            +name: str
+            +email: str
+            +login()
+            +logout()
+        }
+
+        class Session {
+            +token: str
+            +expires: datetime
+            +validate()
+        }
+
+        User "1" -- "*" Session : has
+
+**State Diagram:**
+
+.. code-block:: rst
+
+    .. diagram:: state
+        :title: Page Lifecycle
+
+        [*] --> Draft
+        Draft --> Published : publish
+        Published --> Archived : archive
+        Published --> Draft : unpublish
+
+Music Scores
+~~~~~~~~~~~~
+
+Create music scores using ABC notation:
+
+.. code-block:: rst
+
+    .. musicscore:: melody
+        :title: Simple Melody
+
+        X:1
+        T:Andante
+        K:C
+        C D E F | G A B c | c B A G | F E D C
+
+**Features:**
+- ABC notation parsing
+- SVG rendering
+- Staff lines, clefs, key signatures
+- Multi-voice support
+- Download as SVG
+
+Table of Contents
+~~~~~~~~~~~~~~~~
+
+Auto-generated TOC with customizable depth:
+
+.. code-block:: rst
+
+    .. toctree::
+       :maxdepth: 2
+       :caption: Contents:
+
+       chapter1
+       chapter2
+       chapter3
+
+Cross-References
+~~~~~~~~~~~~~~~~
+
+Link between documents using RST ``:ref:`` directives:
+
+.. code-block:: rst
+
+    .. _features:
+
+    Features Section
+    ===============
+
+    See the :ref:`introduction` section for more details.
+
+    .. _introduction:
+
+    Introduction
+    ============
+
+    This is the introduction. See :ref:`features` for more.
+
 Architecture
 ============
 
 Peta follows an RST-first architecture with component-based theming:
 
-* **V4 Component System**: Atomic, composite, and content components with flexible composition
-* **Direct RST Processing**: No intermediate JSON conversion, pure RST→HTML pipeline
-* **Template Engine**: Tera-based with component support and custom filters
+* **RST-First Processing**: Direct RST→HTML conversion without intermediate JSON structures
+* **V4 Component System**: Atomic, composite, and content components with props, slots, and state management
+* **Template Engine**: Tera-based with component support, custom filters, and functions
 * **Asset Pipeline**: Integrated CSS/JS processing, minification, and optimization
-* **Search System**: Client-side search with metadata indexing and relevance scoring
-* **Math Rendering**: KaTeX integration with automatic detection and fallback to MathJax
+* **Search System**: Client-side search with Tantivy indexing, metadata support, and relevance scoring
+* **Math Rendering**: KaTeX integration with automatic detection and on-demand loading
 * **Code Highlighting**: Syntect-based with 30+ language support and customizable themes
 * **Development Server**: Live reload with file watching and WebSocket support
 
@@ -394,7 +851,7 @@ Detailed documentation is available in the ``docs/`` directory:
 * ``docs/features/search/`` - Search pipeline and implementation
 * ``docs/architecture/`` - Overall system architecture
 
-For detailed information about the search pipeline, see `docs/features/search/search_pipeline.rst`.
+For detailed information about specific features, see the corresponding documentation files.
 
 Testing
 =======
