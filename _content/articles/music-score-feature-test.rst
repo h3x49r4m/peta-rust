@@ -77,15 +77,15 @@ To add a music score to your RST content, use the ``musicscore`` directive:
 
 .. code-block:: rst
 
-   .. musicscore:: abc
-      :title: Your Song Title
-      
-      X:1
-      T:Song Title
-      M:4/4
-      L:1/4
-      K:C
-      C D E F | G A B c |
+    .. musicscore:: abc
+       :title: Your Song Title
+   
+        X:1
+        T:Song Title
+        M:4/4
+        L:1/4
+        K:C
+        C D E F | G A B c |
 
 Supported Options
 ~~~~~~~~~~~~~~~~~
