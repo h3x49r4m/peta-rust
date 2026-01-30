@@ -199,31 +199,34 @@
     if (existingToast) {
       existingToast.remove();
     }
-    
+
     // Create toast element
     const toast = document.createElement('div');
     toast.className = 'share-toast' + (isError ? ' share-toast-error' : '');
     toast.textContent = message;
     toast.setAttribute('role', 'alert');
     toast.setAttribute('aria-live', 'polite');
-    
-    // Add styles
+
+    // Add styles matching site's design
     Object.assign(toast.style, {
       position: 'fixed',
       bottom: '100px',
       right: '80px',
-      padding: '12px 20px',
-      background: isError ? '#ef4444' : '#10b981',
+      padding: '14px 24px',
+      background: isError ? '#ef4444' : 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
       color: 'white',
-      borderRadius: '8px',
+      borderRadius: '12px',
       fontSize: '14px',
-      fontWeight: '500',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+      fontWeight: '600',
+      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      boxShadow: '0 8px 24px rgba(59, 130, 246, 0.3), 0 4px 12px rgba(139, 92, 246, 0.2)',
       zIndex: '2000',
-      animation: 'shareToastFadeIn 0.3s ease, shareToastFadeOut 0.3s ease 2.7s',
-      opacity: '0'
+      animation: 'shareToastFadeIn 0.3s cubic-bezier(0.23, 1, 0.32, 1), shareToastFadeOut 0.3s cubic-bezier(0.23, 1, 0.32, 1) 7.7s',
+      opacity: '0',
+      backdropFilter: 'blur(10px)',
+      border: '1px solid rgba(255, 255, 255, 0.1)'
     });
-    
+
     // Add animation keyframes
     if (!document.querySelector('#share-toast-styles')) {
       const style = document.createElement('style');
@@ -240,16 +243,16 @@
       `;
       document.head.appendChild(style);
     }
-    
+
     // Append to body
     document.body.appendChild(toast);
-    
-    // Remove toast after animation
+
+    // Remove toast after animation (8 seconds total)
     setTimeout(function() {
       if (toast.parentNode) {
         toast.remove();
       }
-    }, 3000);
+    }, 8000);
   }
   
   // Initialize when DOM is ready

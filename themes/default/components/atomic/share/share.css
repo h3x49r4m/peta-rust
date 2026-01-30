@@ -1,11 +1,49 @@
-/* Share Button */
+/* Shared positioning variables for utility icons */
+:root {
+  --utility-icon-gap: 60px;
+  --utility-icon-right: 2rem;
+}
+
+/* Share Button - Default: floating center-right */
 .share {
   position: fixed;
-  top: 50%;
-  right: 2rem;
+  top: calc(50% - var(--utility-icon-gap));
+  right: var(--utility-icon-right);
   transform: translateY(-50%);
   z-index: 1000;
 }
+
+/* Share Button in book modal - relative positioning (flows naturally after book_toc) */
+.book-modal .share {
+  position: relative;
+  top: auto;
+  right: auto;
+  transform: none;
+  margin-top: 1rem;
+}
+
+/* Share Button in article modal - floating center-right */
+.article-modal .share {
+  position: fixed;
+  top: calc(50% - var(--utility-icon-gap));
+  right: var(--utility-icon-right);
+  transform: translateY(-50%);
+}
+
+/* Share Button in project modal - floating center-right */
+.project-modal .share {
+  position: fixed;
+  top: calc(50% - var(--utility-icon-gap));
+  right: var(--utility-icon-right);
+  transform: translateY(-50%);
+}
+
+/* For future icons, use offsets like:
+   Icon 1: top: calc(50% - (var(--utility-icon-gap) * 2))
+   Icon 2: top: calc(50% - var(--utility-icon-gap))
+   Icon 3: top: 50%
+   Icon 4: top: calc(50% + var(--utility-icon-gap))
+*/
 
 .share-toggle {
   width: 48px;
@@ -150,20 +188,25 @@
   .share {
     right: 1.5rem;
   }
-  
+
   .share-toggle {
     width: 44px;
     height: 44px;
   }
-  
+
   .share-toggle svg {
     width: 22px;
     height: 22px;
   }
-  
+
   .share-dropdown-inner {
     min-width: 180px;
     padding: 1rem;
+  }
+
+  /* Book modal share button mobile styles */
+  .book-modal .share {
+    margin-top: 0.75rem;
   }
 }
 
@@ -171,24 +214,29 @@
   .share {
     right: 1rem;
   }
-  
+
   .share-toggle {
     width: 40px;
     height: 40px;
   }
-  
+
   .share-toggle svg {
     width: 20px;
     height: 20px;
   }
-  
+
   .share-dropdown-inner {
     min-width: 160px;
     padding: 0.875rem;
   }
-  
+
   .share-option-label {
     font-size: 0.8125rem;
+  }
+
+  /* Book modal share button mobile styles */
+  .book-modal .share {
+    margin-top: 0.5rem;
   }
 }
 

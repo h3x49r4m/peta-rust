@@ -17,6 +17,9 @@
     <div class="book-modal-body">
       {{ component(name="book_toc", book_toc=book_toc, book_title=book_title) | safe }}
 
+      <!-- Share component -->
+      {{ component(name="share") | safe }}
+
       <!-- Book Content -->
       <main class="book-modal-content">
         {% if content %}
