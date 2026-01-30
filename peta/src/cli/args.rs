@@ -72,20 +72,39 @@ pub enum Commands {
         all: bool,
     },
     
-    /// Initialize new content (article/book/snippet/project)
+    /// Initialize new content or site
     Init {
-        /// Content type: article, book, snippet, or project
-        #[arg(value_parser = ["article", "book", "snippet", "project"])]
-        r#type: String,
-        
-        /// Title of the content
-        title: String,
+        #[command(subcommand)]
+        action: InitAction,
     },
     
     /// Theme management
     Theme {
         #[command(subcommand)]
         action: ThemeAction,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum InitAction {
+    /// Initialize a new site
+    Site {
+        /// Site name
+        name: String,
+        
+        /// Theme to use (default: "default")
+        #[arg(short, long, default_value = "default")]
+        theme: String,
+    },
+    
+    /// Initialize new content (article/book/snippet/project)
+    Content {
+        /// Content type: article, book, snippet, or project
+        #[arg(value_parser = ["article", "book", "snippet", "project"])]
+        r#type: String,
+        
+        /// Title of the content
+        title: String,
     },
 }
 

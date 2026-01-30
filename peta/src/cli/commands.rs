@@ -48,23 +48,127 @@ pub fn init_site(name: &str, theme: &str, output: &mut OutputFormatter) -> Resul
     
     let site_dir = Path::new(name);
     
+    // Check if directory already exists
+    if site_dir.exists() {
+        return Err(anyhow::anyhow!("Directory '{}' already exists", name));
+    }
+    
     // Create site directory structure
     std::fs::create_dir_all(&site_dir)?;
-    std::fs::create_dir_all(site_dir.join("_content"))?;
-    std::fs::create_dir_all(site_dir.join("themes").join(theme))?;
-    std::fs::create_dir_all(site_dir.join("themes").join(theme).join("templates"))?;
-    std::fs::create_dir_all(site_dir.join("themes").join(theme).join("css"))?;
-    std::fs::create_dir_all(site_dir.join("themes").join(theme).join("js"))?;
+    std::fs::create_dir_all(site_dir.join("_content/articles"))?;
+    std::fs::create_dir_all(site_dir.join("_content/books"))?;
+    std::fs::create_dir_all(site_dir.join("_content/projects"))?;
+    std::fs::create_dir_all(site_dir.join("_content/snippets"))?;
+    
+    // Copy workspace files (Cargo.toml, Cargo.lock, peta directory)
+    output.info("Copying peta workspace...");
+    
+    // Copy root Cargo.toml
+    if Path::new("Cargo.toml").exists() {
+        std::fs::copy("Cargo.toml", site_dir.join("Cargo.toml"))?;
+    }
+    
+    // Copy Cargo.lock
+    if Path::new("Cargo.lock").exists() {
+        std::fs::copy("Cargo.lock", site_dir.join("Cargo.lock"))?;
+    }
+    
+    // Copy peta source directory
+    let peta_source_dir = Path::new("peta");
+    if peta_source_dir.exists() {
+        copy_dir_recursive(peta_source_dir, &site_dir.join("peta"))?;
+    } else {
+        output.warn("peta source directory not found, skipping source copy");
+    }
+    
+    // Copy theme directory
+    let theme_source_dir = Path::new("themes").join(theme);
+    if theme_source_dir.exists() {
+        output.info(&format!("Copying theme '{}'...", theme));
+        copy_dir_recursive(&theme_source_dir, &site_dir.join("themes").join(theme))?;
+    } else {
+        output.warn(&format!("Theme '{}' not found, skipping theme copy", theme));
+    }
+    
+    // Create .gitignore
+    let gitignore_content = r#"# Build output
+_out/
+
+# Cache
+.peta_cache/
+
+# Cargo build artifacts
+target/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Log files
+*.log
+"#;
+    std::fs::write(site_dir.join(".gitignore"), gitignore_content)?;
+    
+    // Create Makefile
+    let makefile_content = r#".PHONY: help build-peta build serve clean
+
+help:
+	@echo "Available commands:"
+	@echo "  make build-peta  - Build peta from source"
+	@echo "  make build       - Build the site"
+	@echo "  make serve       - Start development server"
+	@echo "  make clean       - Clean build artifacts"
+
+build-peta:
+	@echo "Building peta..."
+	cargo build --release --manifest-path=peta/Cargo.toml --target-dir target
+	@echo "✓ peta built successfully!"
+
+build: build-peta
+	@echo "Building site..."
+	./target/release/peta build
+
+serve: build-peta
+	@echo "Starting development server..."
+	./target/release/peta serve
+
+clean:
+	@echo "Cleaning build artifacts..."
+	rm -rf _out
+	rm -rf .peta_cache
+	rm -rf target
+	@echo "✓ Clean completed!"
+"#;
+    std::fs::write(site_dir.join("Makefile"), makefile_content)?;
     
     // Create configuration file
     let mut config = SiteConfig::default();
     config.site.title = name.to_string();
+    config.site.description = format!("A site built with Peta");
+    config.site.url = "https://example.com".to_string();
     config.build.theme_dir = format!("themes/{}", theme);
+    config.build.drafts = false;
+    config.components.enabled_components = vec![];  // Disable components for simpler setup
     
     config.save_to_file(site_dir.join("peta.toml"))?;
-    
-    // Create default theme
-    create_default_theme(&site_dir, theme)?;
     
     // Create sample content
     create_sample_content(&site_dir)?;
@@ -72,7 +176,9 @@ pub fn init_site(name: &str, theme: &str, output: &mut OutputFormatter) -> Resul
     output.success(&format!("Site '{}' created successfully!", name));
     output.info("Next steps:");
     output.info(&format!("  cd {}", name));
-    output.info("  peta serve");
+    output.info("  make build-peta");
+    output.info("  ./target/release/peta init content article \"My First Article\"");
+    output.info("  make serve");
     
     Ok(())
 }
@@ -172,167 +278,8 @@ pub fn clean_site(all: bool, output: &mut OutputFormatter) -> Result<()> {
     Ok(())
 }
 
-fn create_default_theme(site_dir: &Path, theme: &str) -> Result<()> {
-    let theme_dir = site_dir.join("themes").join(theme);
-    
-    // Create base template
-    let base_template = r#"<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ site.title }} - {{ page.title }}</title>
-    <!-- CSS is now inline in templates -->
-</head>
-<body>
-    <header>
-        <nav>
-            <a href="{{ url('/') }}">{{ site.title }}</a>
-        </nav>
-    </header>
-    
-    <main>
-        {% block content %}{% endblock %}
-    </main>
-    
-    <footer>
-        <p>&copy; 2026 {{ site.author }}. All rights reserved.</p>
-    </footer>
-    
-    <script src="{{ asset_url('js/search.js') }}"></script>
-</body>
-</html>"#;
-    
-    std::fs::write(theme_dir.join("templates").join("base.html"), base_template)?;
-    
-    // Create index template
-    let index_template = r#"{% extends "base.html" %}
-
-{% block content %}
-<h1>{{ site.title }}</h1>
-<p>{{ site.description }}</p>
-
-{% if recent_content %}
-<h2>Recent Content</h2>
-<ul>
-{% for item in recent_content %}
-    <li><a href="{{ item.url }}">{{ item.title }}</a></li>
-{% endfor %}
-</ul>
-{% endif %}
-{% endblock %}"#;
-    
-    std::fs::write(theme_dir.join("templates").join("index.html"), index_template)?;
-    
-    // Create basic CSS
-    let css_content = r#"body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    line-height: 1.6;
-    color: #333;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-header {
-    border-bottom: 1px solid #eee;
-    padding-bottom: 20px;
-    margin-bottom: 40px;
-}
-
-nav a {
-    text-decoration: none;
-    color: #007bff;
-    font-weight: bold;
-    font-size: 1.2em;
-}
-
-footer {
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 1px solid #eee;
-    text-align: center;
-    color: #666;
-}"#;
-    
-    std::fs::write(theme_dir.join("css").join("main.css"), css_content)?;
-    
-    Ok(())
-}
-
-fn create_sample_content(site_dir: &Path) -> Result<()> {
-    let content_dir = site_dir.join("_content");
-    
-    // Create index.rst
-    let index_content = r#"Welcome to {{ site.title }}
-==========================
-
-{{ site.description }}
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-   articles/index
-   snippets/index
-   books/index
-   projects/index
-"#;
-    
-    std::fs::write(content_dir.join("index.rst"), index_content)?;
-    
-    // Create article index
-    let articles_dir = content_dir.join("articles");
-    std::fs::create_dir_all(&articles_dir)?;
-    
-    let articles_index = r#"Articles
-========
-
-.. toctree::
-   :maxdepth: 2
-   
-   getting-started
-   advanced-topics
-"#;
-    
-    std::fs::write(articles_dir.join("index.rst"), articles_index)?;
-    
-    // Create sample article
-    let sample_article = r#"Getting Started
-===============
-
-This is a sample article to get you started with {{ site.title }}.
-
-Features
---------
-
-* Fast static site generation
-* RST support with extensions
-* Component-based theming
-* Live development server
-* Search functionality
-
-Code Blocks
------------
-
-.. code-block:: rust
-
-    fn main() {
-        println!("Hello, {{ site.title }}!");
-    }
-
-Links and References
--------------------
-
-You can create links to other pages like this: `articles/getting-started`.
-
-And reference sections like this: `Features`_.
-
-.. _Features: #features
-"#;
-    
-    std::fs::write(articles_dir.join("getting-started.rst"), sample_article)?;
-    
+fn create_sample_content(_site_dir: &Path) -> Result<()> {
+    // No sample content needed - the theme's index.html serves as the homepage
     Ok(())
 }
 
@@ -742,4 +689,27 @@ fn capitalize(s: &str) -> String {
         None => String::new(),
         Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
     }
+}
+
+/// Recursively copy a directory
+fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<()> {
+    if dst.exists() {
+        std::fs::remove_dir_all(dst)?;
+    }
+    std::fs::create_dir_all(dst)?;
+    
+    for entry in std::fs::read_dir(src)? {
+        let entry = entry?;
+        let file_type = entry.file_type()?;
+        let src_path = entry.path();
+        let dst_path = dst.join(entry.file_name());
+        
+        if file_type.is_dir() {
+            copy_dir_recursive(&src_path, &dst_path)?;
+        } else {
+            std::fs::copy(&src_path, &dst_path)?;
+        }
+    }
+    
+    Ok(())
 }

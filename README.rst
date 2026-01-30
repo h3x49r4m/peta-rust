@@ -23,6 +23,7 @@ Core Features
 
 * **Component-Based Themes (V4)**: Atomic, composite, and content components with flexible theming system
 * **RST-First Architecture**: Direct RST→HTML conversion with advanced parsing capabilities
+* **Site Initialization**: Create new sites with complete peta source code and theme included
 * **Content CLI**: Initialize articles, books, snippets, and projects with template generation
 * **Math Rendering**: KaTeX integration for LaTeX equations with automatic detection and fallback support
 * **Code Highlighting**: Syntect-based syntax highlighting with 30+ language support, line numbers, and copy button
@@ -49,8 +50,40 @@ Advanced Features
 Quick Start
 ===========
 
-Build From Source
------------------
+Initialize a New Site
+--------------------
+
+.. code-block:: bash
+
+    # Clone repository
+    git clone https://github.com/h3x49r4m/peta-rust.git
+    cd peta-rust
+
+    # Build the project
+    cargo build --release
+
+    # Initialize a new site (includes peta source code and theme)
+    ./_out/target/release/peta init site myblog
+
+    # Navigate to the new site
+    cd myblog
+
+    # Build peta from source
+    make build-peta
+
+    # Initialize new content
+    ./target/release/peta init content article "Getting Started"
+    ./target/release/peta init content snippet "Code Example"
+    ./target/release/peta init content project "My Portfolio"
+
+    # Build the site
+    make build
+
+    # Start development server
+    make serve
+
+Build From Source (Existing Project)
+------------------------------------
 
 .. code-block:: bash
 
@@ -62,9 +95,9 @@ Build From Source
     cargo build --bin peta
 
     # Initialize new content
-    cargo run --bin peta -- init article "Getting Started"
-    cargo run --bin peta -- init snippet "Code Example"
-    cargo run --bin peta -- init project "My Portfolio"
+    cargo run --bin peta -- init content article "Getting Started"
+    cargo run --bin peta -- init content snippet "Code Example"
+    cargo run --bin peta -- init content project "My Portfolio"
 
     # Build the site
     cargo run --bin peta -- build
@@ -83,7 +116,7 @@ For faster development workflow:
     cargo build --release
 
     # Use the compiled binary directly (much faster than cargo run)
-    ./target/release/peta init article "My Article"
+    ./target/release/peta init content article "My Article"
     ./target/release/peta build
     ./target/release/peta serve
 
@@ -91,174 +124,76 @@ For faster development workflow:
     cargo install --path .
 
     # Then use directly
-    peta init article "My Article"
+    peta init content article "My Article"
     peta build
     peta serve
 
 Build Commands
 ==============
 
+Site Initialization Commands
+----------------------------
+
+.. code-block:: bash
+
+    # Initialize a new site with default theme
+    peta init site myblog
+
+    # Initialize a new site with custom theme
+    peta init site --theme custom myblog
+
+Content Creation Commands
+--------------------------
+
 .. code-block:: bash
 
     # Initialize new content (article/book/snippet/project)
-    cargo run --bin peta -- init article "My Article Title"
-    cargo run --bin peta -- init book "My Book Title"
-    cargo run --bin peta -- init snippet "My Snippet Title"
-    cargo run --bin peta -- init project "My Project Title"
+    peta init content article "My Article Title"
+    peta init content book "My Book Title"
+    peta init content snippet "My Snippet Title"
+    peta init content project "My Project Title"
+
+Build and Serve Commands
+-------------------------
+
+.. code-block:: bash
 
     # Build the site
-    cargo run --bin peta -- build
+    peta build
 
     # Start development server (default port 3566)
-    cargo run --bin peta -- serve
+    peta serve
 
     # Start server on custom port
-    cargo run --bin peta -- serve --port 8080
+    peta serve --port 8080
 
     # Start server and open browser
-    cargo run --bin peta -- serve --port 3566 --open
+    peta serve --port 3566 --open
 
     # Clean build artifacts
-    cargo run --bin peta -- clean
+    peta clean
 
-Project Structure
-=================
+Makefile Commands (New Sites)
+-----------------------------
 
-::
+When you create a new site with ``peta init site``, a Makefile is included:
 
-    peta-rust/
-    ├── Cargo.toml                    # Workspace configuration
-    ├── peta.toml                     # Site configuration
-    ├── README.rst                    # This file
-    ├── LICENSE                       # Apache 2.0 License
-    ├── Makefile                      # Build automation
-    ├── _content/                     # Content directory
-    │   ├── articles/                 # Blog posts and articles
-    │   ├── books/                    # Multi-section books
-    │   ├── projects/                 # Portfolio projects
-    │   └── snippets/                 # Code snippets gallery
-    ├── themes/                       # Theme system (V4)
-    │   └── default/
-    │       ├── README.md             # Theme documentation
-    │       ├── theme.yaml            # Theme configuration
-    │       ├── components/           # Component-based themes
-    │       │   ├── atomic/           # Atomic components (buttons, inputs, etc.)
-    │       │   │   ├── search_bar/
-    │       │   │   ├── search_results/
-    │       │   │   ├── tag_cloud/
-    │       │   │   └── ...
-    │       │   ├── composite/        # Composite components (header, footer, etc.)
-    │       │   │   ├── header/
-    │       │   │   ├── footer/
-    │       │   │   └── ...
-    │       │   └── content/          # Content components
-    │       ├── templates/            # HTML templates
-    │       │   ├── base.html         # Base template
-    │       │   ├── index.html        # Homepage
-    │       │   ├── search.html       # Search page
-    │       │   ├── articles.html     # Articles listing
-    │       │   ├── article.html      # Article detail
-    │       │   └── ...
-    │       └── assets/               # Theme assets
-    │           ├── css/              # Stylesheets
-    │           └── js/               # JavaScript
-    ├── _out/                         # Generated static site
-    │   └── dist/                     # Production build output
-    ├── docs/                         # Documentation
-    │   ├── architecture/             # Architecture documentation
-    │   └── features/                 # Feature documentation
-    │       ├── cli/
-    │       ├── codeblocks/
-    │       ├── components/
-    │       ├── css/
-    │       ├── embedded_snippet_cards/
-    │       ├── math_formulas/
-    │       └── search/
-    ├── examples/                     # Example content
-    ├── peta/                         # Main package
-    │   ├── Cargo.toml                # Package configuration
-    │   └── src/
-    │       ├── main.rs               # CLI entry point
-    │       ├── lib.rs                # Core library
-    │       ├── cli/                  # Command-line interface
-    │       │   ├── args.rs           # CLI argument parsing
-    │       │   ├── commands.rs       # CLI commands
-    │       │   ├── component_commands.rs  # Component commands
-    │       │   ├── mod.rs            # CLI module
-    │       │   └── output.rs         # Output handling
-    │       ├── components/           # Component system
-    │       │   ├── config.rs         # Component configuration
-    │       │   ├── discovery.rs      # Component discovery
-    │       │   ├── loader.rs         # Component loader
-    │       │   ├── manager.rs        # Component manager
-    │       │   ├── mod.rs            # Components module
-    │       │   ├── registry.rs       # Component registry
-    │       │   ├── renderer.rs       # Component renderer
-    │       │   ├── theme.rs          # Theme management
-    │       │   └── version.rs        # Version management
-    │       ├── content/              # Content processing
-    │       │   ├── metadata.rs       # Content metadata
-    │       │   ├── mod.rs            # Content module
-    │       │   ├── resolver.rs       # Content resolver
-    │       │   ├── taxonomy.rs       # Taxonomy management
-    │       │   └── rst/              # RST processing
-    │       │       ├── book_toc_generator.rs
-    │       │       ├── cross_ref.rs
-    │       │       ├── directives.rs
-    │       │       ├── mod.rs
-    │       │       ├── parser.rs
-    │       │       ├── toc_generator.rs
-    │       │       ├── code_blocks/
-    │       │       ├── embedded_snippet_cards/
-    │       │       └── math_formulas/
-    │       ├── core/                 # Core engine
-    │       │   ├── builder.rs        # Site builder
-    │       │   ├── config.rs         # Configuration
-    │       │   ├── error.rs          # Error types
-    │       │   ├── mod.rs            # Core module
-    │       │   ├── site.rs           # Site structure
-    │       │   └── theme.rs          # Theme handling
-    │       ├── deploy/               # Deployment tools
-    │       │   ├── github.rs         # GitHub Pages deployment
-    │       │   ├── mod.rs            # Deploy module
-    │       │   ├── netlify.rs        # Netlify deployment
-    │       │   ├── s3.rs             # S3 deployment
-    │       │   └── vercel.rs         # Vercel deployment
-    │       ├── search/               # Search functionality
-    │       │   ├── indexer.rs        # Search indexer
-    │       │   ├── mod.rs            # Search module
-    │       │   ├── query.rs          # Query processing
-    │       │   └── ranking.rs        # Ranking algorithm
-    │       ├── server/               # Development server
-    │       │   ├── dev_server.rs     # Dev server implementation
-    │       │   ├── file_watcher.rs   # File watching
-    │       │   ├── livereload.rs     # Live reload
-    │       │   ├── mod.rs            # Server module
-    │       │   ├── websocket.rs      # WebSocket support
-    │       │   └── static/           # Static files
-    │       ├── templates/            # Template engine
-    │       │   ├── engine.rs         # Template engine
-    │       │   ├── filters.rs        # Template filters
-    │       │   ├── functions.rs      # Template functions
-    │       │   ├── mod.rs            # Templates module
-    │       │   └── renderer.rs       # Template renderer
-    │       ├── assets/               # Asset processing
-    │       │   ├── css_generator.rs  # CSS generation
-    │       │   ├── css.rs            # CSS utilities
-    │       │   ├── images.rs         # Image processing
-    │       │   ├── js_generator.rs   # JS generation
-    │       │   ├── js.rs             # JS utilities
-    │       │   ├── minifier.rs       # Asset minification
-    │       │   ├── mod.rs            # Assets module
-    │       │   └── pipeline.rs       # Asset pipeline
-    │       └── utils/                # Utilities
-    │           ├── cache.rs          # Caching utilities
-    │           ├── file.rs           # File utilities
-    │           ├── http.rs           # HTTP utilities
-    │           ├── mod.rs            # Utils module
-    │           └── progress.rs       # Progress reporting
-    └── tests/                        # Test suite
-        └── component_discovery_integration.rs
+.. code-block:: bash
+
+    # Build peta from source
+    make build-peta
+
+    # Build the site
+    make build
+
+    # Start development server
+    make serve
+
+    # Clean build artifacts
+    make clean
+
+    # Show available commands
+    make help
 
 Configuration
 =============
