@@ -586,7 +586,7 @@ console.log('Theme "{}" loaded');"#;
 
 /// Generate template content based on content type
 fn generate_template(content_type: &str, title: &str) -> Result<String> {
-    let date = chrono::Utc::now().format("%Y-%m-%dT00:00:00").to_string();
+    let date = chrono::Utc::now().format("%Y-%m-%dT%H:%M:%S").to_string();
     
     match content_type {
         "article" => Ok(format!(
