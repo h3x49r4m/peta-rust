@@ -3,6 +3,7 @@
 use crate::content::ContentMetadata;
 use crate::content::ContentType;
 use crate::core::Result;
+use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 
 /// Metadata extractor
@@ -35,10 +36,13 @@ impl MetadataExtractor {
             .map(|s| ContentType::from_string(s))
             .unwrap_or(ContentType::Article);
         
-        let date = frontmatter.get("date")
+        let date_str = frontmatter.get("date")
             .and_then(|v| v.as_str())
             .unwrap_or("")
             .to_string();
+        
+        // Parse datetime from date string
+        let date_time = Self::parse_datetime(&date_str);
         
         let tags = frontmatter.get("tags")
             .and_then(|v| v.as_array())
@@ -71,13 +75,35 @@ impl MetadataExtractor {
             id,
             title,
             content_type,
-            date,
+            date: date_str,
+            date_time,
             tags,
             author,
             excerpt,
             url,
             extra: HashMap::new(),
         })
+    }
+    
+    /// Parse datetime from date string
+    /// Supports formats: "YYYY-MM-DD" and "YYYY-MM-DDTHH:MM:SS"
+    fn parse_datetime(date_str: &str) -> Option<DateTime<Utc>> {
+        if date_str.is_empty() {
+            return None;
+        }
+        
+        // Try ISO 8601 format with time (YYYY-MM-DDTHH:MM:SS)
+        if let Ok(dt) = DateTime::parse_from_rfc3339(&format!("{}Z", date_str)) {
+            return Some(dt.with_timezone(&Utc));
+        }
+        
+        // Try simple date format (YYYY-MM-DD) and append midnight time
+        if let Ok(naive_date) = chrono::NaiveDate::parse_from_str(date_str, "%Y-%m-%d") {
+            let naive_datetime = naive_date.and_hms_opt(0, 0, 0)?;
+            return Some(DateTime::from_naive_utc_and_offset(naive_datetime, Utc));
+        }
+        
+        None
     }
     
     /// Generate URL from title and content type

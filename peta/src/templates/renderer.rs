@@ -57,7 +57,15 @@ impl HtmlRenderer {
         
         // Add recent content
         let mut recent_content = content.to_vec();
-        recent_content.sort_by(|a, b| b.metadata.date.cmp(&a.metadata.date));
+        recent_content.sort_by(|a, b| {
+            // Use date_time for sorting if available, otherwise fall back to date string
+            match (&a.metadata.date_time, &b.metadata.date_time) {
+                (Some(dt_a), Some(dt_b)) => dt_b.cmp(dt_a),
+                (Some(_), None) => std::cmp::Ordering::Less,
+                (None, Some(_)) => std::cmp::Ordering::Greater,
+                (None, None) => b.metadata.date.cmp(&a.metadata.date),
+            }
+        });
         recent_content.truncate(10);
         context.insert("recent_content", &recent_content);
         

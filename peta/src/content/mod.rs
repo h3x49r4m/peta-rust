@@ -7,6 +7,7 @@ pub mod taxonomy;
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use chrono::{DateTime, Utc};
 
 /// Processed article with math detection
 #[derive(Debug, Clone)]
@@ -25,6 +26,7 @@ pub struct ContentMetadata {
     pub title: String,
     pub content_type: ContentType,
     pub date: String,
+    pub date_time: Option<DateTime<Utc>>,
     pub tags: Vec<String>,
     pub author: Option<String>,
     pub excerpt: Option<String>,
