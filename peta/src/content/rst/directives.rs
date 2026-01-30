@@ -143,3 +143,31 @@ impl DirectiveHandler for DiagramHandler {
         self.renderer.render(diagram_type, &content, title)
     }
 }
+
+/// Music score directive handler
+pub struct MusicScoreHandler {
+    renderer: crate::content::rst::music_scores::MusicScoreRenderer,
+}
+
+impl MusicScoreHandler {
+    pub fn new() -> Result<Self> {
+        Ok(Self {
+            renderer: crate::content::rst::music_scores::MusicScoreRenderer::new()?,
+        })
+    }
+}
+
+impl DirectiveHandler for MusicScoreHandler {
+    fn handle(&mut self, score_type: &str, content: &str, options: &std::collections::HashMap<String, String>) -> Result<String> {
+        // Clean up the music score content
+        let content = content
+            .replace("<p>", "")
+            .replace("</p>", "\n");
+
+        // Extract title from options
+        let title = options.get("title").map(|t| t.as_str());
+
+        // Render the music score
+        self.renderer.render(score_type, &content, title)
+    }
+}

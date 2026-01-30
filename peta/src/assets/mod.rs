@@ -13,5 +13,5 @@ pub use js::JsProcessor;
 pub use images::ImageProcessor;
 pub use minifier::Minifier;
 pub use pipeline::AssetPipeline;
-pub use css_generator::{CssGenerator, CssConfig, DiagramCssGenerator};
-pub use js_generator::{JsGenerator, JsConfig, DiagramJsGenerator};
+pub use css_generator::{CssGenerator, CssConfig, DiagramCssGenerator, MusicScoreCssGenerator};
+pub use js_generator::{JsGenerator, JsConfig, DiagramJsGenerator, MusicScoreJsGenerator};

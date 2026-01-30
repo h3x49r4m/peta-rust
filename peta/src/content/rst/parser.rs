@@ -42,6 +42,11 @@ impl RstParser {
             Box::new(crate::content::rst::directives::DiagramHandler::new()
                 .map_err(|e| Error::Content(format!("Failed to create DiagramHandler: {}", e)))?),
         );
+        directive_handlers.insert(
+            "musicscore".to_string(),
+            Box::new(crate::content::rst::directives::MusicScoreHandler::new()
+                .map_err(|e| Error::Content(format!("Failed to create MusicScoreHandler: {}", e)))?),
+        );
 
         Ok(Self {
             math_renderer: MathRenderer::new(),

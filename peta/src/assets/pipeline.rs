@@ -119,6 +119,9 @@ impl AssetPipeline {
         // Generate diagram assets (from Rust)
         self.generate_diagram_assets()?;
 
+        // Generate music score assets (from Rust)
+        self.generate_music_score_assets()?;
+
         // Process component assets
         self.process_component_assets()?;
 
@@ -236,6 +239,31 @@ impl AssetPipeline {
             .map_err(|e| Error::asset(format!("Failed to create diagram JS directory: {}", e)))?;
         fs::write(&js_output_path, js_content)
             .map_err(|e| Error::asset(format!("Failed to write diagrams.js: {}", e)))?;
+
+        Ok(())
+    }
+
+    /// Generate music score CSS and JS from Rust generators
+    fn generate_music_score_assets(&mut self) -> Result<()> {
+        // Generate music score CSS
+        let css_generator = crate::assets::css_generator::MusicScoreCssGenerator::new()?;
+        let css_content = css_generator.generate()?;
+
+        let css_output_path = self.output_dir.join("css").join("music-scores.css");
+        fs::create_dir_all(css_output_path.parent().unwrap())
+            .map_err(|e| Error::asset(format!("Failed to create music score CSS directory: {}", e)))?;
+        fs::write(&css_output_path, css_content)
+            .map_err(|e| Error::asset(format!("Failed to write music-scores.css: {}", e)))?;
+
+        // Generate music score JS
+        let js_generator = crate::assets::js_generator::MusicScoreJsGenerator::new()?;
+        let js_content = js_generator.generate()?;
+
+        let js_output_path = self.output_dir.join("js").join("music-scores.js");
+        fs::create_dir_all(js_output_path.parent().unwrap())
+            .map_err(|e| Error::asset(format!("Failed to create music score JS directory: {}", e)))?;
+        fs::write(&js_output_path, js_content)
+            .map_err(|e| Error::asset(format!("Failed to write music-scores.js: {}", e)))?;
 
         Ok(())
     }

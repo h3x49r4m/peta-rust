@@ -1287,3 +1287,223 @@ impl Default for DiagramCssGenerator {
         Self::new().expect("Failed to create DiagramCssGenerator")
     }
 }
+
+/// Configuration for music score CSS generation
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MusicScoreCssConfig {
+    /// Border color
+    pub border_color: String,
+    /// Border radius
+    pub border_radius: String,
+    /// Background color
+    pub background_color: String,
+    /// Shadow
+    pub shadow: String,
+    /// Dark mode border color
+    pub dark_border_color: String,
+    /// Dark mode background color
+    pub dark_background_color: String,
+}
+
+impl Default for MusicScoreCssConfig {
+    fn default() -> Self {
+        Self {
+            border_color: "#e5e7eb".to_string(),
+            border_radius: "0.75rem".to_string(),
+            background_color: "#ffffff".to_string(),
+            shadow: "0 1px 3px rgba(0, 0, 0, 0.1)".to_string(),
+            dark_border_color: "#374151".to_string(),
+            dark_background_color: "#1f2937".to_string(),
+        }
+    }
+}
+
+/// CSS generator for music score styling
+pub struct MusicScoreCssGenerator {
+    /// Configuration
+    config: MusicScoreCssConfig,
+}
+
+impl MusicScoreCssGenerator {
+    /// Create a new music score CSS generator
+    pub fn new() -> Result<Self> {
+        Ok(Self {
+            config: MusicScoreCssConfig::default(),
+        })
+    }
+
+    /// Create a CSS generator with custom configuration
+    pub fn with_config(config: MusicScoreCssConfig) -> Result<Self> {
+        Ok(Self { config })
+    }
+
+    /// Generate complete CSS for music scores
+    pub fn generate(&self) -> Result<String> {
+        let mut css = String::new();
+
+        css.push_str("/* Music Score Styles */\n\n");
+
+        // Base styles
+        css.push_str(&self.generate_base_styles());
+
+        // SVG styles
+        css.push_str(&self.generate_svg_styles());
+
+        // Download button styles
+        css.push_str(&self.generate_download_button_styles());
+
+        // Dark mode styles
+        css.push_str(&self.generate_dark_mode_styles());
+
+        // Responsive styles
+        css.push_str(&self.generate_responsive_styles());
+
+        Ok(css)
+    }
+
+    /// Generate base styles
+    fn generate_base_styles(&self) -> String {
+        format!(
+            r#"
+.music-score-container {{
+  margin: 2rem 0;
+  padding: 1.5rem;
+  padding-top: 3rem;
+  border: 1px solid {};
+  border-radius: {};
+  background: {};
+  box-shadow: {};
+  overflow-x: auto;
+  position: relative;
+}}
+"#,
+            self.config.border_color,
+            self.config.border_radius,
+            self.config.background_color,
+            self.config.shadow
+        )
+    }
+
+    /// Generate SVG styles
+    fn generate_svg_styles(&self) -> String {
+        r#"
+.music-score-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+.music-score-svg text {
+  font-family: inherit;
+}
+"#
+        .to_string()
+    }
+
+    /// Generate download button styles
+    fn generate_download_button_styles(&self) -> String {
+        r#"
+.music-score-download {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.music-score-download:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #111827;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.music-score-download:active {
+  background: #f3f4f6;
+  transform: translateY(1px);
+}
+
+.music-score-download svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+"#
+        .to_string()
+    }
+
+    /// Generate dark mode styles
+    fn generate_dark_mode_styles(&self) -> String {
+        format!(
+            r#"
+@media (prefers-color-scheme: dark) {{
+  .music-score-container {{
+    border-color: {};
+    background: {};
+  }}
+  
+  .music-score-download {{
+    background: #1f2937;
+    border-color: #374151;
+    color: #e5e7eb;
+  }}
+  
+  .music-score-download:hover {{
+    background: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }}
+}}
+"#,
+            self.config.dark_border_color,
+            self.config.dark_background_color
+        )
+    }
+
+    /// Generate responsive styles
+    fn generate_responsive_styles(&self) -> String {
+        r#"
+@media (max-width: 768px) {
+  .music-score-container {
+    padding: 1rem;
+    padding-top: 2.5rem;
+    margin: 1rem 0;
+  }
+  
+  .music-score-download {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.75rem;
+  }
+}
+"#
+        .to_string()
+    }
+
+    /// Set configuration
+    pub fn set_config(&mut self, config: MusicScoreCssConfig) {
+        self.config = config;
+    }
+
+    /// Get configuration
+    pub fn config(&self) -> &MusicScoreCssConfig {
+        &self.config
+    }
+}
+
+impl Default for MusicScoreCssGenerator {
+    fn default() -> Self {
+        Self::new().expect("Failed to create MusicScoreCssGenerator")
+    }
+}

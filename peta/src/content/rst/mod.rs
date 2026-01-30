@@ -21,3 +21,7 @@ pub use embedded_snippet_cards::*;
 // Diagrams module
 pub mod diagrams;
 pub use diagrams::*;
+
+// Music scores module
+pub mod music_scores;
+pub use music_scores::{MusicScore, MusicScoreParser, MusicScoreRenderer, AbcScore, AbcVoice, MusicScoreType};
