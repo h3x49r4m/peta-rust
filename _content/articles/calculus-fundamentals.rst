@@ -1,6 +1,6 @@
 ---
 title: "Calculus Fundamentals"
-date: 2023-02-20
+date: 2023-02-20T00:00:00
 tags: ["mathematics", "calculus", "analysis"]
 author: "Prof. John Doe"
 ---

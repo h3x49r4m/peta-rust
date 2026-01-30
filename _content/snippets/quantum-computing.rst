@@ -1,6 +1,6 @@
 ---
 title: "Quantum Computing Applications"
-date: 2023-01-14
+date: 2023-01-14T00:00:00
 tags: ["physics", "quantum", "computing", "technology"]
 snippet_id: "quantum-computing"
 ---

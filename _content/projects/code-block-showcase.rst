@@ -1,6 +1,6 @@
 ---
 title: Code Block Showcase
-date: 2026-01-20
+date: 2026-01-20T00:00:00
 tags: [showcase, code-blocks, syntax-highlighting]
 author: Peta Team
 description: A comprehensive showcase of code blocks with various programming languages and syntax highlighting

@@ -1,6 +1,6 @@
 ---
 title: "Introduction to Quantum Mechanics"
-date: 2023-01-15
+date: 2023-01-15T00:00:00
 tags: ["physics", "quantum", "science"]
 author: "Dr. Jane Smith"
 ---

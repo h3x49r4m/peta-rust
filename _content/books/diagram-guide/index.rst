@@ -1,6 +1,6 @@
 ---
 title: "Complete Diagram Guide"
-date: 2026-01-30
+date: 2026-01-30T00:00:00
 tags: ["diagrams", "rst", "documentation"]
 author: "Peta Team"
 description: "A comprehensive guide to creating diagrams in Peta"

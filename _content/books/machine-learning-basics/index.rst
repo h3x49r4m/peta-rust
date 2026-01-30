@@ -1,6 +1,6 @@
 ---
 title: "Machine Learning Basics"
-date: 2026-01-20
+date: 2026-01-20T00:00:00
 tags: ["machine-learning", "python", "ai", "data-science"]
 author: "Dr. Jane Smith"
 description: "A comprehensive introduction to machine learning fundamentals with practical examples"

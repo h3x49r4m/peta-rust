@@ -1,6 +1,6 @@
 ---
 title: "Integrals"
-date: 2023-02-16
+date: 2023-02-16T00:00:00
 tags: ["mathematics", "calculus", "integrals"]
 snippet_id: "integrals"
 ---

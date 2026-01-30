@@ -1,6 +1,6 @@
 ---
 title: "Derivatives"
-date: 2023-02-15
+date: 2023-02-15T00:00:00
 tags: ["mathematics", "calculus", "derivatives"]
 snippet_id: "derivatives"
 ---

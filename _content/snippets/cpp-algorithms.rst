@@ -1,6 +1,6 @@
 ---
 title: C++ Algorithms
-date: 2026-01-19
+date: 2026-01-19T00:00:00
 tags: [cpp, algorithms, data-structures]
 author: "Anonymous"
 ---

@@ -1,6 +1,6 @@
 ---
 title: "The Wave Function"
-date: 2023-01-10
+date: 2023-01-10T00:00:00
 tags: ["physics", "quantum", "mathematics"]
 snippet_id: "wave-function"
 ---

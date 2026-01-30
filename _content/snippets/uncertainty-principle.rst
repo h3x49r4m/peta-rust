@@ -1,6 +1,6 @@
 ---
 title: "Uncertainty Principle"
-date: 2023-01-12
+date: 2023-01-12T00:00:00
 tags: ["physics", "quantum", "principles"]
 snippet_id: "uncertainty-principle"
 ---

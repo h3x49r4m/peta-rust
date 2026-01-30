@@ -1,6 +1,6 @@
 ---
 title: "Diagram Showcase Project"
-date: 2026-01-30
+date: 2026-01-30T00:00:00
 tags: ["diagrams", "visualization", "documentation", "rst"]
 github_url: "https://github.com/example/diagram-showcase"
 demo_url: "https://diagram-showcase.example.com"

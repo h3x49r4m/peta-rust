@@ -1,6 +1,6 @@
 ---
 title: "Deep Learning with Python"
-date: 2023-03-10
+date: 2023-03-10T00:00:00
 tags: ["deep-learning", "python", "machine-learning", "neural-networks", "ai"]
 author: "François Chollet"
 description: "A comprehensive guide to deep learning using Python and Keras"

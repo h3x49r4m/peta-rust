@@ -1,6 +1,6 @@
 ---
 title: "Interactive Mathematical Visualizer"
-date: 2023-02-15
+date: 2023-02-15T00:00:00
 tags: ["mathematics", "visualization", "education", "webgl"]
 github_url: "https://github.com/example/math-visualizer"
 demo_url: "https://math-visualizer.example.com"

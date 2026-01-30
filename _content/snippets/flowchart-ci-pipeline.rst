@@ -1,6 +1,6 @@
 ---
 title: "CI/CD Pipeline"
-date: 2026-01-30
+date: 2026-01-30T00:00:00
 tags: ["diagrams", "flowchart", "cicd"]
 author: "Peta"
 ---

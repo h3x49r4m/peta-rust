@@ -1,6 +1,6 @@
 ---
 title: "Quantum Computing: A Complete Guide"
-date: 2023-01-15
+date: 2023-01-15T00:00:00
 tags: ["quantum-computing", "physics", "computer-science", "guide"]
 author: "Dr. Eleanor Rieffel & Wolfgang Polak"
 description: "A comprehensive guide to quantum computing, from basic concepts to advanced algorithms"
