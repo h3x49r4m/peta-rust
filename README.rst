@@ -68,7 +68,7 @@ Quick Start
 ===========
 
 Initialize a New Site
---------------------
+---------------------
 
 .. code-block:: bash
 
@@ -637,7 +637,7 @@ ABC notation support for music score rendering:
         :title: Simple Melody
 
 Cross-References
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 Automatic linking between documents:
 
@@ -649,7 +649,7 @@ Architecture
 ============
 
 Project Structure
-----------------
+-----------------
 
 ::
 
@@ -745,7 +745,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 5. Open a Pull Request
 
 Acknowledgments
-==============
+===============
 
 * Rust community for excellent tooling and libraries
 * reStructuredText specification and community
