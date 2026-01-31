@@ -3,6 +3,7 @@ title = "Peta"
 description = "High-Performance Static Site Generator"
 url = "https://h3x49r4m.github.io/peta-rust"
 author = "Peta Team"
+base_url = ""
 
 [social]
 github = "https://github.com/h3x49r4m/peta-rust"

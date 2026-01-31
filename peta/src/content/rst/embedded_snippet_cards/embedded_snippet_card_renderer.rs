@@ -8,6 +8,8 @@ use crate::core::Result;
 pub struct EmbeddedSnippetCardRenderer {
     /// Configuration
     config: EmbeddedSnippetCardConfig,
+    /// Base URL for generating links
+    base_url: String,
 }
 
 impl EmbeddedSnippetCardRenderer {
@@ -15,12 +17,24 @@ impl EmbeddedSnippetCardRenderer {
     pub fn new() -> Result<Self> {
         Ok(Self {
             config: EmbeddedSnippetCardConfig::default(),
+            base_url: String::new(),
+        })
+    }
+
+    /// Create a new embedded snippet card renderer with base URL
+    pub fn with_base_url(base_url: String) -> Result<Self> {
+        Ok(Self {
+            config: EmbeddedSnippetCardConfig::default(),
+            base_url,
         })
     }
 
     /// Create a new embedded snippet card renderer with custom configuration
     pub fn with_config(config: EmbeddedSnippetCardConfig) -> Result<Self> {
-        Ok(Self { config })
+        Ok(Self {
+            config,
+            base_url: String::new(),
+        })
     }
 
     /// Render an embedded snippet card
@@ -69,9 +83,14 @@ impl EmbeddedSnippetCardRenderer {
         // Card footer with link
         if self.config.show_footer {
             html.push_str("  <div class=\"embedded-snippet-footer\">\n");
+            let url = if self.base_url.is_empty() {
+                format!("/{}", snippet.metadata.url)
+            } else {
+                format!("{}/{}", self.base_url.trim_end_matches('/'), snippet.metadata.url)
+            };
             html.push_str(&format!(
-                r#"    <a href="/{}" class="embedded-snippet-link">📄 View full snippet →</a>"#,
-                snippet.metadata.url
+                r#"    <a href="{}" class="embedded-snippet-link">📄 View full snippet →</a>"#,
+                url
             ));
             html.push('\n');
             html.push_str("  </div>\n");

@@ -1022,8 +1022,16 @@ impl TemplateEngine {
                     .or_else(|| args.get("path"))
                     .and_then(|v| v.as_str())
                     .ok_or_else(|| tera::Error::msg("Asset path is required"))?;
+                let base_url = args.get("base_url")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
                 let clean_path = path.trim_start_matches('/');
-                Ok(Value::String(format!("/assets/{}", clean_path)))
+                let url = if base_url.is_empty() {
+                    format!("/{}", clean_path)
+                } else {
+                    format!("{}/{}", base_url.trim_end_matches('/'), clean_path)
+                };
+                Ok(Value::String(url))
             })
         );
 
@@ -1034,11 +1042,16 @@ impl TemplateEngine {
                     .or_else(|| args.get("path"))
                     .and_then(|v| v.as_str())
                     .ok_or_else(|| tera::Error::msg("URL path is required"))?;
+                let base_url = args.get("base_url")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
                 let clean_path = path.trim_start_matches('/');
                 let url = if clean_path.starts_with("http") {
                     clean_path.to_string()
-                } else {
+                } else if base_url.is_empty() {
                     format!("/{}", clean_path)
+                } else {
+                    format!("{}/{}", base_url.trim_end_matches('/'), clean_path)
                 };
                 Ok(Value::String(url))
             })

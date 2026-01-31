@@ -27,6 +27,7 @@ pub struct ChapterHeader {
 pub struct BookTocGenerator {
     #[allow(dead_code)]
     max_depth: usize,
+    base_url: String,
 }
 
 impl BookTocGenerator {
@@ -34,6 +35,24 @@ impl BookTocGenerator {
     pub fn new() -> Self {
         Self {
             max_depth: 3,
+            base_url: String::new(),
+        }
+    }
+
+    /// Create a new book TOC generator with base URL
+    pub fn with_base_url(base_url: String) -> Self {
+        Self {
+            max_depth: 3,
+            base_url,
+        }
+    }
+
+    /// Get full URL with base_url prefix
+    fn get_full_url(&self, path: &str) -> String {
+        if self.base_url.is_empty() {
+            format!("/{}", path.trim_start_matches('/'))
+        } else {
+            format!("{}/{}", self.base_url.trim_end_matches('/'), path.trim_start_matches('/'))
         }
     }
 
@@ -56,6 +75,11 @@ impl BookTocGenerator {
     /// Parse toctree directive from RST content
     fn parse_toctree(&self, content: &str, book_dir: &Path) -> Result<Vec<BookChapter>> {
         let mut chapters = Vec::new();
+        
+        // Extract book slug from directory name
+        let book_slug = book_dir.file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("book");
         
         // Find toctree directive
         let lines: Vec<&str> = content.lines().collect();
@@ -103,7 +127,7 @@ impl BookTocGenerator {
                         
                         chapters.push(BookChapter {
                             title,
-                            url: format!("{}.html", chapter_slug),
+                            url: format!("books/{}/{}.html", book_slug, chapter_slug),
                             slug: chapter_slug.to_string(),
                             order: current_order,
                             headers,
@@ -423,11 +447,15 @@ impl BookTocGenerator {
 
                 html.push_str(&format!(
 
-                    "      <a href=\"{}\" class=\"toc-chapter-link\">{}</a>\n",
+                                    "      <a href=\"{}\" class=\"toc-chapter-link\">{}</a>\n",
 
-                    chapter.url, chapter.title
+                
 
-                ));
+                                    self.get_full_url(&chapter.url), chapter.title
+
+                
+
+                                ));
 
                 html.push_str("    </div>\n");
 
@@ -529,11 +557,15 @@ impl BookTocGenerator {
 
                 html.push_str(&format!(
 
-                    "            <a href=\"{}#{}\" class=\"toc-header-link\">{}</a>\n",
+                                    "            <a href=\"{}#{}\" class=\"toc-header-link\">{}</a>\n",
 
-                    chapter_url, header.anchor, header.title
+                
 
-                ));
+                                    self.get_full_url(chapter_url), header.anchor, header.title
+
+                
+
+                                ));
 
                 html.push_str("          </div>\n");
 
@@ -565,11 +597,15 @@ impl BookTocGenerator {
 
                 html.push_str(&format!(
 
-                    "          <a href=\"{}#{}\" class=\"toc-header-link\">{}</a>\n",
+                                    "          <a href=\"{}#{}\" class=\"toc-header-link\">{}</a>\n",
 
-                    chapter_url, header.anchor, header.title
+                
 
-                ));
+                                    self.get_full_url(chapter_url), header.anchor, header.title
+
+                
+
+                                ));
 
             }
 

@@ -21,6 +21,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set base_url for GitHub Pages
+        run: sed -i 's/base_url = ""/base_url = "\/peta-rust"/' peta.toml
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 

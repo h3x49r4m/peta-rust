@@ -181,7 +181,9 @@ impl SiteBuilder {
                 
                 if let Some(snippet) = resolver.find_snippet(snippet_id) {
                     // Render the actual snippet card
-                    let renderer = crate::content::rst::EmbeddedSnippetCardRenderer::new()?;
+                    let renderer = crate::content::rst::EmbeddedSnippetCardRenderer::with_base_url(
+                        self.config.site.base_url.clone()
+                    )?;
                     let rendered_card = renderer.render(snippet)?;
 
                     // Replace the placeholder with the rendered card
@@ -689,7 +691,7 @@ impl SiteBuilder {
         }
         
         // Generate book TOC
-        let generator = BookTocGenerator::new();
+        let generator = BookTocGenerator::with_base_url(self.config.site.base_url.clone());
         let chapters = generator.generate(&book_dir)?;
         
         // Render TOC as HTML
@@ -795,28 +797,39 @@ impl SiteBuilder {
     fn generate_site_context(&self, contexts_dir: &PathBuf) -> Result<()> {
         use chrono::Utc;
         
+        let base_url = &self.config.site.base_url;
+        
         // Build navigation structure
         let mut main_nav = Vec::new();
         let mut footer_nav = Vec::new();
         
+        // Helper function to add base_url to paths
+        let add_base = |path: &str| -> String {
+            if base_url.is_empty() {
+                path.to_string()
+            } else {
+                format!("{}/{}", base_url.trim_end_matches('/'), path.trim_start_matches('/'))
+            }
+        };
+        
         // Add main navigation items
         main_nav.push(serde_json::json!({
             "title": "Home",
-            "url": "/",
+            "url": add_base("/"),
             "icon": "home",
             "weight": 10
         }));
         
         main_nav.push(serde_json::json!({
             "title": "Documentation",
-            "url": "/docs/",
+            "url": add_base("/docs/"),
             "icon": "book",
             "weight": 20,
             "children": [
-                {"title": "Getting Started", "url": "/docs/getting-started/", "weight": 21},
-                {"title": "Components", "url": "/docs/components/", "weight": 22},
-                {"title": "Themes", "url": "/docs/themes/", "weight": 23},
-                {"title": "Deployment", "url": "/docs/deployment/", "weight": 24}
+                {"title": "Getting Started", "url": add_base("/docs/getting-started/"), "weight": 21},
+                {"title": "Components", "url": add_base("/docs/components/"), "weight": 22},
+                {"title": "Themes", "url": add_base("/docs/themes/"), "weight": 23},
+                {"title": "Deployment", "url": add_base("/docs/deployment/"), "weight": 24}
             ]
         }));
         
@@ -826,7 +839,7 @@ impl SiteBuilder {
             let title = content_type.chars().next().unwrap().to_uppercase().collect::<String>() + &content_type[1..];
             main_nav.push(serde_json::json!({
                 "title": title,
-                "url": format!("/{}/", content_type),
+                "url": add_base(&format!("/{}/", content_type)),
                 "icon": match *content_type {
                     "articles" => "file-text",
                     "books" => "book-open",
@@ -859,11 +872,11 @@ impl SiteBuilder {
                 "title": self.config.site.title,
                 "description": self.config.site.description,
                 "url": self.config.site.url,
-                "base_url": "",
+                "base_url": base_url.clone(),
                 "author": self.config.site.author,
                 "email": self.config.site.author,
-                "logo": "/assets/images/logo.svg",
-                "favicon": "/assets/images/favicon.ico",
+                "logo": add_base("/assets/images/logo.svg"),
+                "favicon": add_base("/assets/images/favicon.ico"),
                 "language": "en",
                 "timezone": "UTC",
                 "build_date": Utc::now().to_rfc3339(),

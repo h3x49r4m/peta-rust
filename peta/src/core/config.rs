@@ -60,6 +60,7 @@ pub struct SiteInfo {
     pub description: String,
     pub url: String,
     pub author: String,
+    pub base_url: String,
 }
 
 impl Default for SiteInfo {
@@ -69,6 +70,7 @@ impl Default for SiteInfo {
             description: "High-Performance Static Site Generator".to_string(),
             url: "https://example.com".to_string(),
             author: "Peta Team".to_string(),
+            base_url: String::new(),
         }
     }
 }

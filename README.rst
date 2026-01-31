@@ -239,15 +239,46 @@ Automated deployment using GitHub Actions on every push to main branch:
 
 **Setup:**
 
-1. Create GitHub Actions workflow (already included in ``.github/workflows/deploy.yml``)
-2. Enable GitHub Pages: Go to repository Settings → Pages → Build and deployment → Source: GitHub Actions
-3. Push changes - deployment happens automatically
+1. Set ``base_url`` in ``peta.toml`` for GitHub Pages (e.g., ``base_url = "/your-repo-name"``)
+2. Create GitHub Actions workflow (already included in ``.github/workflows/deploy.yml``)
+3. Enable GitHub Pages: Go to repository Settings → Pages → Build and deployment → Source: GitHub Actions
+4. Push changes to the ``deploy`` branch - deployment happens automatically
+
+**How base_url works:**
+
+The ``base_url`` configuration in ``peta.toml`` automatically adjusts URLs for different environments:
+
+* **Local Development**: Set ``base_url = ""`` in ``peta.toml``
+
+  .. code-block:: toml
+
+      [site]
+      base_url = ""
+
+  URLs resolve as ``/books.html``, ``/snippets.html``, etc.
+
+* **GitHub Pages**: Set ``base_url = "/your-repo-name"`` in ``peta.toml``
+
+  .. code-block:: toml
+
+      [site]
+      base_url = "/your-repo-name"
+
+  URLs resolve as ``/your-repo-name/books.html``, ``/your-repo-name/snippets.html``, etc.
+
+  The GitHub Actions workflow in ``.github/workflows/deploy.yml`` automatically updates this value during deployment using:
+
+  .. code-block:: yaml
+
+      - name: Set base_url for GitHub Pages
+        run: sed -i 's/base_url = ""/base_url = "\/your-repo-name"/' peta.toml
 
 **Workflow features:**
 - Caches Cargo registry, index, and build artifacts for faster builds
 - Builds peta from source
 - Generates the site in ``_out/dist``
 - Deploys to GitHub Pages automatically
+- Automatically sets ``base_url`` during deployment
 
 Build Commands
 ==============
@@ -378,6 +409,7 @@ Create a ``peta.toml`` file in your project root:
     description = "High-Performance Static Site Generator"
     url = "https://example.com"
     author = "Peta Team"
+    base_url = ""  # Set to "" for local dev, "/your-repo-name" for GitHub Pages
 
     [social]
     github = "https://github.com/username/repo"

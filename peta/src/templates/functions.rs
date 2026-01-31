@@ -28,8 +28,18 @@ impl Function for AssetFunction {
             .and_then(|v| v.as_str())
             .ok_or_else(|| tera::Error::msg("Missing 'path' argument"))?;
         
-        // Generate asset URL
-        let url = format!("/assets/{}", asset_path.trim_start_matches('/'));
+        let base_url = args.get("base_url")
+            .and_then(|v| v.as_str())
+            .unwrap_or("");
+        
+        // Generate asset URL with base_url support
+        let clean_path = asset_path.trim_start_matches('/');
+        let url = if base_url.is_empty() {
+            format!("/{}", clean_path)
+        } else {
+            format!("{}/{}", base_url.trim_end_matches('/'), clean_path)
+        };
+        
         Ok(Value::String(url))
     }
 }

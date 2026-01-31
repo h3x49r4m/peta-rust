@@ -52,8 +52,8 @@ coverage/
 *.orig
 
 # Test artifacts
-test_*.rs
-simple_test.rs
+#test_*.rs
+#simple_test.rs
 
 # Node modules (if any)
 node_modules/
