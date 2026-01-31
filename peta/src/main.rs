@@ -23,8 +23,8 @@ async fn main() -> Result<()> {
                 }
             }
         }
-        Commands::Build { content_dir, output: output_dir, theme, draft } => {
-            commands::build_site(content_dir, output_dir, theme, draft, &mut output).await?;
+        Commands::Build { content_dir, output: output_dir, theme, base_url, draft } => {
+            commands::build_site(content_dir, output_dir, theme, base_url, draft, &mut output).await?;
         }
         Commands::Serve { content_dir, port, host, open, draft } => {
             commands::serve_site(content_dir, port, &host, open, draft, &mut output).await?;

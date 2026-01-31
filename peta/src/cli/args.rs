@@ -38,6 +38,10 @@ pub enum Commands {
         #[arg(short, long)]
         theme: Option<String>,
 
+        /// Base URL for the site (default: "")
+        #[arg(long, default_value = "")]
+        base_url: String,
+
         /// Include draft content
         #[arg(long)]
         draft: bool,
