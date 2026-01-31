@@ -6,19 +6,22 @@ use std::path::Path;
 use anyhow::Result;
 
 /// Initialize new content (article/book/snippet/project)
-pub fn init_content(content_type: &str, title: &str, output: &mut OutputFormatter) -> Result<()> {
+pub fn init_content(content_type: &str, title: &str, content_dir: Option<&str>, output: &mut OutputFormatter) -> Result<()> {
+    // Determine base content directory and remove trailing slash
+    let base_dir = content_dir.unwrap_or("_content").trim_end_matches('/');
+
     // Map content type to target directory
     let target_dir = match content_type {
-        "article" => "_content/articles",
-        "book" => "_content/books",
-        "snippet" => "_content/snippets",
-        "project" => "_content/projects",
+        "article" => format!("{}/articles", base_dir),
+        "book" => format!("{}/books", base_dir),
+        "snippet" => format!("{}/snippets", base_dir),
+        "project" => format!("{}/projects", base_dir),
         _ => return Err(anyhow::anyhow!("Invalid content type: {}", content_type)),
     };
-    
+
     // Generate filename (convert title to kebab-case)
     let filename = title_to_filename(title);
-    let file_path = Path::new(target_dir).join(format!("{}.rst", filename));
+    let file_path = Path::new(&target_dir).join(format!("{}.rst", filename));
     
     // Check if file already exists
     if file_path.exists() {

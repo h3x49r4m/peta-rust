@@ -274,6 +274,12 @@ Content Creation Commands
     peta init content snippet "My Snippet Title"
     peta init content project "My Project Title"
 
+    # Initialize content with custom content directory
+    peta init content article "My Article" --content-dir /path/to/content
+    peta init content book "My Book" --content-dir /path/to/content
+    peta init content snippet "My Snippet" -d /path/to/content
+    peta init content project "My Project" -d /path/to/content
+
 Build and Serve Commands
 -------------------------
 

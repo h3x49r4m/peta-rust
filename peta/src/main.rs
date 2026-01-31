@@ -18,8 +18,8 @@ async fn main() -> Result<()> {
                 peta::cli::args::InitAction::Site { name, theme } => {
                     commands::init_site(&name, &theme, &mut output)?;
                 }
-                peta::cli::args::InitAction::Content { r#type, title } => {
-                    commands::init_content(&r#type, &title, &mut output)?;
+                peta::cli::args::InitAction::Content { r#type, title, content_dir } => {
+                    commands::init_content(&r#type, &title, content_dir.as_deref(), &mut output)?;
                 }
             }
         }

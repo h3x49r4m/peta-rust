@@ -113,6 +113,10 @@ pub enum InitAction {
         
         /// Title of the content
         title: String,
+
+        /// Content directory (default: "_content")
+        #[arg(short = 'd', long)]
+        content_dir: Option<String>,
     },
 }
 
