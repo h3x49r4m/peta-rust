@@ -131,46 +131,43 @@ Automated deployment using GitHub Actions on every push to deploy branch:
 
 **Setup:**
 
-1. Set ``base_url`` in ``peta.toml`` for GitHub Pages (e.g., ``base_url = "/your-repo-name"``)
-2. Create GitHub Actions workflow (already included in ``.github/workflows/deploy.yml``)
-3. Enable GitHub Pages: Go to repository Settings → Pages → Build and deployment → Source: GitHub Actions
-4. Push changes to the ``deploy`` branch - deployment happens automatically
+1. Create GitHub Actions workflow (already included in ``.github/workflows/deploy.yml``)
+2. Enable GitHub Pages: Go to repository Settings → Pages → Build and deployment → Source: GitHub Actions
+3. Push changes to the ``deploy`` branch - deployment happens automatically
 
 **How base_url works:**
 
-The ``base_url`` configuration in ``peta.toml`` automatically adjusts URLs for different environments:
+The ``--base-url`` CLI option allows you to specify the base URL for different environments without modifying ``peta.toml``:
 
-* **Local Development**: Set ``base_url = ""`` in ``peta.toml``
+* **Local Development**: Use default empty ``base_url``
 
-  .. code-block:: toml
+  .. code-block:: bash
 
-      [site]
-      base_url = ""
+      peta build
 
   URLs resolve as ``/books.html``, ``/snippets.html``, etc.
 
-* **GitHub Pages**: Set ``base_url = "/your-repo-name"`` in ``peta.toml``
+* **GitHub Pages**: Specify the repository name as ``base_url``
 
-  .. code-block:: toml
+  .. code-block:: bash
 
-      [site]
-      base_url = "/your-repo-name"
+      peta build --base-url "/your-repo-name"
 
   URLs resolve as ``/your-repo-name/books.html``, ``/your-repo-name/snippets.html``, etc.
 
-  The GitHub Actions workflow in ``.github/workflows/deploy.yml`` automatically updates this value during deployment using:
+  The GitHub Actions workflow in ``.github/workflows/deploy.yml`` automatically uses this option during deployment:
 
   .. code-block:: yaml
 
-      - name: Set base_url for GitHub Pages
-        run: sed -i 's/base_url = ""/base_url = "\/your-repo-name"/' peta.toml
+      - name: Build site
+        run: peta build --base-url "/your-repo-name"
 
 **Workflow features:**
 - Caches Cargo registry, index, and build artifacts for faster builds
 - Builds peta from source
 - Generates the site in ``_out/dist``
 - Deploys to GitHub Pages automatically
-- Automatically sets ``base_url`` during deployment
+- Uses ``--base-url`` option for proper URL generation
 
 Build Commands
 ==============
@@ -218,6 +215,9 @@ Build and Development Commands
 
     # Build with custom theme
     peta build --theme mytheme
+
+    # Build with base URL (for GitHub Pages or subdirectory deployment)
+    peta build --base-url "/your-repo-name"
 
     # Build including draft content
     peta build --draft
@@ -280,7 +280,7 @@ Create a ``peta.toml`` file in your project root:
     description = "High-Performance Static Site Generator"
     url = "https://example.com"
     author = "Peta Team"
-    base_url = ""  # Set to "" for local dev, "/your-repo-name" for GitHub Pages
+    base_url = ""  # Default base URL, can be overridden via --base-url CLI option
 
     [social]
     github = "https://github.com/username/repo"
