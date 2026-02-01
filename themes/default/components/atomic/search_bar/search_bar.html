@@ -1,7 +1,7 @@
 <section class="search-section{% if props.compact %} compact{% endif %}" data-component="search_bar">
     <div class="search-wrapper">
         <div class="search-container">
-            <form class="search-form" action="{{ action | default(value="/search.html") }}" method="get">
+            <form class="search-form" action="{{ url(path='search.html', base_url=base_url) }}" method="get">
                 <div class="search-input-wrapper">
                     <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="11" cy="11" r="8"/>
