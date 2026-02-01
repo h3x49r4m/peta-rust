@@ -357,6 +357,38 @@ For more details, see :doc:`docs/features/components/how_to_create_a_component`.
 Commands
 --------
 
+``peta new``
+~~~~~~~~~~~~
+
+Create a new site.
+
+.. code-block:: bash
+
+   # Create a new site with default theme
+   peta new --name my-site
+
+   # Create a new site with specific theme
+   peta new --name my-site --theme custom
+
+``peta init``
+~~~~~~~~~~~~
+
+Initialize new content or site.
+
+.. code-block:: bash
+
+   # Initialize a new site
+   peta init site --name my-site --theme default
+
+   # Initialize new content
+   peta init content --type article --title "My Article"
+   peta init content --type book --title "My Book"
+   peta init content --type snippet --title "My Snippet"
+   peta init content --type project --title "My Project"
+
+   # Initialize content with custom directory
+   peta init content --type article --title "My Article" --content-dir custom-content
+
 ``peta build``
 ~~~~~~~~~~~~~
 
@@ -364,17 +396,26 @@ Build the static site.
 
 .. code-block:: bash
 
-   # Local development
-   peta build --base-url ""
+   # Local development (default)
+   peta build
 
-   # GitHub Pages
+   # GitHub Pages deployment
    peta build --base-url "/repo-name"
 
+   # Custom content directory
+   peta build --content-dir custom-content
+
    # Custom output directory
-   peta build --output-dir "./dist"
+   peta build --output-dir ./dist
+
+   # Use specific theme
+   peta build --theme custom
 
    # Include draft content
    peta build --draft
+
+   # Combine options
+   peta build --base-url "/repo-name" --content-dir content --output-dir build --theme default --draft
 
 ``peta serve``
 ~~~~~~~~~~~~~~
@@ -383,7 +424,7 @@ Start development server with hot reload.
 
 .. code-block:: bash
 
-   # Default settings
+   # Default settings (localhost:3566)
    peta serve
 
    # Custom port
@@ -392,24 +433,69 @@ Start development server with hot reload.
    # Custom host
    peta serve --host 0.0.0.0
 
-   # Don't open browser
-   peta serve --no-open
+   # Open browser automatically
+   peta serve --open
 
-``peta component``
-~~~~~~~~~~~~~~~~~
+   # Use custom content directory
+   peta serve --content-dir custom-content
 
-Component management commands.
+   # Include draft content
+   peta serve --draft
+
+   # Combine options
+   peta serve --port 8080 --host 0.0.0.0 --open --draft
+
+``peta deploy``
+~~~~~~~~~~~~~~
+
+Deploy the site to a target platform.
 
 .. code-block:: bash
 
-   # List all components
-   peta component list
+   # Deploy to GitHub Pages (default)
+   peta deploy
 
-   # Show component details
-   peta component show navbar
+   # Deploy to specific target
+   peta deploy --target github
+   peta deploy --target netlify
+   peta deploy --target vercel
 
-   # Create new component
-   peta component create my_component
+``peta clean``
+~~~~~~~~~~~~~
+
+Clean build artifacts.
+
+.. code-block:: bash
+
+   # Clean only build artifacts
+   peta clean
+
+   # Clean all artifacts including output directory
+   peta clean --all
+
+``peta theme``
+~~~~~~~~~~~~~
+
+Theme management commands.
+
+.. code-block:: bash
+
+   # List available themes
+   peta theme list
+
+   # Create a new theme
+   peta theme create --name my-theme
+   peta theme create --name my-theme --base default
+
+   # Validate theme configuration
+   peta theme validate --name default
+
+   # Show theme information
+   peta theme info --name default
+
+   # Install theme from repository
+   peta theme install --source https://github.com/user/theme
+   peta theme install --source https://github.com/user/theme --name my-theme
 
 URL System
 ----------
