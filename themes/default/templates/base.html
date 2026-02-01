@@ -269,7 +269,7 @@
         window.closeSnippetModal = closeModal;
 
         // Set base_url for JavaScript to use
-        window.PETA_BASE_URL = "{{ base_url }}";
+        window.PETA_BASE_URL = "{{ base_url | safe }}";
         
         // Initialize on DOM content loaded
         if (document.readyState === 'loading') {
