@@ -38,6 +38,12 @@ impl TagCollector {
     }
 
     fn collect_from_directory(&self, dir_path: &str) -> Value {
+        // Check if directory exists before attempting to scan
+        use std::path::Path;
+        if !Path::new(dir_path).exists() {
+            return serde_json::Value::Array(vec![]);
+        }
+        
         if let Ok(cache) = self.cache.read() {
             if let Some(cached) = cache.get(dir_path) {
                 return cached.clone();
