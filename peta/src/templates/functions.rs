@@ -32,14 +32,7 @@ impl Function for AssetFunction {
             .and_then(|v| v.as_str())
             .unwrap_or("");
         
-        // Generate asset URL with base_url support
-        let clean_path = asset_path.trim_start_matches('/');
-        let url = if base_url.is_empty() {
-            format!("/{}", clean_path)
-        } else {
-            format!("{}/{}", base_url.trim_end_matches('/'), clean_path)
-        };
-        
+        let url = crate::utils::url::build_url(base_url, asset_path);
         Ok(Value::String(url))
     }
 }

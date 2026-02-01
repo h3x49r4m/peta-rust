@@ -49,11 +49,7 @@ impl BookTocGenerator {
 
     /// Get full URL with base_url prefix
     fn get_full_url(&self, path: &str) -> String {
-        if self.base_url.is_empty() {
-            format!("/{}", path.trim_start_matches('/'))
-        } else {
-            format!("{}/{}", self.base_url.trim_end_matches('/'), path.trim_start_matches('/'))
-        }
+        crate::utils::url::build_url(&self.base_url, path)
     }
 
     /// Generate book TOC from index.rst file

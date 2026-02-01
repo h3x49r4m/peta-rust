@@ -83,11 +83,7 @@ impl EmbeddedSnippetCardRenderer {
         // Card footer with link
         if self.config.show_footer {
             html.push_str("  <div class=\"embedded-snippet-footer\">\n");
-            let url = if self.base_url.is_empty() {
-                format!("/{}", snippet.metadata.url)
-            } else {
-                format!("{}/{}", self.base_url.trim_end_matches('/'), snippet.metadata.url)
-            };
+            let url = crate::utils::url::build_url(&self.base_url, &snippet.metadata.url);
             html.push_str(&format!(
                 r#"    <a href="{}" class="embedded-snippet-link">📄 View full snippet →</a>"#,
                 url

@@ -237,7 +237,7 @@ impl SiteBuilder {
     
             )?;
     
-            let template_engine = TemplateEngine::new_with_components(&theme, self.component_registry.clone())?;        
+            let template_engine = TemplateEngine::new_with_components(&theme, self.component_registry.clone(), self.config.clone())?;        
     
             
     
@@ -513,7 +513,8 @@ impl SiteBuilder {
             &assets_dir,
         );
         
-        asset_pipeline.set_component_registry(self.component_registry.clone());        if let Err(e) = asset_pipeline.process_assets() {
+        asset_pipeline.set_component_registry(self.component_registry.clone());
+        asset_pipeline.set_base_url(self.config.site.base_url.clone());        if let Err(e) = asset_pipeline.process_assets() {
             eprintln!("Warning: Failed to process theme assets: {}", e);
             // Fallback to basic asset copying
             self.copy_theme_assets("css", &assets_dir)?;
@@ -656,6 +657,7 @@ impl SiteBuilder {
         let mut context = tera::Context::new();
         context.insert("site", &self.config.site);
         context.insert("config", &self.config);
+        context.insert("base_url", &self.config.site.base_url);
         
         // Add component information
         let enabled_components = self.component_registry.get_enabled_components();
@@ -805,11 +807,7 @@ impl SiteBuilder {
         
         // Helper function to add base_url to paths
         let add_base = |path: &str| -> String {
-            if base_url.is_empty() {
-                path.to_string()
-            } else {
-                format!("{}/{}", base_url.trim_end_matches('/'), path.trim_start_matches('/'))
-            }
+            crate::utils::url::build_url(base_url, path)
         };
         
         // Add main navigation items

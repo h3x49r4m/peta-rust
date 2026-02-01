@@ -10,22 +10,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- External CSS -->
-    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="{{ asset_url(path='css/main.css', base_url=base_url) }}">
 
     <!-- Code Block Styles (generated from Rust) -->
-    <link rel="stylesheet" href="/assets/css/code-blocks.css">
+    <link rel="stylesheet" href="{{ asset_url(path='assets/css/code-blocks.css', base_url=base_url) }}">
 
     <!-- Math Formula Styles (generated from Rust) -->
-    <link rel="stylesheet" href="/assets/css/math-formulas.css">
+    <link rel="stylesheet" href="{{ asset_url(path='assets/css/math-formulas.css', base_url=base_url) }}">
 
     <!-- Embedded Snippet Card Styles (generated from Rust) -->
-    <link rel="stylesheet" href="/assets/css/embedded-snippet-cards.css">
+    <link rel="stylesheet" href="{{ asset_url(path='assets/css/embedded-snippet-cards.css', base_url=base_url) }}">
 
     <!-- Diagram Styles (generated from Rust) -->
-    <link rel="stylesheet" href="/assets/css/diagrams.css">
+    <link rel="stylesheet" href="{{ asset_url(path='assets/css/diagrams.css', base_url=base_url) }}">
 
     <!-- Music Score Styles (generated from Rust) -->
-    <link rel="stylesheet" href="/assets/css/music-scores.css">
+    <link rel="stylesheet" href="{{ asset_url(path='assets/css/music-scores.css', base_url=base_url) }}">
 
     <!-- Component Styles -->
     <style>
@@ -52,22 +52,22 @@
     {{ component(name="back_to_top") | safe }}
     
     <!-- External JavaScript -->
-    <script src="/js/main.js"></script>
+    <script src="{{ asset_url(path='js/main.js', base_url=base_url) }}"></script>
 
     <!-- Code Block Scripts (generated from Rust) -->
-    <script src="/assets/js/code-blocks.js"></script>
+    <script src="{{ asset_url(path='assets/js/code-blocks.js', base_url=base_url) }}"></script>
 
     <!-- Math Formula Scripts (generated from Rust) -->
-    <script src="/assets/js/math-formulas.js"></script>
+    <script src="{{ asset_url(path='assets/js/math-formulas.js', base_url=base_url) }}"></script>
 
     <!-- Embedded Snippet Card Scripts (generated from Rust) -->
-    <script src="/assets/js/embedded-snippet-cards.js"></script>
+    <script src="{{ asset_url(path='assets/js/embedded-snippet-cards.js', base_url=base_url) }}"></script>
 
     <!-- Diagram Scripts (generated from Rust) -->
-    <script src="/assets/js/diagrams.js"></script>
+    <script src="{{ asset_url(path='assets/js/diagrams.js', base_url=base_url) }}"></script>
 
     <!-- Music Score Scripts (generated from Rust) -->
-    <script src="/assets/js/music-scores.js"></script>
+    <script src="{{ asset_url(path='assets/js/music-scores.js', base_url=base_url) }}"></script>
 
     <!-- Component Scripts -->
     <script>
@@ -258,8 +258,9 @@
                 document.body.style.overflow = '';
                 
                 // Update URL back to snippets page
-                if (window.location.pathname !== '/snippets.html') {
-                    history.replaceState({}, '', '/snippets.html');
+                const snippetsUrl = "{{ url(path='snippets.html', base_url=base_url) }}";
+                if (window.location.pathname !== snippetsUrl) {
+                    history.replaceState({}, '', snippetsUrl);
                 }
             }, 300);
         }

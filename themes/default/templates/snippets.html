@@ -24,7 +24,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (modalOverlay && modalOverlay.classList.contains('active')) {
                     window.closeSnippetModal();
                     // Go back to snippets.html
-                    history.replaceState({}, '', '/snippets.html');
+                    const snippetsPageUrl = "{{ url(path='snippets.html', base_url=base_url) }}";
+                    history.replaceState({}, '', snippetsPageUrl);
                 }
             }
         });

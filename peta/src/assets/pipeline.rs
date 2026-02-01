@@ -44,6 +44,8 @@ pub struct AssetConfig {
     pub bundle_assets: bool,
     /// Cache busting
     pub cache_busting: bool,
+    /// Base URL for the site
+    pub base_url: String,
 }
 
 impl Default for AssetConfig {
@@ -56,6 +58,7 @@ impl Default for AssetConfig {
             generate_sourcemaps: false,
             bundle_assets: true,
             cache_busting: true,
+            base_url: String::new(),
         }
     }
 }
@@ -100,6 +103,11 @@ impl AssetPipeline {
     /// Set component registry
     pub fn set_component_registry(&mut self, registry: ComponentRegistry) {
         self.component_registry = registry;
+    }
+    
+    /// Set base URL
+    pub fn set_base_url(&mut self, base_url: String) {
+        self.config.base_url = base_url;
     }
     
     /// Process all theme assets
@@ -206,7 +214,11 @@ impl AssetPipeline {
             .map_err(|e| Error::asset(format!("Failed to write embedded-snippet-cards.css: {}", e)))?;
 
         // Generate embedded snippet card JS
-        let js_generator = crate::assets::js_generator::EmbeddedSnippetCardJsGenerator::new()?;
+        let js_config = crate::assets::js_generator::EmbeddedSnippetCardConfig {
+            base_url: self.config.base_url.clone(),
+            ..Default::default()
+        };
+        let js_generator = crate::assets::js_generator::EmbeddedSnippetCardJsGenerator::with_config(js_config)?;
         let js_content = js_generator.generate()?;
 
         let js_output_path = self.output_dir.join("js").join("embedded-snippet-cards.js");

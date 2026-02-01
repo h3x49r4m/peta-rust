@@ -353,6 +353,8 @@ pub struct EmbeddedSnippetCardConfig {
     pub collapse_threshold: String,
     /// Show "View in modal" button
     pub show_modal_button: bool,
+    /// Base URL for the site (for fetching snippet JSON)
+    pub base_url: String,
 }
 
 impl Default for EmbeddedSnippetCardConfig {
@@ -361,6 +363,7 @@ impl Default for EmbeddedSnippetCardConfig {
             enable_collapse: true,
             collapse_threshold: "400px".to_string(),
             show_modal_button: true,
+            base_url: String::new(),
         }
     }
 }
@@ -495,7 +498,11 @@ impl EmbeddedSnippetCardJsGenerator {
       button.addEventListener('click', function() {
         if (typeof window.openSnippetModal === 'function') {
           // Fetch snippet data
-          fetch(`/snippets/${snippetId}.json`)
+          const baseUrl = "${base_url}";
+          const snippetsJsonUrl = baseUrl 
+            ? `${baseUrl}/snippets/${snippetId}.json`
+            : `/snippets/${snippetId}.json`;
+          fetch(snippetsJsonUrl)
             .then(response => response.json())
             .then(data => {
               window.openSnippetModal({

@@ -224,7 +224,7 @@
         {% if page.tags %}
         <div class="snippet-tags">
             {% for tag in page.tags %}
-            <a href="/snippets.html#tag-{{ tag }}" class="snippet-tag">{{ tag }}</a>
+            <a href="{{ url(path='snippets.html', base_url=base_url) }}#tag-{{ tag }}" class="snippet-tag">{{ tag }}</a>
             {% endfor %}
         </div>
         {% endif %}
@@ -248,7 +248,7 @@
     </main>
     
     <div class="back-to-snippets">
-        <a href="/snippets.html">
+        <a href="{{ url(path='snippets.html', base_url=base_url) }}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="m12 19-7-7 7-7"/>
                 <path d="M19 12H5"/>
@@ -336,7 +336,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (window.location.pathname.includes('/snippets/')) {
             // Redirect to snippets page with modal parameter
             const currentUrl = window.location.pathname + window.location.search;
-            window.location.href = '/snippets.html?modal=' + encodeURIComponent(currentUrl);
+            const snippetsUrl = "{{ url(path='snippets.html', base_url=base_url) }}";
+            window.location.href = snippetsUrl + '?modal=' + encodeURIComponent(currentUrl);
         }
     }
 });

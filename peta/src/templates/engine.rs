@@ -239,8 +239,8 @@ impl TemplateEngine {
     }
 
     /// Create a new template engine with component registry
-    pub fn new_with_components(theme: &Theme, registry: ComponentRegistry) -> Result<Self> {
-        let mut engine = Self::new(theme)?;
+    pub fn new_with_components(theme: &Theme, registry: ComponentRegistry, config: crate::core::config::SiteConfig) -> Result<Self> {
+        let mut engine = Self::new_with_config(theme, config)?;
         engine.component_registry = Some(registry);
         if let (Some(registry), Some(_theme_name)) = (&engine.component_registry, &engine.current_theme) {
             engine.component_renderer = Some(crate::components::renderer::ComponentRendererWrapper::new(
@@ -322,13 +322,15 @@ impl TemplateEngine {
 
                 match nested_tera.render(component_name, &context) {
                     Ok(mut rendered) => {
-                        rendered = Self::handle_nested_components(component_name, &rendered, &props, &tag_collector, &template_cache, &theme_dir, &component_manager_clone2)
+                        rendered = Self::handle_nested_components(component_name, &rendered, &props, &tag_collector, &template_cache, &theme_dir, &component_manager_clone2, &config_clone.site.base_url.as_str())
                             .map_err(|e| tera::Error::msg(e.to_string()))?;
                         Ok(Value::String(rendered))
                     }
                     Err(e) => {
                         eprintln!("Component render error for {}: {}", component_name, e);
+                        eprintln!("Full error: {:?}", e);
                         eprintln!("Props: {:?}", props);
+                        eprintln!("Context contains base_url: {:?}", context.get("base_url"));
                         Ok(Value::String(format!("Component render error: {}", e)))
                     }
                 }
@@ -560,7 +562,7 @@ impl TemplateEngine {
 
                 match nested_tera.render(component_name, &context) {
                     Ok(mut rendered) => {
-                        rendered = Self::handle_nested_components(component_name, &rendered, &props, &tag_collector_clone, &template_cache_clone, &theme_dir_clone, &component_manager_clone2)
+                        rendered = Self::handle_nested_components(component_name, &rendered, &props, &tag_collector_clone, &template_cache_clone, &theme_dir_clone, &component_manager_clone2, &config_clone.site.base_url.as_str())
                             .map_err(|e| tera::Error::msg(e.to_string()))?;
                         Ok(Value::String(rendered))
                     }
@@ -572,6 +574,9 @@ impl TemplateEngine {
                 }
             })
         );
+
+        // Register url and asset_url functions for component templates
+        Self::register_theme_functions(tera);
     }
 
     fn build_component_context(
@@ -615,6 +620,9 @@ impl TemplateEngine {
             "all_tags": all_tags
         }));
 
+        // Add base_url to component context for URL generation
+        context.insert("base_url", &config.site.base_url);
+
         context
     }
 
@@ -657,6 +665,7 @@ impl TemplateEngine {
         template_cache: &Arc<RwLock<TemplateCache>>,
         theme_dir: &Path,
         component_manager: &Arc<RwLock<ComponentManager>>,
+        base_url: &str,
     ) -> Result<String> {
         let mut result = rendered.to_string();
 
@@ -672,17 +681,18 @@ impl TemplateEngine {
                         template_cache,
                         theme_dir,
                         component_manager,
+                        base_url,
                     )?;
                 }
             }
             "page_tags" => {
-                result = Self::render_tag_cloud_nested(&result, props, tag_collector, template_cache, theme_dir, component_manager)?;
+                result = Self::render_tag_cloud_nested(&result, props, tag_collector, template_cache, theme_dir, component_manager, base_url)?;
             }
             "article_modal" => {
-                result = Self::render_article_modal_nested(&result, props, template_cache, theme_dir, component_manager)?;
+                result = Self::render_article_modal_nested(&result, props, template_cache, theme_dir, component_manager, base_url)?;
             }
             "project_modal" => {
-                result = Self::render_project_modal_nested(&result, props, template_cache, theme_dir, component_manager)?;
+                result = Self::render_project_modal_nested(&result, props, template_cache, theme_dir, component_manager, base_url)?;
             }
             _ => {}
         }
@@ -698,6 +708,7 @@ impl TemplateEngine {
         template_cache: &Arc<RwLock<TemplateCache>>,
         theme_dir: &Path,
         component_manager: &Arc<RwLock<ComponentManager>>,
+        base_url: &str,
     ) -> Result<String> {
         let category = if let Ok(manager) = component_manager.read() {
             manager.get_component_category(component_name).unwrap_or_else(|| "atomic".to_string())
@@ -724,17 +735,45 @@ impl TemplateEngine {
 
                 let mut nested_tera = tera::Tera::default();
 
-                nested_tera.autoescape_on(vec![]);
+        
 
-                Self::load_component_templates_for_tera(&mut nested_tera, theme_dir)?;
-
-                // Note: We don't register component function here since nested components use placeholders
-
-                nested_tera.add_raw_template(component_name, &template_content)?;
+                                nested_tera.autoescape_on(vec![]);
 
         
 
-                let context = Self::build_nested_context(component_name, props);
+                
+
+        
+
+                                Self::load_component_templates_for_tera(&mut nested_tera, theme_dir)?;
+
+        
+
+                                // Register url and asset_url functions for nested component rendering
+
+        
+
+                                Self::register_theme_functions(&mut nested_tera);
+
+        
+
+                
+
+        
+
+                                // Note: We don't register component function here since nested components use placeholders
+
+        
+
+                
+
+        
+
+                                nested_tera.add_raw_template(component_name, &template_content)?;
+
+        
+
+                let context = Self::build_nested_context(component_name, props, base_url);
 
         
 
@@ -754,6 +793,7 @@ impl TemplateEngine {
         template_cache: &Arc<RwLock<TemplateCache>>,
         theme_dir: &Path,
         component_manager: &Arc<RwLock<ComponentManager>>,
+        base_url: &str,
     ) -> Result<String> {
         // Get component category from manager
         let category = if let Ok(manager) = component_manager.read() {
@@ -787,10 +827,12 @@ impl TemplateEngine {
         let mut tera = tera::Tera::default();
         tera.autoescape_on(vec![]);
         Self::load_component_templates_for_tera(&mut tera, theme_dir)?;
+        Self::register_theme_functions(&mut tera);
         tera.add_raw_template("tag_cloud", &template_content)?;
 
         let mut context = Context::new();
         context.insert("props", &Value::Object(tag_cloud_props.clone()));
+        context.insert("base_url", &base_url);
 
         let nested_rendered = tera.render("tag_cloud", &context)
             .map_err(|e| Error::template(format!("Failed to render tag_cloud: {}", e)))?;
@@ -804,8 +846,8 @@ impl TemplateEngine {
             template_cache: &Arc<RwLock<TemplateCache>>,
             theme_dir: &Path,
             component_manager: &Arc<RwLock<ComponentManager>>,
-        ) -> Result<String> {
-            let mut result = rendered.to_string();
+            base_url: &str,
+        ) -> Result<String> {            let mut result = rendered.to_string();
 
             // Render article_toc
             let toc_category = if let Ok(manager) = component_manager.read() {
@@ -834,8 +876,12 @@ impl TemplateEngine {
                 let mut tera = tera::Tera::default();
                 tera.autoescape_on(vec![]);
                 Self::load_component_templates_for_tera(&mut tera, theme_dir)?;
-                tera.add_raw_template("article_toc", &template_content)?;            let mut context = Context::new();
+                Self::register_theme_functions(&mut tera);
+                tera.add_raw_template("article_toc", &template_content)?;
+            
+            let mut context = Context::new();
             context.insert("props", &Value::Object(toc_props.clone()));
+            context.insert("base_url", &base_url);
 
             let nested_rendered = tera.render("article_toc", &context)
                 .map_err(|e| Error::template(format!("Failed to render article_toc: {}", e)))?;
@@ -894,8 +940,8 @@ impl TemplateEngine {
             template_cache: &Arc<RwLock<TemplateCache>>,
             theme_dir: &Path,
             component_manager: &Arc<RwLock<ComponentManager>>,
-        ) -> Result<String> {
-            let mut result = rendered.to_string();
+            base_url: &str,
+        ) -> Result<String> {            let mut result = rendered.to_string();
 
             // Render project_toc
             let toc_category = if let Ok(manager) = component_manager.read() {
@@ -921,9 +967,12 @@ impl TemplateEngine {
                 let mut tera = tera::Tera::default();
                 tera.autoescape_on(vec![]);
                 Self::load_component_templates_for_tera(&mut tera, theme_dir)?;
-                tera.add_raw_template("project_toc", &template_content)?;            
+                Self::register_theme_functions(&mut tera);
+                tera.add_raw_template("project_toc", &template_content)?;
+            
                 let mut context = Context::new();
                 context.insert("props", &Value::Object(toc_props.clone()));
+                context.insert("base_url", &base_url);
 
                 let nested_rendered = tera.render("project_toc", &context)
                     .map_err(|e| Error::template(format!("Failed to render project_toc: {}", e)))?;
@@ -977,7 +1026,7 @@ impl TemplateEngine {
             Ok(result)
         }
 
-    fn build_nested_context(component_name: &str, props: &Value) -> Context {
+    fn build_nested_context(component_name: &str, props: &Value, base_url: &str) -> Context {
         let mut context = Context::new();
         context.insert("props", props);
         if let Some(props_obj) = props.as_object() {
@@ -988,6 +1037,9 @@ impl TemplateEngine {
         if let Some(page) = props.get("page") {
             context.insert("page", page);
         }
+        
+        // Add base_url to nested context for URL generation
+        context.insert("base_url", &base_url);
         
         // Pass book_toc to book_toc component
         if component_name == "book_toc" {
@@ -1022,15 +1074,11 @@ impl TemplateEngine {
                     .or_else(|| args.get("path"))
                     .and_then(|v| v.as_str())
                     .ok_or_else(|| tera::Error::msg("Asset path is required"))?;
+                // base_url should be passed as an argument or available in context
                 let base_url = args.get("base_url")
                     .and_then(|v| v.as_str())
                     .unwrap_or("");
-                let clean_path = path.trim_start_matches('/');
-                let url = if base_url.is_empty() {
-                    format!("/{}", clean_path)
-                } else {
-                    format!("{}/{}", base_url.trim_end_matches('/'), clean_path)
-                };
+                let url = crate::utils::url::build_url(base_url, path);
                 Ok(Value::String(url))
             })
         );
@@ -1046,13 +1094,36 @@ impl TemplateEngine {
                     .and_then(|v| v.as_str())
                     .unwrap_or("");
                 let clean_path = path.trim_start_matches('/');
+                // Support external URLs (http/https)
                 let url = if clean_path.starts_with("http") {
                     clean_path.to_string()
-                } else if base_url.is_empty() {
-                    format!("/{}", clean_path)
                 } else {
-                    format!("{}/{}", base_url.trim_end_matches('/'), clean_path)
+                    crate::utils::url::build_url(base_url, path)
                 };
+                Ok(Value::String(url))
+            })
+        );
+
+        // Register tag_url function for tag pages
+        tera.register_function(
+            "tag_url",
+            Box::new(|args: &HashMap<String, Value>| -> tera::Result<Value> {
+                let tag = args.get("0")
+                    .or_else(|| args.get("tag"))
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| tera::Error::msg("Tag is required"))?;
+                let base_url = args.get("base_url")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
+                // Build tag URL: tags/{slugified-tag}.html
+                let slug = tag.to_lowercase()
+                    .replace(" ", "-")
+                    .replace("_", "-")
+                    .chars()
+                    .filter(|c| c.is_alphanumeric() || *c == '-')
+                    .collect::<String>();
+                let path = format!("tags/{}.html", slug);
+                let url = crate::utils::url::build_url(base_url, &path);
                 Ok(Value::String(url))
             })
         );
@@ -1172,6 +1243,7 @@ impl TemplateEngine {
         self.tera.render(template, &enhanced_context)
             .map_err(|e| {
                 eprintln!("Template rendering error for '{}': {}", template, e);
+                eprintln!("Full error: {:?}", e);
                 Error::template(e.to_string())
             })
     }
