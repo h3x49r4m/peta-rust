@@ -8,13 +8,15 @@ class PetaSearch {
         this.minQueryLength = 2;
         this.maxResults = 20;
         this.initialized = false;
+        this.baseUrl = window.PETA_BASE_URL || '';
     }
 
     async init() {
         if (this.initialized) return;
 
         try {
-            const response = await fetch('/search.json');
+            const searchJsonUrl = this.baseUrl ? `${this.baseUrl}/search.json` : '/search.json';
+            const response = await fetch(searchJsonUrl);
             if (!response.ok) {
                 throw new Error(`Failed to load search index: ${response.status}`);
             }
