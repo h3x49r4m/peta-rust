@@ -2,3 +2,40 @@
 2. a unified layout for books, articles, snippets, projects
 3. music scores -> play
 4. svg viewer
+
+## Packaging Strategy for crates.io
+
+The peta project will be split into multiple packages for flexible distribution:
+
+### Core Package: `peta`
+- Core static site generator logic
+- CLI binary
+- Library API for programmatic usage
+- No bundled content or themes
+- Published to crates.io
+
+### Optional Package: `peta-default-theme`
+- Default theme with templates, components, and assets
+- Can be installed separately: `cargo install peta-default-theme`
+- Versioned independently of core
+- Published to crates.io
+
+### Optional Package: `peta-default-content`
+- Starter content examples (articles, books, snippets)
+- Documentation templates
+- Can be installed separately: `cargo install peta-default-content`
+- Published to crates.io
+
+### Usage
+```bash
+# Install core SSG
+cargo install peta
+
+# Install optional default theme
+cargo install peta-default-theme
+
+# Install optional starter content
+cargo install peta-default-content
+```
+
+Users can also create their own themes and content without installing these optional packages.
