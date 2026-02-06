@@ -12,29 +12,16 @@ use tera::{Tera, Context, Value};
 
 /// Tag collector with caching
 #[derive(Clone)]
-struct TagCollector {
-    cache: Arc<RwLock<HashMap<String, Value>>>,
-}
+struct TagCollector;
 
 impl TagCollector {
     fn new() -> Self {
-        Self {
-            cache: Arc::new(RwLock::new(HashMap::new())),
-        }
+        Self
     }
 
     fn collect_all(&self) -> Value {
-        let key = "all".to_string();
-        if let Ok(cache) = self.cache.read() {
-            if let Some(cached) = cache.get(&key) {
-                return cached.clone();
-            }
-        }
-        let result = self.scan_directories(&["_content/articles", "_content/books", "_content/snippets", "_content/projects"]);
-        if let Ok(mut cache) = self.cache.write() {
-            cache.insert(key, result.clone());
-        }
-        result
+        // Real-time scan without caching for immediate updates when content changes
+        self.scan_directories(&["_content/articles", "_content/books", "_content/snippets", "_content/projects"])
     }
 
     fn collect_from_directory(&self, dir_path: &str) -> Value {
@@ -44,16 +31,8 @@ impl TagCollector {
             return serde_json::Value::Array(vec![]);
         }
         
-        if let Ok(cache) = self.cache.read() {
-            if let Some(cached) = cache.get(dir_path) {
-                return cached.clone();
-            }
-        }
-        let result = self.scan_directory(dir_path);
-        if let Ok(mut cache) = self.cache.write() {
-            cache.insert(dir_path.to_string(), result.clone());
-        }
-        result
+        // Real-time scan without caching for immediate updates when content changes
+        self.scan_directory(dir_path)
     }
 
     fn scan_directories(&self, dirs: &[&str]) -> Value {
