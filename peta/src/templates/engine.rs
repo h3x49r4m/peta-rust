@@ -12,27 +12,36 @@ use tera::{Tera, Context, Value};
 
 /// Tag collector with caching
 #[derive(Clone)]
-struct TagCollector;
+struct TagCollector {
+    content_dir: String,
+}
 
 impl TagCollector {
-    fn new() -> Self {
-        Self
+    fn new(content_dir: String) -> Self {
+        Self { content_dir }
     }
 
     fn collect_all(&self) -> Value {
         // Real-time scan without caching for immediate updates when content changes
-        self.scan_directories(&["_content/articles", "_content/books", "_content/snippets", "_content/projects"])
+        let base_dir = &self.content_dir;
+        self.scan_directories(&[
+            &format!("{}/articles", base_dir),
+            &format!("{}/books", base_dir),
+            &format!("{}/snippets", base_dir),
+            &format!("{}/projects", base_dir),
+        ])
     }
 
-    fn collect_from_directory(&self, dir_path: &str) -> Value {
+    fn collect_from_directory(&self, dir_name: &str) -> Value {
         // Check if directory exists before attempting to scan
         use std::path::Path;
-        if !Path::new(dir_path).exists() {
+        let dir_path = format!("{}/{}", self.content_dir, dir_name);
+        if !Path::new(&dir_path).exists() {
             return serde_json::Value::Array(vec![]);
         }
         
         // Real-time scan without caching for immediate updates when content changes
-        self.scan_directory(dir_path)
+        self.scan_directory(&dir_path)
     }
 
     fn scan_directories(&self, dirs: &[&str]) -> Value {
@@ -120,7 +129,7 @@ impl TagCollector {
 
 impl Default for TagCollector {
     fn default() -> Self {
-        Self::new()
+        Self::new("_content".to_string())
     }
 }
 
@@ -209,6 +218,8 @@ impl TemplateEngine {
         Self::register_theme_functions(&mut tera);
         Self::load_templates(&mut tera, &theme.templates_dir)?;
         
+        let content_dir = config.build.content_dir.clone();
+        
         Ok(Self { 
             tera,
             theme_dir,
@@ -218,7 +229,7 @@ impl TemplateEngine {
             component_renderer: None,
             theme_manager: None,
             current_theme: None,
-            tag_collector: TagCollector::default(),
+            tag_collector: TagCollector::new(content_dir),
             template_cache: TemplateCache::default(),
         })
     }
@@ -238,7 +249,7 @@ impl TemplateEngine {
 
     /// Register component functions
     fn register_component_functions(tera: &mut Tera, component_manager: &Arc<RwLock<ComponentManager>>, config: &crate::core::config::SiteConfig) {
-        let tag_collector = Arc::new(RwLock::new(TagCollector::new()));
+        let tag_collector = Arc::new(RwLock::new(TagCollector::new(config.build.content_dir.clone())));
         let template_cache = Arc::new(RwLock::new(TemplateCache::new()));
         let component_manager_clone = Arc::clone(component_manager);
         let component_manager_clone2 = Arc::clone(component_manager);
@@ -631,10 +642,10 @@ impl TemplateEngine {
     fn get_tags_for_page_type(page_type: &str, tag_collector: &Arc<RwLock<TagCollector>>) -> Value {
         if let Ok(collector) = tag_collector.read() {
             match page_type {
-                "books" => collector.collect_from_directory("_content/books"),
-                "articles" => collector.collect_from_directory("_content/articles"),
-                "snippets" => collector.collect_from_directory("_content/snippets"),
-                "projects" => collector.collect_from_directory("_content/projects"),
+                "books" => collector.collect_from_directory("books"),
+                "articles" => collector.collect_from_directory("articles"),
+                "snippets" => collector.collect_from_directory("snippets"),
+                "projects" => collector.collect_from_directory("projects"),
                 _ => collector.collect_all(),
             }
         } else {
