@@ -10,10 +10,14 @@ pub fn init_content(content_type: &str, title: &str, content_dir: Option<&str>, 
     // Determine base content directory and remove trailing slash
     let base_dir = content_dir.unwrap_or("_content").trim_end_matches('/');
 
+    // Special handling for books - create folder structure
+    if content_type == "book" {
+        return init_book(title, base_dir, output);
+    }
+
     // Map content type to target directory
     let target_dir = match content_type {
         "article" => format!("{}/articles", base_dir),
-        "book" => format!("{}/books", base_dir),
         "snippet" => format!("{}/snippets", base_dir),
         "project" => format!("{}/projects", base_dir),
         _ => return Err(anyhow::anyhow!("Invalid content type: {}", content_type)),
@@ -22,26 +26,124 @@ pub fn init_content(content_type: &str, title: &str, content_dir: Option<&str>, 
     // Generate filename (convert title to kebab-case)
     let filename = title_to_filename(title);
     let file_path = Path::new(&target_dir).join(format!("{}.rst", filename));
-    
+
     // Check if file already exists
     if file_path.exists() {
         return Err(anyhow::anyhow!("File '{}' already exists", file_path.display()));
     }
-    
+
     // Generate template content
     let content = generate_template(content_type, title)?;
-    
+
     // Ensure directory exists
     if let Some(parent) = file_path.parent() {
         std::fs::create_dir_all(parent)?;
     }
-    
+
     // Write file
     std::fs::write(&file_path, content)?;
-    
+
     output.success(&format!("{} '{}' created successfully!", capitalize(content_type), title));
     output.info(&format!("Location: {}", file_path.display()));
-    
+
+    Ok(())
+}
+
+/// Initialize a new book with folder-based structure
+fn init_book(title: &str, base_dir: &str, output: &mut OutputFormatter) -> Result<()> {
+    let book_slug = title_to_filename(title);
+    let book_dir = Path::new(base_dir).join("books").join(&book_slug);
+
+    // Check if book directory already exists
+    if book_dir.exists() {
+        return Err(anyhow::anyhow!("Book directory '{}' already exists", book_dir.display()));
+    }
+
+    // Create book directory
+    std::fs::create_dir_all(&book_dir)?;
+
+    // Generate book index.rst content
+    let date = chrono::Utc::now().format("%Y-%m-%dT%H:%M:%S").to_string();
+    let index_content = format!(
+r#"---
+title: "{}"
+date: {}
+tags: ["tag1", "tag2"]
+author: "Your Name"
+description: "A brief description of the book"
+---
+
+{}
+=====
+
+This book provides comprehensive coverage of the topic.
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   chapter1/index
+   chapter2/index
+   chapter3/index
+
+What This Book Covers
+---------------------
+
+- Topic 1
+- Topic 2
+- Topic 3
+
+Target Audience
+---------------
+
+Describe who this book is for.
+
+Prerequisites
+-------------
+
+List any prerequisites.
+"#, title, date, title);
+
+    // Write book index.rst
+    let index_path = book_dir.join("index.rst");
+    std::fs::write(&index_path, index_content)?;
+
+    // Create sample chapter folders with index.rst files
+    let chapters = ["chapter1", "chapter2", "chapter3"];
+    for chapter in &chapters {
+        let chapter_dir = book_dir.join(chapter);
+        std::fs::create_dir_all(&chapter_dir)?;
+
+        let chapter_title = format!("Chapter {}", &chapter[7..]);
+        let chapter_content = format!(
+r#"---
+title: "{}"
+date: {}
+---
+
+{}
+========
+
+Chapter content goes here.
+
+Section
+-------
+
+Add more sections as needed.
+"#, chapter_title, date, chapter_title);
+
+        let chapter_index_path = chapter_dir.join("index.rst");
+        std::fs::write(&chapter_index_path, chapter_content)?;
+    }
+
+    output.success(&format!("Book '{}' created successfully!", title));
+    output.info(&format!("Location: {}", book_dir.display()));
+    output.info("Book structure:");
+    output.info(&format!("  - {}/index.rst", book_slug));
+    for chapter in &chapters {
+        output.info(&format!("  - {}/{}/index.rst", book_slug, chapter));
+    }
+
     Ok(())
 }
 
