@@ -3,6 +3,8 @@ UNIFIED MATH FORMULA RENDERING PIPELINE DESIGN
 
 This document presents the design for unifying the math formula rendering pipeline in the Peta Rust static site generator, moving from a split Rust/Theme architecture to a unified Rust-based system similar to the successful code block pipeline.
 
+**Note:** This pipeline now supports both official RST math syntax (``.. math::`` directive and ``:math:`` role) and legacy LaTeX-style syntax (``$$...$$`` and ``$...$``) for backward compatibility.
+
 Problem Analysis
 ----------------
 
@@ -101,7 +103,14 @@ Pipeline Stages
 STAGE 1: DETECTION & EXTRACTION
 ────────────────────────────────────────────────────────────────────────────
 MathProcessor::extract_math_blocks()
-  • Scan content for $$...$$, $...$, \[...\], \(...\)
+  • Scan content for official RST syntax:
+    - ``.. math::`` directive (display math with optional :label:)
+    - ``:math:`...``` role (inline math)
+  • Scan content for legacy LaTeX syntax:
+    - ``$$...$$`` (display math)
+    - ``$...$`` (inline math)
+    - ``\[...\]`` (display math)
+    - ``\(...\)`` (inline math)
   • Return MathDetectionResult {has_formulas, formula_count, math_blocks}
   • Cache detection results for performance
 
@@ -111,11 +120,94 @@ MathRenderer::render()
   • Transform LaTeX to HTML with data-latex attributes
   • Generate self-contained math elements
   • Support both inline and display modes
+  • Support labeled equations (via :label: option)
   • Return complete HTML structure
 
-OUTPUT EXAMPLE:
-  <div class="math-display" data-latex="f'(x) = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h}"></div>
-  <span class="math-inline" data-latex="f(x)"></span>
+OFFICIAL RST SYNTAX EXAMPLES:
+
+Display math with directive:
+  .. math::
+     :label: eq1
+     
+     E = mc^2
+
+  Output:
+  <div class="math-display" data-label="eq1" data-latex="E = mc^2"></div>
+
+Inline math with role:
+  The energy is :math:`E = mc^2`.
+
+  Output:
+  The energy is <span class="math-inline" data-latex="E = mc^2"></span>.
+
+LEGACY SYNTAX EXAMPLES:
+
+Display math with $$:
+  $$E = mc^2$$
+
+  Output:
+  <div class="math-display" data-latex="E = mc^2"></div>
+
+Inline math with $:
+  The energy is $E = mc^2$.
+
+  Output:
+  The energy is <span class="math-inline" data-latex="E = mc^2"></span>.
+
+RST MATH SYNTAX SUPPORT
+────────────────────────────────────────────────────────────────────────────
+
+The math rendering pipeline supports both official RST math syntax and legacy LaTeX-style syntax for maximum compatibility and standards compliance.
+
+OFFICIAL RST SYNTAX (RECOMMENDED):
+
+Display Math Directive:
+  .. math::
+     :label: optional_label
+     
+     \int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}
+
+Features:
+  - Official reStructuredText/Docutils syntax
+  - Optional :label: for equation references
+  - Automatic dedentation of multi-line equations
+  - Consistent with Sphinx and other RST tools
+
+Inline Math Role:
+  The Gaussian integral is :math:`\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}`.
+
+Features:
+  - Official reStructuredText inline role
+  - Seamless integration with paragraph text
+  - No extra delimiters needed
+
+LEGACY LATEX SYNTAX (BACKWARD COMPATIBILITY):
+
+Display Math:
+  $$\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}$$
+  or
+  \[\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}\]
+
+Inline Math:
+  The value is $x^2$ or \(x^2\).
+
+Features:
+  - Standard LaTeX syntax
+  - Automatic detection and rendering
+  - Useful for migrating from LaTeX documents
+
+SYNTAX PREFERENCE:
+  • New content: Use official RST syntax (``.. math::`` and ``:math:``)
+  • Legacy content: Legacy LaTeX syntax still supported
+  • Mixed usage: Both syntaxes can be used in the same document
+
+PROCESSING ORDER:
+  1. Process ``.. math::`` directives (RST block syntax)
+  2. Process ``:math:`...``` roles (RST inline syntax)
+  3. Convert RST markup to HTML
+  4. Process legacy LaTeX syntax (``$$``, ``$``, ``\[``, ``\(``)
+
+This ensures that official RST syntax is prioritized while maintaining full backward compatibility.
 
 STAGE 3: CSS GENERATION
 ────────────────────────────────────────────────────────────────────────────
@@ -252,6 +344,13 @@ STEP 3: Refactor MathRenderer
   • Remove generate_on_demand_script()
   • Simplify to HTML generation only
   • Keep caching for performance
+  • Make render_equation() public for directive handlers
+
+STEP 3.5: Add RST Math Directive Handler
+  • Create MathDirectiveHandler for ``.. math::`` directive
+  • Support :label: option for equation references
+  • Handle multi-line equations with proper dedentation
+  • Generate HTML with data-label attribute when label provided
 
 STEP 4: Enhance MathProcessor
   • Improve detection logic
@@ -266,7 +365,13 @@ STEP 5: Update AssetPipeline
 STEP 6: Update Parser
   • Remove math_render_script from RstContent
   • Keep has_math_formulas flag (for optimization)
-  • Simplify math integration
+  • Add process_roles() method for inline ``:math:`...`` syntax
+  • Update processing pipeline order:
+    1. process_directives() - handles ``.. math::`` blocks
+    2. process_roles() - handles ``:math:`...`` inline
+    3. convert_rst_to_html() - converts RST markup
+    4. math_renderer.render() - handles legacy LaTeX syntax
+  • Add HTML block tracking to prevent header detection inside math content
 
 STEP 7: Update Templates
   • base.html: Add math asset references
@@ -299,6 +404,7 @@ Key Benefits
    ✅ Single rendering pipeline for ALL page types
    ✅ No more manual script injection
    ✅ Unified styling across the entire site
+   ✅ Official RST syntax support for standards compliance
 
 2. PERFORMANCE
    ✅ Pre-generated CSS and JS at build time
@@ -314,11 +420,13 @@ Key Benefits
    ✅ Theme support
    ✅ Configurable KaTeX version
    ✅ Easy to add new features
+   ✅ Support for both RST and LaTeX syntax
 
 5. FUTURE-PROOF
    ✅ Easy to switch to MathJax if needed
    ✅ Extensible architecture
    ✅ Clean separation of concerns
+   ✅ Full backward compatibility with legacy math syntax
 
 
 Migration Path
@@ -387,6 +495,10 @@ This unified math formula rendering pipeline design follows the proven architect
 - Improve performance with pre-generated assets
 - Simplify maintenance with a single source of truth
 - Enable easy customization through configuration
+- Support official RST math syntax for standards compliance
+- Maintain full backward compatibility with legacy LaTeX syntax
+
+The implementation provides users with the flexibility to choose between official RST syntax (recommended for new content) and legacy LaTeX syntax (for backward compatibility), both rendered through a unified, efficient pipeline.
 
 For detailed implementation steps with code examples, see math_formulas_pipeline_step_by_step.rst.
 
@@ -396,4 +508,5 @@ References
 - Code Block Pipeline: docs/features/codeblocks/codeblock_pipeline_step_by_step.rst
 - Math Implementation Guide: docs/features/math_formulas/math_formulas_pipeline_step_by_step.rst
 - KaTeX Documentation: https://katex.org/docs/
+- reStructuredText Directives: https://docutils.sourceforge.io/docs/ref/rst/directives.html#math
 - Peta Source Code: https://github.com/h3x49r4m/peta-rust
