@@ -105,7 +105,7 @@ impl MathRenderer {
     }
     
     /// Render a single equation
-    fn render_equation(&mut self, equation: &str, display: bool) -> Result<String> {
+    pub fn render_equation(&mut self, equation: &str, display: bool) -> Result<String> {
         // Check cache first
         let cache_key = format!("{}:{}", equation, display);
         if let Some(cached) = self.cache.get(&cache_key) {

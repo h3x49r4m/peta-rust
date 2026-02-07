@@ -171,3 +171,76 @@ impl DirectiveHandler for MusicScoreHandler {
         self.renderer.render(score_type, &content, title)
     }
 }
+
+/// Math directive handler for official RST math syntax
+pub struct MathDirectiveHandler {
+    renderer: crate::content::rst::MathRenderer,
+}
+
+impl MathDirectiveHandler {
+    pub fn new() -> Self {
+        Self {
+            renderer: crate::content::rst::MathRenderer::new(),
+        }
+    }
+}
+
+impl Default for MathDirectiveHandler {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl DirectiveHandler for MathDirectiveHandler {
+    fn handle(&mut self, _directive_type: &str, content: &str, options: &std::collections::HashMap<String, String>) -> Result<String> {
+        // Check for :label: option
+        let empty_label = String::new();
+        let label = options.get("label").unwrap_or(&empty_label);
+        
+        // Clean the math content:
+        // 1. Remove <p> tags
+        // 2. Remove common indentation from all lines
+        let latex_cleaned = content
+            .replace("<p>", "")
+            .replace("</p>", "");
+        
+        // Remove common indentation (find minimum indentation and remove it from all lines)
+        let lines: Vec<&str> = latex_cleaned.lines().collect();
+        let min_indent = lines.iter()
+            .filter(|line| !line.trim().is_empty())
+            .map(|line| line.len() - line.trim_start().len())
+            .min()
+            .unwrap_or(0);
+        
+        let latex_dedented: String = lines.iter()
+            .map(|line| {
+                if line.len() >= min_indent && !line.trim().is_empty() {
+                    &line[min_indent..]
+                } else {
+                    *line
+                }
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+        
+        let latex = latex_dedented.trim();
+        
+        // Render as display math
+        let rendered = if let Ok(eq) = self.renderer.render_equation(latex, true) {
+            eq
+        } else {
+            // Fallback if rendering fails
+            format!(r#"<div class="math-error">Failed to render: {}</div>"#, latex)
+        };
+        
+        // Add label if provided by inserting data-label attribute into the rendered HTML
+        if !label.is_empty() {
+            // The rendered HTML is <div class="math-display" data-latex="..."></div>
+            // We need to add data-label="..." to it
+            let labeled = rendered.replace(r#"<div class="math-display""#, &format!(r#"<div class="math-display" data-label="{}""#, label));
+            Ok(labeled)
+        } else {
+            Ok(rendered)
+        }
+    }
+}

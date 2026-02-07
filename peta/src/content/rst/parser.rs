@@ -47,6 +47,10 @@ impl RstParser {
             Box::new(crate::content::rst::directives::MusicScoreHandler::new()
                 .map_err(|e| Error::Content(format!("Failed to create MusicScoreHandler: {}", e)))?),
         );
+        directive_handlers.insert(
+            "math".to_string(),
+            Box::new(crate::content::rst::directives::MathDirectiveHandler::new()),
+        );
 
         Ok(Self {
             math_renderer: MathRenderer::new(),
@@ -177,13 +181,16 @@ impl RstParser {
     fn process_rst_content(&mut self, content: &str) -> Result<String> {
         let mut processed = content.to_string();
 
-        // Process directives first
+        // Process directives first (handles .. math:: blocks)
         processed = self.process_directives(&processed)?;
+        
+        // Process inline roles (handles :math:`...`)
+        processed = self.process_roles(&processed)?;
 
         // Convert RST markup to HTML (including tables)
         processed = self.convert_rst_to_html(&processed)?;
 
-        // Process math equations
+        // Process legacy math syntax (for backward compatibility with $ and $$)
         processed = self.math_renderer.render(&processed)?;
 
         Ok(processed)
@@ -366,6 +373,31 @@ impl RstParser {
         Ok(result)
     }
 
+    /// Process RST inline roles (like :math:`...`)
+    fn process_roles(&self, content: &str) -> Result<String> {
+        let role_regex = Regex::new(r":([a-zA-Z0-9_-]+):`([^`]*)`").map_err(|e| {
+            crate::core::Error::rst_parse(format!("Failed to compile role regex: {}", e))
+        })?;
+        
+        let result = role_regex.replace_all(content, |caps: &regex::Captures| {
+            let role_name = caps.get(1).unwrap().as_str();
+            let role_content = caps.get(2).unwrap().as_str();
+            
+            match role_name {
+                "math" => {
+                    // Render as inline math
+                    format!(
+                        r#"<span class="math-inline" data-latex="{}"></span>"#,
+                        role_content
+                    )
+                }
+                _ => caps.get(0).unwrap().as_str().to_string(), // Preserve other roles
+            }
+        }).to_string();
+        
+        Ok(result)
+    }
+
     /// Convert RST markup to HTML
     fn convert_rst_to_html(&self, content: &str) -> Result<String> {
         let mut html = content.to_string();
@@ -385,10 +417,30 @@ impl RstParser {
         let mut result = Vec::new();
         let lines: Vec<&str> = content.lines().collect();
         let mut i = 0;
+        let mut in_html_block = false;
+        let mut html_block_depth = 0;
 
         while i < lines.len() {
             let line = lines[i];
             let trimmed = line.trim();
+
+            // Track HTML block depth
+            if trimmed.starts_with("<div") {
+                html_block_depth += 1;
+                in_html_block = true;
+            } else if trimmed.starts_with("</div>") && in_html_block {
+                html_block_depth -= 1;
+                if html_block_depth == 0 {
+                    in_html_block = false;
+                }
+            }
+
+            // Skip processing if inside HTML block
+            if in_html_block {
+                result.push(line.to_string());
+                i += 1;
+                continue;
+            }
 
             // Skip RST underline characters at the start of processing
             if self.is_rst_underline(trimmed) {
@@ -439,6 +491,7 @@ impl RstParser {
                 && !line.starts_with(' ')
                 && !line.contains('[')
                 && !line.contains('`')
+                && !line.contains('<')
             {
                 let trimmed = line.trim();
                 // Skip lines that look like list items
