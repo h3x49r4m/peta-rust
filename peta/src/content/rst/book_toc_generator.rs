@@ -2,7 +2,7 @@
 
 use crate::core::Result;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 /// Book chapter entry
 #[derive(Debug, Clone)]
@@ -113,18 +113,27 @@ impl BookTocGenerator {
                 }
 
                 // Parse chapter entry
-                if let Some(chapter_slug) = trimmed.split_whitespace().next() {
-                    let chapter_path = book_dir.join(format!("{}.rst", chapter_slug));
+                if let Some(chapter_ref) = trimmed.split_whitespace().next() {
+                    // Normalize the chapter reference (remove /index suffix if present)
+                    let chapter_slug = chapter_ref.trim_end_matches("/index").to_string();
+                    
+                    // Try to find the chapter file - support both structures:
+                    // 1. Flat: book_dir/chapter.rst
+                    // 2. Folder-based: book_dir/chapter/index.rst
+                    let chapter_path = self.find_chapter_path(book_dir, &chapter_slug);
                     
                     if chapter_path.exists() {
                         // Read chapter file to get title and headers
                         let title = self.extract_chapter_title(&chapter_path)?;
                         let headers = self.extract_chapter_headers(&chapter_path)?;
                         
+                        // Generate URL based on structure
+                        let url = self.generate_chapter_url(book_slug, &chapter_slug, &chapter_path);
+                        
                         chapters.push(BookChapter {
                             title,
-                            url: format!("books/{}/{}.html", book_slug, chapter_slug),
-                            slug: chapter_slug.to_string(),
+                            url,
+                            slug: chapter_slug,
                             order: current_order,
                             headers,
                         });
@@ -136,6 +145,45 @@ impl BookTocGenerator {
         }
 
         Ok(chapters)
+    }
+    
+    /// Find the chapter file path, supporting both flat and folder-based structures
+    fn find_chapter_path(&self, book_dir: &Path, chapter_slug: &str) -> PathBuf {
+        // First try folder-based structure: chapter/index.rst
+        let folder_path = book_dir.join(chapter_slug).join("index.rst");
+        if folder_path.exists() {
+            return folder_path;
+        }
+        
+        // Then try flat structure: chapter.rst
+        let flat_path = book_dir.join(format!("{}.rst", chapter_slug));
+        if flat_path.exists() {
+            return flat_path;
+        }
+        
+        // Fall back to flat path even if it doesn't exist
+        flat_path
+    }
+    
+    /// Generate chapter URL based on the file structure
+    fn generate_chapter_url(&self, book_slug: &str, chapter_slug: &str, chapter_path: &Path) -> String {
+        // Check if this is a folder-based structure
+        // If the path ends with /index.rst and the parent directory matches the chapter slug
+        if let Some(file_name) = chapter_path.file_name().and_then(|n| n.to_str()) {
+            if file_name == "index.rst" {
+                if let Some(parent) = chapter_path.parent() {
+                    if let Some(dir_name) = parent.file_name().and_then(|n| n.to_str()) {
+                        if dir_name == chapter_slug {
+                            // Folder-based structure: books/{book}/{chapter}/index.html
+                            return format!("books/{}/{}/index.html", book_slug, chapter_slug);
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Default to flat structure: books/{book}/{chapter}.html
+        format!("books/{}/{}.html", book_slug, chapter_slug)
     }
 
     /// Extract headers from chapter RST file

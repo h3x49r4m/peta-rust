@@ -118,8 +118,36 @@ impl MetadataExtractor {
         if *content_type == ContentType::Book {
             if let Some(path) = file_path {
                 if let Some(file_name) = path.file_name().and_then(|n| n.to_str()) {
-                    if file_name != "index.rst" {
-                        // This is a chapter file - ALWAYS use filename stem for URL to ensure 1-to-1 mapping
+                    // Check if this is an index.rst file (could be book index or chapter index)
+                    if file_name == "index.rst" {
+                        // Determine if this is a book index or chapter index
+                        if let Some(parent) = path.parent() {
+                            // Check if parent is a book directory (direct child of books/)
+                            if let Some(grandparent) = parent.parent() {
+                                if let Some(grandparent_name) = grandparent.file_name().and_then(|n| n.to_str()) {
+                                    if grandparent_name == "books" {
+                                        // This is a book index: books/{book}/index.html
+                                        let book_slug = Self::slugify(
+                                            parent.file_name()
+                                                .and_then(|n| n.to_str())
+                                                .unwrap_or("book")
+                                        );
+                                        return format!("books/{}/index.html", book_slug);
+                                    } else {
+                                        // This is a chapter index in a folder: books/{book}/{chapter}/index.html
+                                        let book_slug = Self::slugify(grandparent_name);
+                                        let chapter_slug = Self::slugify(
+                                            parent.file_name()
+                                                .and_then(|n| n.to_str())
+                                                .unwrap_or("chapter")
+                                        );
+                                        return format!("books/{}/{}/index.html", book_slug, chapter_slug);
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        // This is a chapter file in flat structure: books/{book}/{chapter}.html
                         let fallback_slug = Self::slugify(title);
                         let chapter_slug = path.file_stem()
                             .and_then(|s| s.to_str())
@@ -129,7 +157,6 @@ impl MetadataExtractor {
                         if let Some(parent) = path.parent() {
                             if let Some(book_dir_name) = parent.file_name().and_then(|n| n.to_str()) {
                                 let book_slug = Self::slugify(book_dir_name);
-                                // Generate URL: books/{book-name}/{chapter-name}.html
                                 return format!("books/{}/{}.html", book_slug, chapter_slug);
                             }
                         }
@@ -145,15 +172,6 @@ impl MetadataExtractor {
                 format!("articles/{}.html", slug)
             }
             ContentType::Book => {
-                // For book index pages, use directory name instead of title for URL
-                if let Some(path) = file_path {
-                    if let Some(parent) = path.parent() {
-                        if let Some(book_dir_name) = parent.file_name().and_then(|n| n.to_str()) {
-                            let book_slug = Self::slugify(book_dir_name);
-                            return format!("books/{}/index.html", book_slug);
-                        }
-                    }
-                }
                 // Fallback to title-based slug
                 let slug = Self::slugify(title);
                 format!("books/{}/index.html", slug)

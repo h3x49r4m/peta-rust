@@ -350,7 +350,14 @@ impl SiteBuilder {
         
         // Add content type counts
         let books_count = self.rst_content.iter()
-            .filter(|c| c.metadata.content_type == ContentType::Book && c.metadata.url.ends_with("index.html"))
+            .filter(|c| {
+                c.metadata.content_type == ContentType::Book && {
+                    let url_parts: Vec<&str> = c.metadata.url.split('/').collect();
+                    // Only count book indices: books/{book-name}/index.html (3 parts)
+                    // Exclude chapter indices: books/{book-name}/{chapter}/index.html (4 parts)
+                    url_parts.len() == 3 && url_parts[0] == "books" && url_parts[2] == "index.html"
+                }
+            })
             .count();
         let articles_count = self.rst_content.iter()
             .filter(|c| c.metadata.content_type == ContentType::Article)
@@ -439,7 +446,10 @@ impl SiteBuilder {
                 ContentType::Snippet => snippets.push(item),
                 ContentType::Book => {
                     // Only include book index files, not chapters
-                    if content.metadata.url.ends_with("index.html") {
+                    // Book indices have URL like: books/{book-name}/index.html (3 parts after splitting)
+                    // Chapter indices have URL like: books/{book-name}/{chapter}/index.html (4 parts)
+                    let url_parts: Vec<&str> = content.metadata.url.split('/').collect();
+                    if url_parts.len() == 3 && url_parts[0] == "books" && url_parts[2] == "index.html" {
                         books.push(item);
                     }
                 },
