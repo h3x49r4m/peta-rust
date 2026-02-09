@@ -15,9 +15,13 @@ pub fn init_content(content_type: &str, title: &str, content_dir: Option<&str>, 
         return init_book(title, base_dir, output);
     }
 
+    // Special handling for articles - create folder structure
+    if content_type == "article" {
+        return init_article(title, base_dir, output);
+    }
+
     // Map content type to target directory
     let target_dir = match content_type {
-        "article" => format!("{}/articles", base_dir),
         "snippet" => format!("{}/snippets", base_dir),
         "project" => format!("{}/projects", base_dir),
         _ => return Err(anyhow::anyhow!("Invalid content type: {}", content_type)),
@@ -142,6 +146,100 @@ Add more sections as needed.
     output.info(&format!("  - {}/index.rst", book_slug));
     for chapter in &chapters {
         output.info(&format!("  - {}/{}/index.rst", book_slug, chapter));
+    }
+
+    Ok(())
+}
+
+/// Initialize a new article with folder-based structure
+fn init_article(title: &str, base_dir: &str, output: &mut OutputFormatter) -> Result<()> {
+    let article_slug = title_to_filename(title);
+    let article_dir = Path::new(base_dir).join("articles").join(&article_slug);
+
+    // Check if article directory already exists
+    if article_dir.exists() {
+        return Err(anyhow::anyhow!("Article directory '{}' already exists", article_dir.display()));
+    }
+
+    // Create article directory
+    std::fs::create_dir_all(&article_dir)?;
+
+    // Generate article index.rst content
+    let date = chrono::Utc::now().format("%Y-%m-%dT%H:%M:%S").to_string();
+    let index_content = format!(
+r#"---
+title: "{}"
+date: {}
+tags: ["tag1", "tag2"]
+author: "Your Name"
+---
+
+{}
+=====
+
+This article provides comprehensive coverage of the topic.
+
+.. article-parts::
+   :maxdepth: 2
+
+   introduction
+   methodology
+   results
+   conclusions
+
+What This Article Covers
+------------------------
+
+- Topic 1
+- Topic 2
+- Topic 3
+
+Introduction
+------------
+
+Brief introduction to the article.
+"#, title, date, title);
+
+    // Write article index.rst
+    let index_path = article_dir.join("index.rst");
+    std::fs::write(&index_path, index_content)?;
+
+    // Create sample part files
+    let parts = [
+        ("introduction", "Introduction"),
+        ("methodology", "Methodology"),
+        ("results", "Results"),
+        ("conclusions", "Conclusions"),
+    ];
+
+    for (part_slug, part_title) in &parts {
+        let part_content = format!(
+r#"---
+title: "{}"
+date: {}
+---
+
+{}
+{}
+
+Part content goes here.
+
+Section
+-------
+
+Add more sections as needed.
+"#, part_title, date, part_title, "=".repeat(part_title.len()));
+
+        let part_path = article_dir.join(format!("{}.rst", part_slug));
+        std::fs::write(&part_path, part_content)?;
+    }
+
+    output.success(&format!("Article '{}' created successfully!", title));
+    output.info(&format!("Location: {}", article_dir.display()));
+    output.info("Article structure:");
+    output.info(&format!("  - {}/index.rst", article_slug));
+    for (part_slug, _) in &parts {
+        output.info(&format!("  - {}/{}.rst", article_slug, part_slug));
     }
 
     Ok(())

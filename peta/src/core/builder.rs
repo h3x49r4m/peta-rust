@@ -117,7 +117,7 @@ impl SiteBuilder {
         // For books, also load non-index .rst files in subdirectories (chapters)
         if content_type == ContentType::Book {
             let pattern = dir.join("**/*.rst");
-            
+
             if let Ok(paths) = glob(pattern.to_str().unwrap()) {
                 for path in paths.flatten() {
                     // Skip files that were already loaded
@@ -125,6 +125,43 @@ impl SiteBuilder {
                         if let Ok(content) = self.load_rst_file(&path, content_type.clone()).await {
                             loaded_files.insert(path.clone());
                             self.rst_content.push(content);
+                        }
+                    }
+                }
+            }
+        }
+
+        // For articles, also load non-index .rst files in subdirectories (parts)
+        if content_type == ContentType::Article {
+            let pattern = dir.join("**/*.rst");
+
+            if let Ok(paths) = glob(pattern.to_str().unwrap()) {
+                for path in paths.flatten() {
+                    // Skip files that were already loaded
+                    if !loaded_files.contains(&path) {
+                        // Check if this is an article part (in a subdirectory with an index.rst that has article-parts directive)
+                        let is_article_part = if let Some(parent) = path.parent() {
+                            let index_path = parent.join("index.rst");
+                            if index_path.exists() {
+                                // Check if index.rst has article-parts directive
+                                if let Ok(index_content) = std::fs::read_to_string(&index_path) {
+                                    index_content.contains(".. article-parts::")
+                                } else {
+                                    false
+                                }
+                            } else {
+                                false
+                            }
+                        } else {
+                            false
+                        };
+
+                        // Skip article parts - they're loaded as part of the main article
+                        if !is_article_part {
+                            if let Ok(content) = self.load_rst_file(&path, content_type.clone()).await {
+                                loaded_files.insert(path.clone());
+                                self.rst_content.push(content);
+                            }
                         }
                     }
                 }
@@ -197,13 +234,13 @@ impl SiteBuilder {
             content.html = result;
         }
 
-        // Regenerate TOC for articles and projects to include embedded snippet cards
+        // Regenerate TOC for articles and projects
         let toc_generator = crate::content::rst::toc_generator::TocGenerator::new();
         for content in self.rst_content.iter_mut() {
-            if content.metadata.content_type == crate::content::ContentType::Article || 
+            if content.metadata.content_type == crate::content::ContentType::Article ||
                content.metadata.content_type == crate::content::ContentType::Project {
-                // Use enhanced TOC generator that includes embedded snippet cards
-                let toc_entries = toc_generator.generate_with_snippets(&content.html)?;
+                // Generate TOC from headers
+                let toc_entries = toc_generator.generate(&content.html)?;
                 let toc_html = toc_generator.render_html(&toc_entries);
                 content.toc = toc_entries;
                 content.toc_html = toc_html;

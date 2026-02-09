@@ -116,6 +116,17 @@ impl DirectiveHandler for TocTreeHandler {
     }
 }
 
+/// ArticleParts directive handler
+pub struct ArticlePartsHandler;
+
+impl DirectiveHandler for ArticlePartsHandler {
+    fn handle(&mut self, _directive_type: &str, _content: &str, _options: &std::collections::HashMap<String, String>) -> Result<String> {
+        // Return empty HTML since the TOC is already generated separately
+        // similar to toctree for books
+        Ok(String::new())
+    }
+}
+
 /// Diagram directive handler
 pub struct DiagramHandler {
     renderer: crate::content::rst::diagrams::DiagramRenderer,

@@ -153,7 +153,7 @@ impl MetadataExtractor {
                             .and_then(|s| s.to_str())
                             .unwrap_or(fallback_slug.as_str())
                             .to_string();
-                        
+
                         if let Some(parent) = path.parent() {
                             if let Some(book_dir_name) = parent.file_name().and_then(|n| n.to_str()) {
                                 let book_slug = Self::slugify(book_dir_name);
@@ -164,7 +164,58 @@ impl MetadataExtractor {
                 }
             }
         }
-        
+
+        // For articles, check if this is a part file
+        if *content_type == ContentType::Article {
+            if let Some(path) = file_path {
+                if let Some(file_name) = path.file_name().and_then(|n| n.to_str()) {
+                    // Check if this is an index.rst file (could be article index or part index)
+                    if file_name == "index.rst" {
+                        // Determine if this is an article index or part index
+                        if let Some(parent) = path.parent() {
+                            // Check if parent is an article directory (direct child of articles/)
+                            if let Some(grandparent) = parent.parent() {
+                                if let Some(grandparent_name) = grandparent.file_name().and_then(|n| n.to_str()) {
+                                    if grandparent_name == "articles" {
+                                        // This is an article index: articles/{article}/index.html
+                                        let article_slug = Self::slugify(
+                                            parent.file_name()
+                                                .and_then(|n| n.to_str())
+                                                .unwrap_or("article")
+                                        );
+                                        return format!("articles/{}/index.html", article_slug);
+                                    } else {
+                                        // This is a part index in a folder: articles/{article}/{part}/index.html
+                                        let article_slug = Self::slugify(grandparent_name);
+                                        let part_slug = Self::slugify(
+                                            parent.file_name()
+                                                .and_then(|n| n.to_str())
+                                                .unwrap_or("part")
+                                        );
+                                        return format!("articles/{}/{}/index.html", article_slug, part_slug);
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        // This is a part file in flat structure: articles/{article}/{part}.html
+                        let fallback_slug = Self::slugify(title);
+                        let part_slug = path.file_stem()
+                            .and_then(|s| s.to_str())
+                            .unwrap_or(fallback_slug.as_str())
+                            .to_string();
+
+                        if let Some(parent) = path.parent() {
+                            if let Some(article_dir_name) = parent.file_name().and_then(|n| n.to_str()) {
+                                let article_slug = Self::slugify(article_dir_name);
+                                return format!("articles/{}/{}.html", article_slug, part_slug);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // Default URL generation for index pages and other content types
         match content_type {
             ContentType::Article => {

@@ -3,6 +3,7 @@
 use crate::content::rst::{
     toc_generator::TocGenerator, CodeHighlighter, directives::DirectiveHandler, MathProcessor, MathRenderer,
 };
+use crate::content::rst::article_toc_generator::ArticleTocGenerator;
 use crate::content::{ContentMetadata, ContentType, RstContent, TocEntry};
 use crate::core::Error;
 use crate::core::Result;
@@ -17,6 +18,7 @@ pub struct RstParser {
     code_highlighter: CodeHighlighter,
     directive_handlers: HashMap<String, Box<dyn DirectiveHandler>>,
     toc_generator: TocGenerator,
+    article_toc_generator: ArticleTocGenerator,
 }
 
 impl RstParser {
@@ -36,6 +38,10 @@ impl RstParser {
         directive_handlers.insert(
             "toctree".to_string(),
             Box::new(crate::content::rst::directives::TocTreeHandler),
+        );
+        directive_handlers.insert(
+            "article-parts".to_string(),
+            Box::new(crate::content::rst::directives::ArticlePartsHandler),
         );
         directive_handlers.insert(
             "diagram".to_string(),
@@ -59,6 +65,7 @@ impl RstParser {
                 .map_err(|e| Error::Content(format!("Failed to create code highlighter: {}", e)))?,
             directive_handlers,
             toc_generator: TocGenerator::new(),
+            article_toc_generator: ArticleTocGenerator::new(),
         })
     }
 
@@ -93,15 +100,28 @@ impl RstParser {
             file_path,
         )?;
 
-        // 3. Parse RST structure and process directives
-        let processed_html = self.process_rst_content(&rst_content)?;
+        // 3. For articles with article-parts directive, merge part contents
+        let content_to_process = if metadata.content_type == ContentType::Article &&
+                                   self.has_article_parts_directive(&rst_content) {
+            self.merge_article_parts(&rst_content, file_path)?
+        } else {
+            rst_content.clone()
+        };
 
-        // 4. Generate table of contents
+        // 4. Parse RST structure and process directives
+        let processed_html = self.process_rst_content(&content_to_process)?;
+
+        // 5. Generate table of contents
         let (toc, toc_html) = if metadata.content_type == ContentType::Book {
             self.extract_toc_from_toctree(&processed_html)?
-        } else if metadata.content_type == ContentType::Article || metadata.content_type == ContentType::Project {
-            // Use enhanced TOC generator that includes embedded snippet cards
-            let toc_entries = self.toc_generator.generate_with_snippets(&processed_html)?;
+        } else if metadata.content_type == ContentType::Article {
+            // Generate TOC from article headers (content is already merged if needed)
+            let toc_entries = self.toc_generator.generate(&processed_html)?;
+            let toc_html = self.toc_generator.render_html(&toc_entries);
+            (toc_entries, toc_html)
+        } else if metadata.content_type == ContentType::Project {
+            // Generate TOC from project headers
+            let toc_entries = self.toc_generator.generate(&processed_html)?;
             let toc_html = self.toc_generator.render_html(&toc_entries);
             (toc_entries, toc_html)
         } else {
@@ -110,7 +130,7 @@ impl RstParser {
             (toc_entries, toc_html)
         };
 
-        // 5. Detect math formulas (keep for optimization, but don't generate script)
+        // 6. Detect math formulas (keep for optimization, but don't generate script)
         let math_detection = self.math_processor.auto_detect_math_content(&processed_html)?;
 
         Ok(RstContent {
@@ -425,13 +445,17 @@ impl RstParser {
             let trimmed = line.trim();
 
             // Track HTML block depth
-            if trimmed.starts_with("<div") {
+            if trimmed.contains("<div") && !trimmed.contains("</div>") {
+                // Opening div without closing on the same line
                 html_block_depth += 1;
                 in_html_block = true;
-            } else if trimmed.starts_with("</div>") && in_html_block {
-                html_block_depth -= 1;
-                if html_block_depth == 0 {
-                    in_html_block = false;
+            } else if trimmed.contains("</div>") {
+                // Closing div
+                if html_block_depth > 0 {
+                    html_block_depth -= 1;
+                    if html_block_depth == 0 {
+                        in_html_block = false;
+                    }
                 }
             }
 
@@ -1131,6 +1155,159 @@ impl RstParser {
         }
 
         Ok((entries, toc_html))
+    }
+
+    /// Check if the RST content has an article-parts directive
+    fn has_article_parts_directive(&self, content: &str) -> bool {
+        content.contains(".. article-parts::")
+    }
+
+    /// Merge article parts content into the main article HTML
+    fn merge_article_parts(&self, rst_content: &str, file_path: Option<&std::path::Path>) -> Result<String> {
+        use std::fs;
+
+        // Parse article-parts directive to get part references
+        let lines: Vec<&str> = rst_content.lines().collect();
+        let mut in_article_parts = false;
+        let mut indent_level: usize = 0;
+        let mut part_refs = Vec::new();
+
+        for line in lines {
+            let trimmed: &str = line.trim();
+
+            // Check for article-parts start
+            if trimmed.starts_with(".. article-parts::") {
+                in_article_parts = true;
+                indent_level = line.len() - line.trim_start().len();
+                continue;
+            }
+
+            // Exit article-parts when we return to the same or lower indentation
+            if in_article_parts {
+                let line_indent = line.len() - line.trim_start().len();
+                if trimmed.is_empty() {
+                    continue;
+                }
+
+                if line_indent <= indent_level && !trimmed.starts_with(":") {
+                    in_article_parts = false;
+                    continue;
+                }
+
+                // Skip article-parts options (lines starting with :)
+                if trimmed.starts_with(":") {
+                    continue;
+                }
+
+                // Parse part entry
+                if let Some(part_ref) = trimmed.split_whitespace().next() {
+                    part_refs.push(part_ref.trim_end_matches("/index").to_string());
+                }
+            }
+        }
+
+        // If no parts found, return original content
+        if part_refs.is_empty() {
+            return Ok(rst_content.to_string());
+        }
+
+        // Get article directory from file path
+        let article_dir = if let Some(path) = file_path {
+            if let Some(parent) = path.parent() {
+                parent.to_path_buf()
+            } else {
+                return Ok(rst_content.to_string());
+            }
+        } else {
+            return Ok(rst_content.to_string());
+        };
+
+        // Load and merge part contents
+        let mut merged_content = String::new();
+        let mut parts_found = false;
+
+        for part_slug in &part_refs {
+            // Try folder-based structure: part/index.rst
+            let folder_path = article_dir.join(part_slug).join("index.rst");
+            // Try flat structure: part.rst
+            let flat_path = article_dir.join(format!("{}.rst", part_slug));
+
+            let part_path = if folder_path.exists() {
+                folder_path
+            } else if flat_path.exists() {
+                flat_path
+            } else {
+                continue;
+            };
+
+            if let Ok(part_content) = fs::read_to_string(&part_path) {
+                parts_found = true;
+                // Remove frontmatter from part content
+                let part_content_without_frontmatter = self.remove_frontmatter(&part_content);
+                merged_content.push_str(&part_content_without_frontmatter);
+                merged_content.push_str("\n\n");
+            }
+        }
+
+        // If we found and merged parts, return merged content
+        if parts_found {
+            // Remove the article-parts directive from the content
+            let content_without_directive = self.remove_article_parts_directive(rst_content);
+            Ok(format!("{}\n\n{}", content_without_directive, merged_content))
+        } else {
+            Ok(rst_content.to_string())
+        }
+    }
+
+    /// Remove frontmatter from RST content
+    fn remove_frontmatter(&self, content: &str) -> String {
+        if content.starts_with("---\n") {
+            if let Some(end_pos) = content[4..].find("\n---\n") {
+                return content[end_pos + 9..].to_string();
+            }
+        }
+        content.to_string()
+    }
+
+    /// Remove article-parts directive from RST content
+    fn remove_article_parts_directive(&self, content: &str) -> String {
+        let lines: Vec<&str> = content.lines().collect();
+        let mut result = Vec::new();
+        let mut in_article_parts = false;
+        let mut indent_level: usize = 0;
+
+        for line in lines {
+            let trimmed: &str = line.trim();
+
+            // Check for article-parts start
+            if trimmed.starts_with(".. article-parts::") {
+                in_article_parts = true;
+                indent_level = line.len() - line.trim_start().len();
+                continue;
+            }
+
+            // Exit article-parts when we return to the same or lower indentation
+            if in_article_parts {
+                let line_indent = line.len() - line.trim_start().len();
+                if trimmed.is_empty() {
+                    continue;
+                }
+
+                if line_indent <= indent_level && !trimmed.starts_with(":") {
+                    in_article_parts = false;
+                    // Add the line that caused exit
+                    result.push(line);
+                    continue;
+                }
+
+                // Skip article-parts content
+                continue;
+            }
+
+            result.push(line);
+        }
+
+        result.join("\n")
     }
 
     /// Convert title to URL-friendly slug

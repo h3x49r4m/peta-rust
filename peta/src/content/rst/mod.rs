@@ -5,6 +5,7 @@ pub mod directives;
 pub mod cross_ref;
 pub mod toc_generator;
 pub mod book_toc_generator;
+pub mod article_toc_generator;
 
 // Code blocks module
 pub mod code_blocks;
