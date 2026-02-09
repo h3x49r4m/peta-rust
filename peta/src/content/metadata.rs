@@ -229,6 +229,21 @@ impl MetadataExtractor {
             }
             ContentType::Snippet => {
                 let slug = Self::slugify(title);
+                // Try to determine the relative path from the file path
+                if let Some(path) = file_path {
+                    let snippet_slug = path.file_stem()
+                        .and_then(|s| s.to_str())
+                        .unwrap_or(slug.as_str())
+                        .to_string();
+                    
+                    // Get the parent directory name (should be "snippets" or similar)
+                    if let Some(parent) = path.parent() {
+                        if let Some(parent_name) = parent.file_name().and_then(|n| n.to_str()) {
+                            return format!("{}/{}.html", parent_name, snippet_slug);
+                        }
+                    }
+                }
+                // Fallback to hardcoded "snippets/"
                 format!("snippets/{}.html", slug)
             }
             ContentType::Project => {
