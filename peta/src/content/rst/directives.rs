@@ -1,17 +1,18 @@
 //! RST directive handlers
 
 use crate::core::Result;
+use std::collections::HashMap;
+use std::any::Any;
 
+/// Trait for handling RST directives
+pub trait DirectiveHandler: Any {
+    /// Handle a directive and return the generated content
+    fn handle(&mut self, directive_type: &str, content: &str, options: &HashMap<String, String>) -> Result<String>;
 
-/// Trait for RST directive handlers
-pub trait DirectiveHandler {
-    /// Handle the directive and return HTML
-    /// 
-    /// # Arguments
-    /// * `directive_type` - The type of directive (e.g., "code-block", "diagram")
-    /// * `content` - The content of the directive
-    /// * `options` - Field list options (key-value pairs, e.g., {"title": "My Title"})
-    fn handle(&mut self, directive_type: &str, content: &str, options: &std::collections::HashMap<String, String>) -> Result<String>;
+    /// Helper for downcasting
+    fn as_any_mut(&mut self) -> &mut dyn Any where Self: Sized {
+        self
+    }
 }
 
 /// Code block directive handler
@@ -124,6 +125,98 @@ impl DirectiveHandler for ArticlePartsHandler {
         // Return empty HTML since the TOC is already generated separately
         // similar to toctree for books
         Ok(String::new())
+    }
+}
+
+/// Include directive handler
+pub struct IncludeHandler {
+    article_dir: Option<std::path::PathBuf>,
+}
+
+impl IncludeHandler {
+    pub fn new() -> Self {
+        Self {
+            article_dir: None,
+        }
+    }
+
+    pub fn with_article_dir(article_dir: std::path::PathBuf) -> Self {
+        Self {
+            article_dir: Some(article_dir),
+        }
+    }
+
+    pub fn set_article_dir(&mut self, article_dir: std::path::PathBuf) {
+        self.article_dir = Some(article_dir);
+    }
+}
+
+impl Default for IncludeHandler {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl DirectiveHandler for IncludeHandler {
+    fn handle(&mut self, _directive_type: &str, file_ref: &str, _options: &std::collections::HashMap<String, String>) -> Result<String> {
+        use std::fs;
+        use std::path::Path;
+
+        let file_ref = file_ref.trim();
+        
+        // Get the article directory
+        let article_dir = if let Some(ref dir) = self.article_dir {
+            dir.clone()
+        } else {
+            return Ok(String::new()); // No article directory, can't resolve include
+        };
+
+        // Resolve the file path
+        let file_path = if file_ref.starts_with("/") {
+            // Absolute path from articles directory
+            article_dir.join(file_ref.trim_start_matches("/"))
+        } else {
+            // Relative path
+            article_dir.join(file_ref)
+        };
+
+        // Try both .rst and /index.rst
+        let target_path = if file_path.exists() && file_path.extension().map_or(false, |e| e == "rst") {
+            file_path.clone()
+        } else {
+            let index_path = file_path.join("index.rst");
+            if index_path.exists() {
+                index_path
+            } else {
+                // Try adding .rst extension
+                let rst_path = format!("{}.rst", file_path.to_string_lossy());
+                let rst_full_path = Path::new(&rst_path);
+                if rst_full_path.exists() {
+                    rst_full_path.to_path_buf()
+                } else {
+                    return Ok(String::new()); // File not found, return empty
+                }
+            }
+        };
+
+        // Read the file content
+        let content = fs::read_to_string(&target_path)
+            .map_err(|e| crate::core::Error::content(format!("Failed to read include file {}: {}", target_path.display(), e)))?;
+
+        // Remove frontmatter from included content
+        let content_without_frontmatter = if content.starts_with("---") {
+            let parts: Vec<&str> = content.split("---").collect();
+            if parts.len() >= 3 {
+                // Skip first two "---" delimiters and their content
+                parts[2..].join("\n")
+            } else {
+                content
+            }
+        } else {
+            content
+        };
+
+        Ok(content_without_frontmatter)
     }
 }
 

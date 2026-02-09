@@ -10,17 +10,14 @@ Machine Learning Fundamentals
 
 This article provides comprehensive coverage of the topic.
 
-.. article-parts::
-   :maxdepth: 2
-
-   introduction
-   introduction/sections/basics
-   introduction/sections/types
-   methodology
-   methodology/experiments/setup
-   methodology/experiments/evaluation
-   results
-   conclusions
+.. include:: introduction.rst
+.. include:: introduction/sections/basics.rst
+.. include:: introduction/sections/types.rst
+.. include:: methodology.rst
+.. include:: methodology/experiments/setup.rst
+.. include:: methodology/experiments/evaluation.rst
+.. include:: results.rst
+.. include:: conclusions.rst
 
 What This Article Covers
 ------------------------

@@ -179,13 +179,10 @@ author: "Your Name"
 
 This article provides comprehensive coverage of the topic.
 
-.. article-parts::
-   :maxdepth: 2
-
-   introduction
-   methodology
-   results
-   conclusions
+.. include:: introduction.rst
+.. include:: methodology.rst
+.. include:: results.rst
+.. include:: conclusions.rst
 
 What This Article Covers
 ------------------------

@@ -173,11 +173,11 @@ impl SiteBuilder {
                 return false;
             }
             
-            // Check if current directory has index.rst with article-parts directive
+            // Check if current directory has index.rst with include directive
             let index_path = current_dir.join("index.rst");
             if index_path.exists() {
                 if let Ok(content) = std::fs::read_to_string(&index_path) {
-                    if content.contains(".. article-parts::") {
+                    if content.contains(".. include::") {
                         return true;
                     }
                 }

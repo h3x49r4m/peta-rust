@@ -8,6 +8,7 @@ use crate::core::Error;
 use crate::core::Result;
 use regex::Regex;
 use std::collections::HashMap;
+use std::path::Path;
 
 /// Main RST parser that processes RST content directly to HTML
 pub struct RstParser {
@@ -55,6 +56,10 @@ impl RstParser {
             "math".to_string(),
             Box::new(crate::content::rst::directives::MathDirectiveHandler::new()),
         );
+        directive_handlers.insert(
+            "include".to_string(),
+            Box::new(crate::content::rst::directives::IncludeHandler::new()),
+        );
 
         Ok(Self {
             math_renderer: MathRenderer::new(),
@@ -97,10 +102,15 @@ impl RstParser {
             file_path,
         )?;
 
-        // 3. For articles with article-parts directive, merge part contents
+        // 3. For articles with include directive, set article directory and process
         let content_to_process = if metadata.content_type == ContentType::Article &&
-                                   self.has_article_parts_directive(&rst_content) {
-            self.merge_article_parts(&rst_content, file_path)?
+                                   self.has_include_directive(&rst_content) {
+            if let Some(path) = file_path {
+                if let Some(parent) = path.parent() {
+                    self.set_article_dir_for_include(parent);
+                }
+            }
+            rst_content.clone()
         } else {
             rst_content.clone()
         };
@@ -258,6 +268,12 @@ impl RstParser {
                 // The language variable already contains the snippet ID (extracted from content_after_directive)
                 // Set content_end to content_start (empty content)
                 content_end = content_start;
+            } else if directive_name == "include" {
+                // For include, the file reference is on the same line as the directive
+                // Format: ".. include:: file.rst"
+                // The language variable already contains the file reference (extracted from content_after_directive)
+                // Set content_end to content_start (empty content)
+                content_end = content_start;
             } else if directive_name == "toctree" {
                 // For toctree, skip all indented content and options
                 // The toctree directive has options (:maxdepth:, :caption:) followed by indented chapter names
@@ -378,7 +394,23 @@ impl RstParser {
             let actual_content = content_lines.join("\n");
 
             if let Some(handler) = self.directive_handlers.get_mut(directive_name) {
-                let processed = handler.handle(language, &actual_content, &options)?;
+                // Different directives interpret parameters differently:
+                // - code-block: first param is language, second is content
+                // - snippet-card: first param is snippet ID, second is content (empty)
+                // - include: first param is directive name, second is file reference
+                // - others: first param is directive name, second is content
+                let (handler_directive_type, handler_content) = if directive_name == "code-block" {
+                    // For code-block, language is the first param
+                    (language, actual_content.as_str())
+                } else if directive_name == "snippet-card" || directive_name == "include" {
+                    // For snippet-card and include, directive_name is first param, language is second param
+                    (directive_name, language)
+                } else {
+                    // For other directives, directive_name is first param, actual_content is second param
+                    (directive_name, actual_content.as_str())
+                };
+                
+                let processed = handler.handle(handler_directive_type, handler_content, &options)?;
                 result.push_str(&processed);
             }
 
@@ -1154,158 +1186,18 @@ impl RstParser {
         Ok((entries, toc_html))
     }
 
-    /// Check if the RST content has an article-parts directive
-    fn has_article_parts_directive(&self, content: &str) -> bool {
-        content.contains(".. article-parts::")
+    /// Check if the RST content has an include directive
+    fn has_include_directive(&self, content: &str) -> bool {
+        content.contains(".. include::")
+    }
+    
+    /// Set the article directory for include directive handler
+    fn set_article_dir_for_include(&mut self, article_dir: &Path) {
+        // Create a new handler with the article directory
+        let new_handler = Box::new(crate::content::rst::directives::IncludeHandler::with_article_dir(article_dir.to_path_buf()));
+        self.directive_handlers.insert("include".to_string(), new_handler);
     }
 
-    /// Merge article parts content into the main article HTML
-    fn merge_article_parts(&self, rst_content: &str, file_path: Option<&std::path::Path>) -> Result<String> {
-        use std::fs;
-
-        // Parse article-parts directive to get part references
-        let lines: Vec<&str> = rst_content.lines().collect();
-        let mut in_article_parts = false;
-        let mut indent_level: usize = 0;
-        let mut part_refs = Vec::new();
-
-        for line in lines {
-            let trimmed: &str = line.trim();
-
-            // Check for article-parts start
-            if trimmed.starts_with(".. article-parts::") {
-                in_article_parts = true;
-                indent_level = line.len() - line.trim_start().len();
-                continue;
-            }
-
-            // Exit article-parts when we return to the same or lower indentation
-            if in_article_parts {
-                let line_indent = line.len() - line.trim_start().len();
-                if trimmed.is_empty() {
-                    continue;
-                }
-
-                if line_indent <= indent_level && !trimmed.starts_with(":") {
-                    in_article_parts = false;
-                    continue;
-                }
-
-                // Skip article-parts options (lines starting with :)
-                if trimmed.starts_with(":") {
-                    continue;
-                }
-
-                // Parse part entry
-                if let Some(part_ref) = trimmed.split_whitespace().next() {
-                    part_refs.push(part_ref.trim_end_matches("/index").to_string());
-                }
-            }
-        }
-
-        // If no parts found, return original content
-        if part_refs.is_empty() {
-            return Ok(rst_content.to_string());
-        }
-
-        // Get article directory from file path
-        let article_dir = if let Some(path) = file_path {
-            if let Some(parent) = path.parent() {
-                parent.to_path_buf()
-            } else {
-                return Ok(rst_content.to_string());
-            }
-        } else {
-            return Ok(rst_content.to_string());
-        };
-
-        // Load and merge part contents
-        let mut merged_content = String::new();
-        let mut parts_found = false;
-
-        for part_slug in &part_refs {
-            // Try folder-based structure: part/index.rst
-            let folder_path = article_dir.join(part_slug).join("index.rst");
-            // Try flat structure: part.rst
-            let flat_path = article_dir.join(format!("{}.rst", part_slug));
-
-            let part_path = if folder_path.exists() {
-                folder_path
-            } else if flat_path.exists() {
-                flat_path
-            } else {
-                continue;
-            };
-
-            if let Ok(part_content) = fs::read_to_string(&part_path) {
-                parts_found = true;
-                // Remove frontmatter from part content
-                let part_content_without_frontmatter = self.remove_frontmatter(&part_content);
-                merged_content.push_str(&part_content_without_frontmatter);
-                merged_content.push_str("\n\n");
-            }
-        }
-
-        // If we found and merged parts, return merged content
-        if parts_found {
-            // Remove the article-parts directive from the content
-            let content_without_directive = self.remove_article_parts_directive(rst_content);
-            Ok(format!("{}\n\n{}", content_without_directive, merged_content))
-        } else {
-            Ok(rst_content.to_string())
-        }
-    }
-
-    /// Remove frontmatter from RST content
-    fn remove_frontmatter(&self, content: &str) -> String {
-        if content.starts_with("---\n") {
-            if let Some(end_pos) = content[4..].find("\n---\n") {
-                return content[end_pos + 9..].to_string();
-            }
-        }
-        content.to_string()
-    }
-
-    /// Remove article-parts directive from RST content
-    fn remove_article_parts_directive(&self, content: &str) -> String {
-        let lines: Vec<&str> = content.lines().collect();
-        let mut result = Vec::new();
-        let mut in_article_parts = false;
-        let mut indent_level: usize = 0;
-
-        for line in lines {
-            let trimmed: &str = line.trim();
-
-            // Check for article-parts start
-            if trimmed.starts_with(".. article-parts::") {
-                in_article_parts = true;
-                indent_level = line.len() - line.trim_start().len();
-                continue;
-            }
-
-            // Exit article-parts when we return to the same or lower indentation
-            if in_article_parts {
-                let line_indent = line.len() - line.trim_start().len();
-                if trimmed.is_empty() {
-                    continue;
-                }
-
-                if line_indent <= indent_level && !trimmed.starts_with(":") {
-                    in_article_parts = false;
-                    // Add the line that caused exit
-                    result.push(line);
-                    continue;
-                }
-
-                // Skip article-parts content
-                continue;
-            }
-
-            result.push(line);
-        }
-
-        result.join("\n")
-    }
 
     /// Convert title to URL-friendly slug
     fn slugify(&self, title: &str) -> String {
