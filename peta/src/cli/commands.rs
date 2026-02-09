@@ -37,7 +37,12 @@ pub fn init_content(content_type: &str, title: &str, content_dir: Option<&str>, 
     }
 
     // Generate template content
-    let content = generate_template(content_type, title)?;
+    let snippet_id = if content_type == "snippet" {
+        Some(filename.as_str())
+    } else {
+        None
+    };
+    let content = generate_template(content_type, title, snippet_id.as_deref())?;
 
     // Ensure directory exists
     if let Some(parent) = file_path.parent() {
@@ -747,7 +752,7 @@ console.log('Theme "{}" loaded');"#;
 }
 
 /// Generate template content based on content type
-fn generate_template(content_type: &str, title: &str) -> Result<String> {
+fn generate_template(content_type: &str, title: &str, snippet_id: Option<&str>) -> Result<String> {
     let date = chrono::Utc::now().format("%Y-%m-%dT%H:%M:%S").to_string();
     
     match content_type {
@@ -816,11 +821,15 @@ Prerequisites
 List any prerequisites.
 "#, title, date, title)),
 
-        "snippet" => Ok(format!(
+        "snippet" => {
+            let snippet_id_str = snippet_id.unwrap_or("unknown");
+            Ok(format!(
 r#"---
 title: {}
 date: {}
 tags: [language, topic]
+author: "Your Name"
+snippet_id: {}
 ---
 
 {}
@@ -839,7 +848,8 @@ Explanation
 -----------
 
 Add explanations here.
-"#, title, date, title)),
+"#, title, date, snippet_id_str, title))
+        }
 
         "project" => Ok(format!(
 r#"---
