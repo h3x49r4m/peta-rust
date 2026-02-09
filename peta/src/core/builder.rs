@@ -139,19 +139,10 @@ impl SiteBuilder {
                 for path in paths.flatten() {
                     // Skip files that were already loaded
                     if !loaded_files.contains(&path) {
-                        // Check if this is an article part (in a subdirectory with an index.rst that has article-parts directive)
+                        // Check if this is an article part by traversing up the directory tree
+                        // to find if there's an ancestor with index.rst containing article-parts directive
                         let is_article_part = if let Some(parent) = path.parent() {
-                            let index_path = parent.join("index.rst");
-                            if index_path.exists() {
-                                // Check if index.rst has article-parts directive
-                                if let Ok(index_content) = std::fs::read_to_string(&index_path) {
-                                    index_content.contains(".. article-parts::")
-                                } else {
-                                    false
-                                }
-                            } else {
-                                false
-                            }
+                            self.is_in_article_folder(parent, dir)
                         } else {
                             false
                         };
@@ -171,6 +162,35 @@ impl SiteBuilder {
         Ok(())
     }
     
+    /// Check if a path is inside an article folder (has ancestor with index.rst containing article-parts)
+    fn is_in_article_folder(&self, path: &Path, articles_dir: &Path) -> bool {
+        // Start from the current directory and traverse up
+        let mut current_dir = path.to_path_buf();
+        
+        loop {
+            // Check if we've reached the articles directory
+            if current_dir == articles_dir {
+                return false;
+            }
+            
+            // Check if current directory has index.rst with article-parts directive
+            let index_path = current_dir.join("index.rst");
+            if index_path.exists() {
+                if let Ok(content) = std::fs::read_to_string(&index_path) {
+                    if content.contains(".. article-parts::") {
+                        return true;
+                    }
+                }
+            }
+            
+            // Move to parent directory
+            match current_dir.parent() {
+                Some(parent) => current_dir = parent.to_path_buf(),
+                None => return false,
+            }
+        }
+    }
+
     /// Load a single RST file
     async fn load_rst_file(&self, path: &PathBuf, content_type: ContentType) -> Result<RstContent> {
         let content = std::fs::read_to_string(path)

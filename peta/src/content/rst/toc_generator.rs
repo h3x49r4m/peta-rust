@@ -60,7 +60,7 @@ impl TocGenerator {
         let mut header_stack: Vec<(usize, usize)> = Vec::new(); // (level, index in result)
         let mut last_header_idx: Option<usize> = None;
 
-        for (pos, is_heading, cap) in all_matches {
+        for (_pos, is_heading, cap) in all_matches {
             if is_heading {
                 // Process heading
                 if let (Some(level), Some(id), Some(title)) = (cap.get(1), cap.get(2), cap.get(3)) {
@@ -135,19 +135,6 @@ impl TocGenerator {
         }
 
         Ok(result)
-    }
-    
-    /// Find a header by title in the nested structure and return its index
-    fn find_header_index(&self, entries: &[TocEntry], title: &str) -> Option<usize> {
-        for (idx, entry) in entries.iter().enumerate() {
-            if entry.title == title {
-                return Some(idx);
-            }
-            // Check children recursively, but we need the full path to the child
-            // For simplicity, we'll just continue searching at the top level
-            // If we need to support nested snippets under nested headers, we'll need a different approach
-        }
-        None
     }
 
     /// Generate table of contents with embedded snippet cards

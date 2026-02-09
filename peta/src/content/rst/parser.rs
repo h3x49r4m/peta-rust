@@ -3,7 +3,6 @@
 use crate::content::rst::{
     toc_generator::TocGenerator, CodeHighlighter, directives::DirectiveHandler, MathProcessor, MathRenderer,
 };
-use crate::content::rst::article_toc_generator::ArticleTocGenerator;
 use crate::content::{ContentMetadata, ContentType, RstContent, TocEntry};
 use crate::core::Error;
 use crate::core::Result;
@@ -18,7 +17,6 @@ pub struct RstParser {
     code_highlighter: CodeHighlighter,
     directive_handlers: HashMap<String, Box<dyn DirectiveHandler>>,
     toc_generator: TocGenerator,
-    article_toc_generator: ArticleTocGenerator,
 }
 
 impl RstParser {
@@ -65,7 +63,6 @@ impl RstParser {
                 .map_err(|e| Error::Content(format!("Failed to create code highlighter: {}", e)))?,
             directive_handlers,
             toc_generator: TocGenerator::new(),
-            article_toc_generator: ArticleTocGenerator::new(),
         })
     }
 
