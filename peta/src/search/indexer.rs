@@ -310,8 +310,18 @@ impl SearchIndex {
             return text.to_string();
         }
         
+        // Convert byte length to character count to avoid splitting multi-byte characters
+        let char_indices: Vec<usize> = text.char_indices().map(|(i, _)| i).collect();
+        
+        // Find the byte index for the max_length character position
+        let max_byte_index = if max_length < char_indices.len() {
+            char_indices[max_length]
+        } else {
+            text.len()
+        };
+        
         // Find the last complete word within max_length
-        let mut excerpt = text[..max_length].to_string();
+        let mut excerpt = text[..max_byte_index].to_string();
         
         // Remove trailing incomplete word
         while let Some(last_char) = excerpt.chars().last() {

@@ -348,3 +348,46 @@ impl DirectiveHandler for MathDirectiveHandler {
         }
     }
 }
+
+/// Table directive handler for csv-table and list-table directives
+pub struct TableDirectiveHandler;
+
+impl TableDirectiveHandler {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl Default for TableDirectiveHandler {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl DirectiveHandler for TableDirectiveHandler {
+    fn handle(&mut self, directive_type: &str, content: &str, options: &std::collections::HashMap<String, String>) -> Result<String> {
+        // Clean up the table content
+        let content = content
+            .replace("<p>", "")
+            .replace("</p>", "\n");
+
+        // Extract caption from options
+        let caption = options.get("caption").map(|t| t.as_str());
+
+        // Parse based on directive type
+        let table = match directive_type {
+            "csv-table" => crate::content::rst::tables::DirectiveParser::parse_csv(&content, options)?,
+            "list-table" => crate::content::rst::tables::DirectiveParser::parse_list(&content, options)?,
+            _ => return Err(crate::core::Error::rst_parse(format!("Unknown table directive: {}", directive_type))),
+        };
+
+        // Set caption if provided
+        let mut table_with_caption = table;
+        if let Some(cap) = caption {
+            table_with_caption.caption = Some(cap.to_string());
+        }
+
+        // Generate HTML
+        crate::content::rst::tables::TableHtmlGenerator::generate(&table_with_caption)
+    }
+}

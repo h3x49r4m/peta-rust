@@ -130,6 +130,9 @@ impl AssetPipeline {
         // Generate music score assets (from Rust)
         self.generate_music_score_assets()?;
 
+        // Generate table assets (from Rust)
+        self.generate_table_assets()?;
+
         // Process component assets
         self.process_component_assets()?;
 
@@ -276,6 +279,31 @@ impl AssetPipeline {
             .map_err(|e| Error::asset(format!("Failed to create music score JS directory: {}", e)))?;
         fs::write(&js_output_path, js_content)
             .map_err(|e| Error::asset(format!("Failed to write music-scores.js: {}", e)))?;
+
+        Ok(())
+    }
+
+    /// Generate table assets (from Rust)
+    fn generate_table_assets(&mut self) -> Result<()> {
+        // Generate table CSS
+        let table_css_generator = crate::assets::table_css_generator::TableCssGenerator::new();
+        let table_css_content = table_css_generator.generate()?;
+
+        let table_css_output_path = self.output_dir.join("css").join("tables.css");
+        fs::create_dir_all(table_css_output_path.parent().unwrap())
+            .map_err(|e| Error::asset(format!("Failed to create table CSS directory: {}", e)))?;
+        fs::write(&table_css_output_path, table_css_content)
+            .map_err(|e| Error::asset(format!("Failed to write tables.css: {}", e)))?;
+
+        // Generate table JS
+        let table_js_generator = crate::assets::table_js_generator::TableJsGenerator::new();
+        let table_js_content = table_js_generator.generate()?;
+
+        let table_js_output_path = self.output_dir.join("js").join("tables.js");
+        fs::create_dir_all(table_js_output_path.parent().unwrap())
+            .map_err(|e| Error::asset(format!("Failed to create table JS directory: {}", e)))?;
+        fs::write(&table_js_output_path, table_js_content)
+            .map_err(|e| Error::asset(format!("Failed to write tables.js: {}", e)))?;
 
         Ok(())
     }

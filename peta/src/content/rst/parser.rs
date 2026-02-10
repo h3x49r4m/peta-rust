@@ -60,6 +60,14 @@ impl RstParser {
             "include".to_string(),
             Box::new(crate::content::rst::directives::IncludeHandler::new()),
         );
+        directive_handlers.insert(
+            "csv-table".to_string(),
+            Box::new(crate::content::rst::directives::TableDirectiveHandler::new()),
+        );
+        directive_handlers.insert(
+            "list-table".to_string(),
+            Box::new(crate::content::rst::directives::TableDirectiveHandler::new()),
+        );
 
         Ok(Self {
             math_renderer: MathRenderer::new(),
@@ -336,13 +344,13 @@ impl RstParser {
                     // Check if line is indented (has leading whitespace)
                     let is_indented = line.starts_with(' ') || line.starts_with('\t');
 
-                    if !found_indented_content && line.trim().is_empty() {
+                    // Skip empty lines regardless of whether we've found indented content
+                    if line.trim().is_empty() {
                         continue;
                     }
 
                     if is_indented {
                         found_indented_content = true;
-                        continue;
                     }
 
                     // If we found indented content and now hit a non-indented line, stop
@@ -451,7 +459,7 @@ impl RstParser {
     fn convert_rst_to_html(&self, content: &str) -> Result<String> {
         let mut html = content.to_string();
 
-        html = self.convert_tables(&html)?;
+        html = self.process_tables(&html)?;
         html = self.convert_headers(&html)?;
         html = self.convert_emphasis(&html)?;
         html = self.convert_links(&html)?;
@@ -459,6 +467,85 @@ impl RstParser {
         html = self.convert_paragraphs(&html)?;
 
         Ok(html)
+    }
+
+    /// Process tables using new table parser
+    fn process_tables(&self, content: &str) -> Result<String> {
+        use crate::content::rst::tables::{TableDetector, TableType};
+use crate::content::rst::tables::parser::TableParser;
+        use crate::content::rst::tables::html_generator::TableHtmlGenerator;
+
+        let lines: Vec<&str> = content.lines().collect();
+        let mut result = Vec::new();
+        let mut i = 0;
+
+        while i < lines.len() {
+            let line = lines[i];
+
+            // Skip HTML tags (already processed content)
+            if line.trim().starts_with('<') {
+                result.push(line.to_string());
+                i += 1;
+                continue;
+            }
+
+            // Check for table detection
+            // For simple tables, check if next line is a multi-group separator
+            let next_line = if i + 1 < lines.len() { lines[i + 1].trim() } else { "" };
+            let next_line_has_multiple_groups = next_line.split_whitespace().count() >= 2;
+            let next_line_is_simple_sep = TableDetector::is_simple_separator(next_line);
+            
+            // For simple tables, we need at least 3 columns to distinguish from headings
+            let current_line_has_multiple_columns = line.trim().split_whitespace().count() >= 3;
+            
+            let table_type = if let Some(tt) = TableDetector::detect(line) {
+                Some(tt)
+            } else if next_line_is_simple_sep && next_line_has_multiple_groups && current_line_has_multiple_columns {
+                // Current line might be a simple table header row
+                Some(TableType::SimpleTable)
+            } else {
+                None
+            };
+
+            if let Some(table_type) = table_type {
+                match table_type {
+                    TableType::GridTable | TableType::SimpleTable => {
+                        // Parse inline table
+                        match TableParser::parse(&lines, i) {
+                            Ok(table) => {
+                                match TableHtmlGenerator::generate(&table) {
+                                    Ok(html) => {
+                                        result.push(html);
+                                        // Skip table lines
+                                        let line_count = TableParser::count_table_lines(&lines, i)?;
+                                        i += line_count;
+                                        continue;
+                                    }
+                                    Err(_e) => {
+                                                                        // If HTML generation fails, keep original line
+                                                                        result.push(line.to_string());
+                                                                    }                                }
+                            }
+                            Err(_) => {
+                                // If parsing fails, keep original line
+                                result.push(line.to_string());
+                            }
+                        }
+                    }
+                    TableType::CsvDirective | TableType::ListDirective => {
+                        // These are handled by process_directives()
+                        result.push(line.to_string());
+                        i += 1;
+                        continue;
+                    }
+                }
+            }
+
+            result.push(line.to_string());
+            i += 1;
+        }
+
+        Ok(result.join("\n"))
     }
 
     /// Convert RST headers to HTML
@@ -944,200 +1031,6 @@ impl RstParser {
             return false;
         }
         trimmed.chars().all(|c| matches!(c, '=' | '-' | '~' | '^' | '"' | '\'' | '`' | ':' | '#' | '*' | '+' | '_' | '<' | '>' | '|'))
-    }
-
-    /// Convert RST simple tables to HTML
-    fn convert_tables(&self, content: &str) -> Result<String> {
-        let lines: Vec<&str> = content.lines().collect();
-        let mut result = Vec::new();
-        let mut i = 0;
-
-        while i < lines.len() {
-            let line = lines[i];
-            
-            // Skip HTML tags (already processed content)
-            if line.trim().starts_with('<') {
-                result.push(line.to_string());
-                i += 1;
-                continue;
-            }
-            
-            // Check if this line looks like a table separator (contains at least 3 dashes and plus signs)
-            if self.is_table_separator(line) {
-                // Look ahead to see if we have a proper table structure
-                let table_start = self.find_table_start(&lines, i);
-                if table_start.is_some() {
-                    let (start_idx, table, line_count) = table_start.unwrap();
-                    if !table.is_empty() && line_count >= 2 {
-                        // Remove lines that were already added before we found the table
-                        while result.len() > start_idx {
-                            result.pop();
-                        }
-                        result.push(table);
-                        i += line_count; // Skip all table lines
-                        continue;
-                    }
-                }
-            }
-            
-            result.push(line.to_string());
-            i += 1;
-        }
-
-        Ok(result.join("\n"))
-    }
-
-    /// Check if a line is a table separator
-    fn is_table_separator(&self, line: &str) -> bool {
-        let trimmed = line.trim();
-        let dash_count = trimmed.chars().filter(|&c| c == '-').count();
-        let plus_count = trimmed.chars().filter(|&c| c == '+').count();
-        let pipe_count = trimmed.chars().filter(|&c| c == '|').count();
-        
-        // Must have at least 3 dashes and use + or = or | as column separators
-        (dash_count >= 3 || trimmed.chars().filter(|&c| c == '=').count() >= 3) 
-            && (plus_count > 0 || trimmed.contains('=') || pipe_count > 1)
-    }
-
-    /// Check if a line looks like a table row (contains pipe separators)
-    fn is_table_row(&self, line: &str) -> bool {
-        let trimmed = line.trim();
-        let pipe_count = trimmed.chars().filter(|&c| c == '|').count();
-        pipe_count >= 2 && trimmed.starts_with('|') && trimmed.ends_with('|')
-    }
-
-    /// Find the start of a table and parse it
-    fn find_table_start(&self, lines: &[&str], idx: usize) -> Option<(usize, String, usize)> {
-        // Look back a few lines to find the start of the table
-        let look_back = std::cmp::min(5, idx + 1);
-        let mut table_start_idx = idx;
-        
-        for i in (idx.saturating_sub(look_back))..=idx {
-            if i < lines.len() && self.is_table_row(lines[i]) {
-                table_start_idx = i;
-                break;
-            }
-        }
-        
-        let (table, line_count) = self.parse_table(lines, table_start_idx).ok()?;
-        if !table.is_empty() {
-            Some((table_start_idx, table, line_count))
-        } else {
-            None
-        }
-    }
-
-    /// Parse a table starting from the current line
-    fn parse_table(&self, lines: &[&str], start_idx: usize) -> Result<(String, usize)> {
-        let mut table_lines = Vec::new();
-        let mut i = start_idx;
-        
-        // Collect table lines
-        while i < lines.len() {
-            let line = lines[i].trim();
-            
-            // Stop at empty line or when line doesn't look like table content
-            if line.is_empty() || (!self.is_table_separator(line) && !line.contains('|') && !line.contains('+')) {
-                break;
-            }
-            
-            table_lines.push(line.to_string());
-            i += 1;
-        }
-        
-        if table_lines.is_empty() {
-            return Ok((String::new(), 0));
-        }
-        
-        let line_count = table_lines.len();
-        
-        // Parse table structure
-        let html = self.render_table(&table_lines)?;
-        
-        Ok((html, line_count))
-    }
-
-    /// Render table lines to HTML
-    fn render_table(&self, table_lines: &[String]) -> Result<String> {
-        let mut html = String::new();
-        let mut rows: Vec<Vec<String>> = Vec::new();
-        let mut header_sep_idx: Option<usize> = None;
-        
-        for (idx, line) in table_lines.iter().enumerate() {
-            // Split by pipe and trim cells
-            let cells: Vec<String> = line
-                .split('|')
-                .map(|s| s.trim().to_string())
-                .filter(|s| !s.is_empty())
-                .collect();
-            
-            if cells.is_empty() {
-                continue;
-            }
-            
-            // Check if this is a separator line (all cells are just dashes or equals)
-            let is_simple_sep = cells.iter().all(|cell| {
-                cell.chars().all(|c| c == '-' || c == '=')
-            });
-            
-            // Track separator lines (first separator after first row)
-            if is_simple_sep && idx > 0 && header_sep_idx.is_none() {
-                header_sep_idx = Some(idx);
-                continue; // Skip the separator line itself
-            }
-            
-            // Skip other separator lines
-            if is_simple_sep {
-                continue;
-            }
-            
-            rows.push(cells);
-        }
-        
-        if rows.is_empty() {
-            return Ok(String::new());
-        }
-        
-        // Determine if we have a header (first row before separator)
-        let has_header = header_sep_idx.is_some() && rows.len() > 1;
-        
-        html.push_str("<table>\n");
-        
-        // Render header and body
-        if has_header {
-            // First row is header, rest are body
-            html.push_str("  <thead>\n    <tr>\n");
-            for cell in &rows[0] {
-                html.push_str(&format!("      <th>{}</th>\n", cell));
-            }
-            html.push_str("    </tr>\n  </thead>\n");
-            
-            // Render body (skip first row which is header)
-            html.push_str("  <tbody>\n");
-            for row in &rows[1..] {
-                html.push_str("    <tr>\n");
-                for cell in row {
-                    html.push_str(&format!("      <td>{}</td>\n", cell));
-                }
-                html.push_str("    </tr>\n");
-            }
-            html.push_str("  </tbody>\n");
-        } else {
-            // No header, render all rows as body
-            html.push_str("  <tbody>\n");
-            for row in &rows {
-                html.push_str("    <tr>\n");
-                for cell in row {
-                    html.push_str(&format!("      <td>{}</td>\n", cell));
-                }
-                html.push_str("    </tr>\n");
-            }
-            html.push_str("  </tbody>\n");
-        }
-        
-        html.push_str("</table>");
-        
-        Ok(html)
     }
 
     /// Extract TOC from toctree directive output in HTML

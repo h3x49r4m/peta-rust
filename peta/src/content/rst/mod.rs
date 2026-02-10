@@ -26,3 +26,7 @@ pub use diagrams::*;
 // Music scores module
 pub mod music_scores;
 pub use music_scores::{MusicScore, MusicScoreParser, MusicScoreRenderer, AbcScore, AbcVoice, MusicScoreType};
+
+// Tables module
+pub mod tables;
+pub use tables::{TableType, TableDetector, ParsedTable, ColumnAlignment};
