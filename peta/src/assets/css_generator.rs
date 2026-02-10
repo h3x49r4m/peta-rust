@@ -244,7 +244,7 @@ impl CssGenerator {
             r#"
 .code-content {{
   padding: 1.5rem;
-  overflow-x: auto;
+  overflow-x: hidden;
   background: rgba(15, 23, 42, 0.3);
   position: relative;
 }}
@@ -257,27 +257,10 @@ impl CssGenerator {
   font-family: {};
   font-size: {};
   line-height: {};
-  white-space: pre;
-  word-wrap: normal;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  word-break: break-all;
   tab-size: 4;
-}}
-
-.code-content::-webkit-scrollbar {{
-  height: 8px;
-}}
-
-.code-content::-webkit-scrollbar-track {{
-  background: rgba(30, 41, 59, 0.5);
-  border-radius: 4px;
-}}
-
-.code-content::-webkit-scrollbar-thumb {{
-  background: rgba(148, 163, 184, 0.3);
-  border-radius: 4px;
-}}
-
-.code-content::-webkit-scrollbar-thumb:hover {{
-  background: rgba(148, 163, 184, 0.5);
 }}
 "#,
             self.config.font_family,
